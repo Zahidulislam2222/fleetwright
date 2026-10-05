@@ -98,7 +98,6 @@ const csp = [...Object.entries(security.csp).map(([k, v]) => `${k} ${v.join(" ")
 const headerLines = Object.entries({ "Content-Security-Policy": csp, ...security.headers, ...security.productionHeaders })
   .map(([k, v]) => `        add_header ${k} "${v.replaceAll('"', '\\"')}" always;`)
   .join("\n");
-const trustedHops = [config.backend.edgeSubnet, ...config.cloudflare.ranges];
 const values = {
   ...config,
   ...config.limits,
@@ -110,7 +109,7 @@ const values = {
   redisImage: pinned("redis"),
   mailpitImage: pinned("axllent/mailpit"),
   cloudflareRanges: config.cloudflare.ranges.join(" "),
-  realIpFrom: trustedHops.map((r) => `    set_real_ip_from ${r};`).join("\n"),
+  cloudflareGeo: config.cloudflare.ranges.map((r) => `        ${r} 1;`).join("\n"),
 };
 const render = (name) =>
   // LF always: these files run on Linux, whatever line endings the Windows working tree has.

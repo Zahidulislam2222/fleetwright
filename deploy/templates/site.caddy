@@ -1,6 +1,7 @@
 # GENERATED from deploy/templates/site.caddy by deploy/build-release.mjs — edit the template.
-# Cloudflare's forwarded headers are trusted only from Cloudflare's published ranges (this site only;
-# the shared main Caddyfile is untouched). Server-sent events are flushed as they arrive.
+# Caddy appends the connecting peer to X-Forwarded-For; nginx uses that last entry to decide whether
+# CF-Connecting-IP can be believed. trusted_proxies (this site only; the shared main Caddyfile is
+# untouched) just lets Caddy's own log show the visitor. Server-sent events are flushed as they arrive.
 {{hostname}} {
     reverse_proxy 127.0.0.1:{{loopbackPort}} {
         trusted_proxies {{cloudflareRanges}}
