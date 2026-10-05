@@ -113,7 +113,8 @@ const values = {
   realIpFrom: trustedHops.map((r) => `    set_real_ip_from ${r};`).join("\n"),
 };
 const render = (name) =>
-  readFileSync(join(deployDir, "templates", name), "utf8").replace(/\{\{(\w+)\}\}/g, (m, k) => {
+  // LF always: these files run on Linux, whatever line endings the Windows working tree has.
+  readFileSync(join(deployDir, "templates", name), "utf8").replace(/\r\n/g, "\n").replace(/\{\{(\w+)\}\}/g, (m, k) => {
     if (!(k in values)) throw new Error(`Template ${name}: unknown placeholder ${m}`);
     return String(values[k]);
   });
