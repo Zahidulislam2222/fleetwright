@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Load marketplace{% endblock %}
+{% block body_attrs %}data-page="loads" data-layout="b" data-poll-ms="{{ poll_ms }}"{% endblock %}
+{% block nav %}<span class="who">Account: <strong>{{ username }}</strong></span><a href="/watch">Live activity</a>
+<form method="post" action="/logout" class="inline"><button type="submit" class="link">Sign out</button></form>{% endblock %}
+{% block head %}<meta name="csrf-token" content="{{ csrf }}">{% endblock %}
+{% block main %}
+<section>
+  <h1>Load marketplace</h1>
+  <p class="status" id="feed-status" role="status" aria-live="polite">Connecting…</p>
+  <ul class="offer-grid" id="offers"></ul>
+</section>
+{% endblock %}
+{% block scripts %}<script src="/static/board.js"></script>{% endblock %}

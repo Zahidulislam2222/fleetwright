@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>{% block title %}{{ branding.name }}{% endblock %} · DEMO</title>
+  <link rel="stylesheet" href="/static/board.css">
+  {% block head %}{% endblock %}
+</head>
+<body {% block body_attrs %}{% endblock %}>
+  <p class="banner" role="note">{{ branding.banner }}</p>
+  <header class="top">
+    <a class="brand" href="/">{{ branding.name }}</a>
+    <nav aria-label="Board">{% block nav %}<a href="/watch">Live activity</a>{% endblock %}</nav>
+  </header>
+  <main id="main">{% block main %}{% endblock %}</main>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

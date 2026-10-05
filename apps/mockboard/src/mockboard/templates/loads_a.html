@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Available loads{% endblock %}
+{% block body_attrs %}data-page="loads" data-layout="a" data-poll-ms="{{ poll_ms }}"{% endblock %}
+{% block nav %}<span class="who">Signed in as <strong>{{ username }}</strong></span><a href="/watch">Live activity</a>
+<form method="post" action="/logout" class="inline"><button type="submit" class="link">Sign out</button></form>{% endblock %}
+{% block head %}<meta name="csrf-token" content="{{ csrf }}">{% endblock %}
+{% block main %}
+<section>
+  <h1>Available loads</h1>
+  <p class="status" id="feed-status" role="status" aria-live="polite">Connecting…</p>
+  <table class="loads" id="loads-table">
+    <caption class="sr-only">Newest loads first</caption>
+    <thead><tr><th scope="col">Load</th><th scope="col">Lane</th><th scope="col">Equipment</th><th scope="col">Weight</th>
+      <th scope="col">Miles</th><th scope="col">Rate</th><th scope="col">Posted</th><th scope="col"><span class="sr-only">Action</span></th></tr></thead>
+    <tbody id="loads-body"></tbody>
+  </table>
+</section>
+{% endblock %}
+{% block scripts %}<script src="/static/board.js"></script>{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Quick check{% endblock %}
+{% block main %}
+<section class="card narrow">
+  <h1>Quick check</h1>
+  <p>You are making a lot of requests. Please answer to continue.</p>
+  {% if error %}<p class="error" role="alert">Wrong answer. Here is a new one.</p>{% endif %}
+  <form method="post" action="/captcha" id="captcha-form">
+    <label for="answer">What is <span id="captcha-a">{{ a }}</span> + <span id="captcha-b">{{ b }}</span>?</label>
+    <input id="answer" name="answer" inputmode="numeric" required maxlength="8">
+    <button type="submit">Continue</button>
+  </form>
+</section>
+{% endblock %}

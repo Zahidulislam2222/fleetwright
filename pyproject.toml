@@ -1,0 +1,71 @@
+[project]
+name = "fleetwright"
+version = "0.2.0"
+description = "Fleetwright workspace root: coordination core, browser workers, mock board, control-plane API"
+requires-python = ">=3.12,<3.13"
+dependencies = ["fw-core", "fw-queue", "fw-browser", "fw-mockboard", "fw-coordinator", "fw-gateway", "fw-worker"]
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["packages/*", "apps/mockboard", "apps/coordinator", "apps/gateway", "apps/worker"]
+
+[tool.uv.sources]
+fw-core = { workspace = true }
+fw-queue = { workspace = true }
+fw-browser = { workspace = true }
+fw-mockboard = { workspace = true }
+fw-coordinator = { workspace = true }
+fw-gateway = { workspace = true }
+fw-worker = { workspace = true }
+
+[dependency-groups]
+dev = [
+  "pytest==9.1.1",
+  "pytest-asyncio==1.4.0",
+  "hypothesis==6.168.4",
+  "ruff==0.16.10",
+  "mypy==2.4.0",
+  "types-PyYAML==6.0.12.20260906",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "ASYNC", "RUF", "SIM", "PL"]
+ignore = ["PLR0913", "PLR2004", "PLR0911", "PLR0912", "PLR0915", "S101", "RUF001", "RUF002", "RUF003"]
+
+[tool.ruff.lint.pycodestyle]
+# The formatter wraps code at 120; embedded SQL lines may run to 140.
+max-line-length = 140
+
+[tool.ruff.lint.isort]
+known-first-party = ["fw_core", "fw_queue", "fw_browser", "mockboard", "fw_coordinator", "fw_gateway", "fw_worker", "conftest"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S", "PLR", "ASYNC"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unused_ignores = true
+plugins = ["pydantic.mypy"]
+files = ["packages/fw_core/src", "packages/fw_queue/src", "packages/fw_browser/src", "apps/coordinator/src", "apps/gateway/src", "apps/worker/src", "apps/mockboard/src"]
+
+[[tool.mypy.overrides]]
+module = ["asyncpg.*", "argon2.*", "pyotp.*", "sse_starlette.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+testpaths = ["packages", "apps/mockboard", "apps/coordinator", "apps/gateway", "apps/worker"]
+markers = [
+  "integration: needs the local Compose stack (Postgres, Redis, Mailpit)",
+  "browser: launches Chromium through Playwright",
+  "slow: long-running load or chaos test",
+]

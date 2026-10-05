@@ -1,0 +1,28 @@
+# Product data for the fictitious mock load board (Phase 2). Not configuration of any real board.
+# Loads are generated from these lists; every value is invented for the demo.
+lanes:
+  cities:
+    - Dallas, TX
+    - Houston, TX
+    - Atlanta, GA
+    - Chicago, IL
+    - Memphis, TN
+    - Denver, CO
+    - Phoenix, AZ
+    - Columbus, OH
+    - Kansas City, MO
+    - Nashville, TN
+    - Charlotte, NC
+    - Salt Lake City, UT
+  equipment: [Van, Reefer, Flatbed]
+  weight_lb: [8000, 44000]
+  miles: [120, 1400]
+  rate_per_mile_usd: [1.6, 3.4]
+  pickup_hours_ahead: [2, 72]
+branding:
+  name: Demo Freight Exchange
+  banner: "DEMO — fictitious load board built for testing Fleetwright. Not a real marketplace."
+captcha:
+  operands: [2, 19]   # "What is A + B?" — our own trivially solvable mock captcha
+competitors:
+  names: [rival-bot-1, rival-bot-2, rival-bot-3]

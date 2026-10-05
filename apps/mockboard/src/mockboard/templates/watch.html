@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Live activity{% endblock %}
+{% block body_attrs %}data-page="watch" data-poll-ms="{{ poll_ms }}"{% endblock %}
+{% block nav %}<a href="/login">Carrier sign-in</a>{% endblock %}
+{% block main %}
+<section>
+  <h1>Live activity</h1>
+  <p>Public, read-only view of the board's ground truth: every load as published, and who booked it how fast.
+     Fleet accounts are the Fleetwright demo fleet; <em>rival-bot</em> entries are the board's own simulated competitors.</p>
+  <p class="status" id="watch-status" role="status" aria-live="polite">Loading…</p>
+  <dl class="facts" id="watch-facts"></dl>
+  <table class="loads" id="watch-table">
+    <caption class="sr-only">Most recent loads</caption>
+    <thead><tr><th scope="col">Load</th><th scope="col">Lane</th><th scope="col">Rate</th><th scope="col">Published</th>
+      <th scope="col">Booked by</th><th scope="col">Time to book</th></tr></thead>
+    <tbody id="watch-body"></tbody>
+  </table>
+</section>
+{% endblock %}
+{% block scripts %}<script src="/static/watch.js"></script>{% endblock %}

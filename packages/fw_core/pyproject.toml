@@ -1,0 +1,12 @@
+[project]
+name = "fw-core"
+version = "0.2.0"
+requires-python = ">=3.12,<3.13"
+dependencies = ["pydantic==2.13.5", "pydantic-settings==2.15.0", "sqlalchemy[asyncio]==2.1.3", "asyncpg==0.31.0", "cryptography==50.0.2", "prometheus-client==0.26.0", "pyyaml==6.0.3"]
+
+[build-system]
+requires = ["uv_build>=0.12.23,<0.13"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "fw_core"
