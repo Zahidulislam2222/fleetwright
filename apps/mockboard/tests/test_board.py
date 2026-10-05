@@ -13,7 +13,7 @@ from datetime import UTC, datetime
 import httpx
 import pytest
 
-from conftest import Board
+from boardkit import Board
 from fw_browser.otp import MailpitOtp
 
 pytestmark = pytest.mark.integration
