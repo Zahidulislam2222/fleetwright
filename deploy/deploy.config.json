@@ -4,7 +4,11 @@
   "loopbackPort": 18090,
   "containerPort": 8080,
   "webImage": "nginx:stable-alpine@sha256:dc5069ad14f19660b141b21236140b91656bf89bbc3e2417c70ae650cd66104c",
-  "limits": { "memory": "128m", "cpus": 0.5, "pids": 64 },
+  "limits": {
+    "memory": "128m",
+    "cpus": 0.5,
+    "pids": 64
+  },
   "releaseRoot": "/srv/apps/fleetwright/releases",
   "caddySite": "/etc/caddy/sites.d/fleetwright.caddy",
   "healthPath": "/healthz",
@@ -12,5 +16,51 @@
     "immutablePrefix": "/_next/static/",
     "mediaPrefix": "/media/",
     "mediaMaxAgeS": 3600
+  },
+  "backend": {
+    "appImage": "fleetwright-app",
+    "appEnvFile": "/srv/apps/fleetwright/shared/fleetwright.env",
+    "postgresEnvFile": "/srv/apps/fleetwright/shared/postgres.env",
+    "apiPort": 8200,
+    "gatewayPort": 8300,
+    "boardPort": 8100,
+    "apiBodyLimit": "16k",
+    "signinRatePerMin": 20,
+    "signinBurst": 10,
+    "pgMemory": "512m",
+    "pgMaxConnections": 100,
+    "pgSharedBuffers": "128MB",
+    "redisMemory": "160m",
+    "redisMaxMemory": "96mb",
+    "workerMemory": "1536m",
+    "workerCpus": 2.0,
+    "edgeSubnet": "172.30.90.0/24"
+  },
+  "cloudflare": {
+    "source": "https://www.cloudflare.com/ips-v4 and https://www.cloudflare.com/ips-v6 (checked 2026-10-06)",
+    "ranges": [
+      "173.245.48.0/20",
+      "103.21.244.0/22",
+      "103.22.200.0/22",
+      "103.31.4.0/22",
+      "141.101.64.0/18",
+      "108.162.192.0/18",
+      "190.93.240.0/20",
+      "188.114.96.0/20",
+      "197.234.240.0/22",
+      "198.41.128.0/17",
+      "162.158.0.0/15",
+      "104.16.0.0/13",
+      "104.24.0.0/14",
+      "172.64.0.0/13",
+      "131.0.72.0/22",
+      "2400:cb00::/32",
+      "2606:4700::/32",
+      "2803:f800::/32",
+      "2405:b500::/32",
+      "2405:8100::/32",
+      "2a06:98c0::/29",
+      "2c0f:f248::/32"
+    ]
   }
 }

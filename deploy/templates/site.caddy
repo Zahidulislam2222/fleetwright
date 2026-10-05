@@ -1,5 +1,10 @@
 # GENERATED from deploy/templates/site.caddy by deploy/build-release.mjs — edit the template.
+# Cloudflare's forwarded headers are trusted only from Cloudflare's published ranges (this site only;
+# the shared main Caddyfile is untouched). Server-sent events are flushed as they arrive.
 {{hostname}} {
-    reverse_proxy 127.0.0.1:{{loopbackPort}}
+    reverse_proxy 127.0.0.1:{{loopbackPort}} {
+        trusted_proxies {{cloudflareRanges}}
+        flush_interval -1
+    }
     log
 }

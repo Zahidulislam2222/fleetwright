@@ -56,3 +56,14 @@ def test_business_code_has_no_hardcoded_endpoints_or_secrets() -> None:
             for line, label, value in scan_source(path.read_text(encoding="utf-8")):
                 problems.append(f"{path.relative_to(ROOT)}:{line} {label}: {value!r}")
     assert not problems, "hardcoded configuration found:\n" + "\n".join(problems)
+
+
+def _fw_keys(path: Path) -> set[str]:
+    return set(re.findall(r"^(FW_[A-Z0-9_]+)=", path.read_text(encoding="utf-8"), re.M))
+
+
+def test_local_and_vps_env_templates_define_the_same_settings() -> None:
+    """A setting added for local runs but forgotten for the VPS (or the reverse) fails here, not in production."""
+    local = _fw_keys(ROOT / ".env.example")
+    vps = _fw_keys(ROOT / "deploy" / "env" / "fleetwright.env.example")
+    assert local == vps, f"only local: {sorted(local - vps)}; only vps: {sorted(vps - local)}"

@@ -1,0 +1,19 @@
+# The backend image needs the uv workspace and config/ only. Keep secrets, local state,
+# the dashboard and tests out of every build context.
+**
+!pyproject.toml
+!uv.lock
+!config/**
+!packages/**
+!apps/coordinator/**
+!apps/gateway/**
+!apps/mockboard/**
+!apps/worker/**
+**/tests/**
+**/__pycache__/**
+**/.pytest_cache/**
+**/.mypy_cache/**
+**/.ruff_cache/**
+**/*.egg-info/**
+**/.env
+**/.env.*

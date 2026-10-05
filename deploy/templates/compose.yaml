@@ -1,35 +1,214 @@
 # GENERATED from deploy/templates/compose.yaml by deploy/build-release.mjs — edit the template.
+# Networks: `edge` carries only Caddy -> web; `backend` is internal (no route to the internet), so
+# the engine, the mock board and the data services can reach each other and nothing else.
 name: {{slug}}
+
+x-hardened: &hardened
+  restart: unless-stopped
+  read_only: true
+  cap_drop: [ALL]
+  security_opt:
+    - no-new-privileges:true
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+x-app: &app
+  <<: *hardened
+  image: {{appImage}}:{{releaseId}}
+  pull_policy: never
+  env_file: [{{appEnvFile}}]
+  networks: [backend]
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,size=64m,mode=1777
+
+x-redis: &redis
+  <<: *hardened
+  image: {{redisImage}}
+  user: "999:999"             # the image's redis user; no root entrypoint step needed with caps dropped
+  command: ["redis-server", "--save", "", "--appendonly", "yes", "--maxmemory", "{{redisMaxMemory}}", "--maxmemory-policy", "noeviction"]
+  networks: [backend]
+  mem_limit: {{redisMemory}}
+  cpus: 0.25
+  pids_limit: 64
+  healthcheck:
+    test: ["CMD", "redis-cli", "ping"]
+    interval: 10s
+    timeout: 3s
+    retries: 10
+
+x-pyhealth: &pyhealth
+  interval: 15s
+  timeout: 5s
+  retries: 5
+  start_period: 20s
+
 services:
   web:
+    <<: *hardened
     image: {{webImage}}
     pull_policy: never
     entrypoint: ["nginx"]
     command: ["-g", "daemon off;"]
     user: "101:101"
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    restart: unless-stopped
-    read_only: true
+    networks: [edge, backend]
     ports:
       - "127.0.0.1:{{loopbackPort}}:{{containerPort}}"
     mem_limit: {{memory}}
     cpus: {{cpus}}
     pids_limit: {{pids}}
-    cap_drop: [ALL]
-    security_opt:
-      - no-new-privileges:true
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=16m,mode=1777
     volumes:
       - ./dist:/usr/share/nginx/html:ro
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      api: { condition: service_healthy }
+      gateway: { condition: service_healthy }
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:{{containerPort}}{{healthPath}}"]
       interval: 15s
       timeout: 3s
       retries: 3
       start_period: 5s
+
+  postgres:
+    <<: *hardened
+    image: {{postgresImage}}
+    read_only: false            # the official image writes its socket and init state outside the volume
+    cap_drop: [ALL]
+    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER, SETGID, SETUID]   # entrypoint drops to the postgres user
+    env_file: [{{postgresEnvFile}}]
+    command: ["postgres", "-c", "max_connections={{pgMaxConnections}}", "-c", "shared_buffers={{pgSharedBuffers}}"]
+    networks: [backend]
+    mem_limit: {{pgMemory}}
+    cpus: 1.0
+    pids_limit: 200
+    shm_size: 128m
+    volumes:
+      - pgdata:/var/lib/postgresql
+      - ./infra/10-roles.sh:/docker-entrypoint-initdb.d/10-roles.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "psql -U postgres -d fleetwright -tAc 'SELECT 1' | grep -q 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 20
+
+  redis-core:
+    <<: *redis
+    volumes: [redis-core:/data]
+  redis-cell-a:
+    <<: *redis
+    volumes: [redis-cell-a:/data]
+
+  mailpit:
+    <<: *hardened
+    image: {{mailpitImage}}
+    environment:
+      MP_MAX_MESSAGES: "2000"
+    networks: [backend]
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=32m,mode=1777
+    mem_limit: 96m
+    cpus: 0.25
+    pids_limit: 64
+
+  board:
+    <<: *app
+    command: ["uvicorn", "--factory", "mockboard.app:create_app", "--host", "0.0.0.0", "--port", "{{boardPort}}"]
+    mem_limit: 256m
+    cpus: 0.5
+    pids_limit: 64
+    depends_on:
+      postgres: { condition: service_healthy }
+      mailpit: { condition: service_started }
+    healthcheck:
+      <<: *pyhealth
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:{{boardPort}}/healthz', timeout=3)"]
+
+  migrate:
+    <<: *app
+    restart: "no"
+    command: ["python", "-m", "fw_coordinator.migrate"]
+    mem_limit: 256m
+    cpus: 0.5
+    pids_limit: 64
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  seed:
+    <<: *app
+    restart: "no"
+    command: ["python", "-m", "fw_coordinator.seed"]
+    mem_limit: 256m
+    cpus: 0.5
+    pids_limit: 64
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      board: { condition: service_healthy }
+      redis-core: { condition: service_healthy }
+
+  api:
+    <<: *app
+    command: ["python", "-m", "fw_coordinator.api"]
+    mem_limit: 320m
+    cpus: 1.0
+    pids_limit: 128
+    depends_on:
+      seed: { condition: service_completed_successfully }
+    healthcheck:
+      <<: *pyhealth
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:{{apiPort}}/healthz', timeout=3)"]
+
+  gateway:
+    <<: *app
+    command: ["python", "-m", "fw_gateway"]
+    mem_limit: 256m
+    cpus: 0.5
+    pids_limit: 128
+    depends_on:
+      redis-core: { condition: service_healthy }
+    healthcheck:
+      <<: *pyhealth
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:{{gatewayPort}}/healthz', timeout=3)"]
+
+  control:
+    <<: *app
+    command: ["python", "-m", "fw_coordinator.control"]
+    mem_limit: 320m
+    cpus: 0.5
+    pids_limit: 128
+    depends_on:
+      seed: { condition: service_completed_successfully }
+      redis-cell-a: { condition: service_healthy }
+
+  worker:
+    <<: *app
+    command: ["python", "-m", "fw_worker"]
+    mem_limit: {{workerMemory}}
+    cpus: {{workerCpus}}
+    pids_limit: 1024           # Chromium runs a process per renderer
+    shm_size: 512m             # Chromium needs more than Docker's 64 MB /dev/shm
+    tmpfs:
+      - /tmp:rw,nosuid,size=512m,mode=1777   # Chromium profiles; exec allowed for its helpers
+    volumes:
+      - evidence:/data/evidence
+    depends_on:
+      control: { condition: service_started }
+      board: { condition: service_healthy }
+
+networks:
+  edge:
+    ipam:
+      config:
+        - subnet: {{edgeSubnet}}
+  backend:
+    internal: true
+
+volumes:
+  pgdata:
+  redis-core:
+  redis-cell-a:
+  evidence:
