@@ -1,0 +1,15 @@
+# Browser profiles for worker contexts (product data, validated by fw_browser.profiles).
+# A stable profile per account keeps fingerprints consistent across restarts.
+profiles:
+  default:
+    locale: en-US
+    timezone: America/Chicago
+    viewport: {width: 1366, height: 768}
+  west:
+    locale: en-US
+    timezone: America/Denver
+    viewport: {width: 1440, height: 900}
+# account_group -> profile name; groups not listed use "default"
+groups:
+  default: default
+  west: west

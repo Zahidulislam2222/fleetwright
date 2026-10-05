@@ -1,0 +1,29 @@
+# Target adapters (product data, validated by fw_browser.targets). Each target an account can belong
+# to (accounts.target) describes how a worker signs in and which JSON endpoints it reads/acts on.
+# Adding a load board = a new entry here (plus a new adapter only if its flow differs).
+targets:
+  demo-board:
+    name: Demo Freight Exchange (mock)
+    login:
+      path: /login
+      username: "#username"
+      password: "#password"
+      submit: "#login-form button[type=submit]"
+      otp_url: "**/otp"
+      otp_field: "#code"
+      otp_submit: "#otp-form button[type=submit]"
+      home_url: "**/loads"
+    captcha:
+      url: "**/captcha"
+      solver: demo_arithmetic       # the demo board's own arithmetic check; real targets use: operator
+      operand_a: "#captcha-a"
+      operand_b: "#captcha-b"
+      answer: "#answer"
+      submit: "#captcha-form button[type=submit]"
+    api:
+      me: /api/me
+      loads: /api/loads
+      book: /api/loads/{ref}/book
+      bookings: /api/bookings
+      csrf_header: X-CSRF-Token
+    blocked_statuses: [403, 429]

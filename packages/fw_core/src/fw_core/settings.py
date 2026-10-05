@@ -110,6 +110,9 @@ class WorkerSettings(BaseModel):
     action_timeout_ms: int = Field(default=5000, ge=100)
     login_timeout_ms: int = Field(default=20000, ge=1000)
     otp_wait_s: float = Field(default=30.0, gt=0)
+    otp_clock_margin_s: float = Field(default=2.0, ge=0)  # mail-server clocks lag behind the worker
+    account_hold_s: float = Field(default=15.0, gt=0)  # account mutex lease, renewed on every heartbeat
+    restart_backoff_s: float = Field(default=5.0, gt=0)  # wait before retrying a slot that failed
     evidence_on_failure: bool = True
     drain_timeout_s: float = Field(default=20.0, gt=0)
 

@@ -2,7 +2,7 @@
 name = "fw-worker"
 version = "0.2.0"
 requires-python = ">=3.12,<3.13"
-dependencies = ["fw-core", "fw-queue", "fw-browser"]
+dependencies = ["fw-core", "fw-queue", "fw-browser", "psutil==7.2.2"]
 
 [build-system]
 requires = ["uv_build>=0.12.23,<0.13"]

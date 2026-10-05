@@ -19,7 +19,7 @@ from fastapi import Depends, FastAPI, Form, Header, HTTPException, Query, Reques
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from fw_core.data import load_yaml
@@ -171,7 +171,10 @@ def create_app(settings: BoardAppSettings | None = None) -> FastAPI:
             raise HTTPException(status_code=422, detail=f"unknown settings: {unknown}")
         async with engine.connect() as conn:
             current = await store.get_settings(conn)
-        merged = Adversity.model_validate({**current.model_dump(), **patch})
+        try:
+            merged = Adversity.model_validate({**current.model_dump(), **patch})
+        except ValidationError as exc:
+            raise HTTPException(status_code=422, detail=exc.errors(include_url=False, include_context=False)) from exc
         cache["value"] = None
         return await store.put_settings(engine, merged, "admin-api")
 

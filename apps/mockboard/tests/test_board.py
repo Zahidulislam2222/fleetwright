@@ -130,6 +130,9 @@ async def test_csrf_token_is_required_for_booking(carrier: httpx.AsyncClient) ->
 async def test_admin_settings_reject_unknown_switches(board: Board) -> None:
     res = board.admin.patch("/admin/settings", json={"no_such_switch": True})
     assert res.status_code == 422
+    # out-of-range values are a client error too, not a 500 (found by the Phase 4 worker tests)
+    res = board.admin.patch("/admin/settings", json={"captcha_after_requests": 2})
+    assert res.status_code == 422 and "captcha_after_requests" in res.text
 
 
 async def test_admin_api_requires_the_token(board: Board) -> None:

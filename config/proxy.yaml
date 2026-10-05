@@ -1,0 +1,14 @@
+# Proxy provider profiles (fw_browser.proxy). The demo ships only the mock provider, which routes
+# directly (no proxy) while exercising stickiness, rotation and health scoring. A real residential
+# provider is added per client after cost approval (Rule 5) — its credentials go in env, not here.
+provider: mock
+sticky_minutes: 30
+rotate_after_blocks: 3        # consecutive blocked responses before an account gets a new exit
+health_window: 50             # responses kept per exit for the block-rate metric
+exits:
+  - id: mock-direct-1
+    server: null              # null = connect directly
+    region: us-central
+  - id: mock-direct-2
+    server: null
+    region: us-west

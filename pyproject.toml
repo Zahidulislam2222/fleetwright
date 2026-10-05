@@ -28,6 +28,7 @@ dev = [
   "ruff==0.16.10",
   "mypy==2.4.0",
   "types-PyYAML==6.0.12.20260906",
+  "types-psutil==7.2.2.20260906",
 ]
 
 [tool.ruff]
@@ -43,7 +44,7 @@ ignore = ["PLR0913", "PLR0917", "PLR2004", "PLR0911", "PLR0912", "PLR0915", "S10
 max-line-length = 140
 
 [tool.ruff.lint.isort]
-known-first-party = ["fw_core", "fw_queue", "fw_browser", "mockboard", "fw_coordinator", "fw_gateway", "fw_worker", "boardkit", "dbkit"]
+known-first-party = ["fw_core", "fw_queue", "fw_browser", "mockboard", "fw_coordinator", "fw_gateway", "fw_worker", "boardkit", "dbkit", "workerkit"]
 
 [tool.ruff.lint.per-file-ignores]
 "**/tests/**" = ["S", "PLR", "ASYNC"]
