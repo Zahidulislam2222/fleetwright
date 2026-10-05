@@ -23,7 +23,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit
 
@@ -132,7 +132,7 @@ def _record(prompt_id: str, record: dict) -> None:
 
 
 def _now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    return datetime.now(UTC).isoformat(timespec="seconds")
 
 
 def generate_image(prompt_id: str) -> None:
@@ -146,13 +146,23 @@ def generate_image(prompt_id: str) -> None:
     files = []
     for index, item in enumerate(result.get("data", [])):
         ext = (item.get("media_type") or "image/png").split("/")[-1]
-        stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+        stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%S")
         target = OUT_DIR / f"{prompt_id}-{stamp}-{index}.{ext}"
         target.write_bytes(base64.b64decode(item["b64_json"]))
         files.append(str(target.relative_to(ROOT)))
     cost = (result.get("usage") or {}).get("cost")
-    _record(prompt_id, {"kind": "image", "model": model, "params": spec.get("params", {}),
-                        "started": started, "finished": _now(), "files": files, "reported_cost_usd": cost})
+    _record(
+        prompt_id,
+        {
+            "kind": "image",
+            "model": model,
+            "params": spec.get("params", {}),
+            "started": started,
+            "finished": _now(),
+            "files": files,
+            "reported_cost_usd": cost,
+        },
+    )
     print(f"Saved {files}  |  reported cost: ${cost}")
 
 
@@ -186,28 +196,40 @@ def _unconfirmed_submit(prompt_id: str) -> str | None:
 def generate_video(prompt_id: str, allow_resubmit: bool = False) -> None:
     pending = _unconfirmed_submit(prompt_id)
     if pending and not allow_resubmit:
-        sys.exit(f"A submit at {pending} never returned a job id, so that job may still be running and billed. "
-                 f"Check the OpenRouter activity page; to submit again anyway, use: resubmit {prompt_id}")
+        sys.exit(
+            f"A submit at {pending} never returned a job id, so that job may still be running and billed. "
+            f"Check the OpenRouter activity page; to submit again anyway, use: resubmit {prompt_id}"
+        )
     spec = PROMPTS[prompt_id]
     model = CONFIG["video"]["model"]
     _guard(_video_estimate(spec))
     body: dict = {"model": model, "prompt": spec["prompt"], **spec["params"]}
     if spec.get("first_frame"):
         frame = _latest_file(spec["first_frame"])
-        mime = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp"}.get(frame.suffix.lower())
+        mime = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp"}.get(
+            frame.suffix.lower()
+        )
         if mime is None:
             sys.exit(f"Unsupported first-frame type {frame.suffix!r}; use PNG, JPEG or WebP.")
         data_url = f"data:{mime};base64,{base64.b64encode(frame.read_bytes()).decode()}"
-        body["frame_images"] = [{"type": "image_url", "image_url": {"url": data_url},
-                                 "frame_type": "first_frame"}]
+        body["frame_images"] = [{"type": "image_url", "image_url": {"url": data_url}, "frame_type": "first_frame"}]
     # Logged before submitting: if the response is lost (timeout), the job may still be running and
     # billed. Check the OpenRouter activity page before re-running rather than paying twice.
     _record(prompt_id, {"kind": "video-submit-attempt", "model": model, "submitted": _now()})
     submitted = _request("POST", f"{API}/videos", body)
     job_id = submitted["id"]
-    _record(prompt_id, {"kind": "video", "model": model, "params": spec["params"],
-                        "first_frame": spec.get("first_frame"), "job_id": job_id,
-                        "submitted": _now(), "status": submitted.get("status")})
+    _record(
+        prompt_id,
+        {
+            "kind": "video",
+            "model": model,
+            "params": spec["params"],
+            "first_frame": spec.get("first_frame"),
+            "job_id": job_id,
+            "submitted": _now(),
+            "status": submitted.get("status"),
+        },
+    )
     print(f"Submitted video job {job_id}")
     poll_video(prompt_id, job_id)
 
@@ -230,9 +252,18 @@ def poll_video(prompt_id: str, job_id: str) -> None:
             target.write_bytes(_request("GET", url, raw=True))
             files.append(str(target.relative_to(ROOT)))
     cost = (status.get("usage") or {}).get("cost")
-    _record(prompt_id, {"kind": "video-result", "job_id": job_id, "status": status.get("status"),
-                        "finished": _now(), "files": files, "reported_cost_usd": cost,
-                        "error": status.get("error")})
+    _record(
+        prompt_id,
+        {
+            "kind": "video-result",
+            "job_id": job_id,
+            "status": status.get("status"),
+            "finished": _now(),
+            "files": files,
+            "reported_cost_usd": cost,
+            "error": status.get("error"),
+        },
+    )
     print(f"Status {status.get('status')}  |  files {files}  |  reported cost: ${cost}")
 
 
