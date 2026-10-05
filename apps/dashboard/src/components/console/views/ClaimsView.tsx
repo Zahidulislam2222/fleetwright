@@ -7,17 +7,20 @@ import { X } from "lucide-react";
 import { claims, fmtAgo, fmtMs, fmtTime, fmtUsd } from "@/mocks/data";
 import type { Claim, ClaimState } from "@/mocks/types";
 import copy from "@/content/console.json";
-import { usePrototype } from "../prototypeStore";
-import { Badge, claimTone, DataState, MockTag, PageHeader } from "../ui";
+import { useList, useLiveGet } from "@/lib/live/useData";
+import { Badge, claimTone, DataState, LoadOlder, MockTag, PageHeader } from "../ui";
 import { DataTable, type Column } from "../DataTable";
 import { SearchInput, SelectFilter, Toolbar } from "../Toolbar";
 
 const p = copy.pages.claims;
 const STATES = Object.keys(copy.claimStates) as ClaimState[];
 
+/** When the board posted the load, or (for boards that don't stamp it) when a watcher saw it. */
+const startOf = (c: Claim) => c.published_at ?? c.seen_at;
+
 function totalMs(c: Claim) {
   const end = c.confirmed_at ?? c.events[c.events.length - 1]?.at;
-  return end ? Date.parse(end) - Date.parse(c.published_at) : null;
+  return end ? Date.parse(end) - Date.parse(startOf(c)) : null;
 }
 
 function ClaimDrawer({ claim, onClose }: { claim: Claim; onClose: () => void }) {
@@ -25,7 +28,7 @@ function ClaimDrawer({ claim, onClose }: { claim: Claim; onClose: () => void }) 
   const opener = useCallback(() => document.querySelector<HTMLElement>(`[data-claim-open="${claim.id}"]`), [claim.id]);
   useDialog(ref, onClose, undefined, opener);
 
-  const start = Date.parse(claim.published_at);
+  const start = Date.parse(startOf(claim));
   return (
     <div className="fixed inset-0 z-[var(--z-overlay)]">
       <button aria-label={copy.common.close} tabIndex={-1} className="absolute inset-0 bg-black/40" onClick={onClose} />
@@ -55,11 +58,13 @@ function ClaimDrawer({ claim, onClose }: { claim: Claim; onClose: () => void }) 
           </dl>
           <h3 className="mt-7 text-[13px] font-semibold text-c-text">{p.timeline}</h3>
           <ol className="mt-3 border-l border-c-border">
-            <li className="relative pb-5 pl-5">
-              <span aria-hidden className="absolute -left-[5px] top-1 size-[9px] rounded-full bg-c-text-3" />
-              <p className="text-[13px] text-c-text">{p.publishedEvent} <span className="text-c-text-3">· {p.publishedActor}</span></p>
-              <p className="font-mono text-[12px] text-c-text-3">{fmtTime(claim.published_at)} · +{fmtMs(0)}</p>
-            </li>
+            {claim.published_at && (
+              <li className="relative pb-5 pl-5">
+                <span aria-hidden className="absolute -left-[5px] top-1 size-[9px] rounded-full bg-c-text-3" />
+                <p className="text-[13px] text-c-text">{p.publishedEvent} <span className="text-c-text-3">· {p.publishedActor}</span></p>
+                <p className="font-mono text-[12px] text-c-text-3">{fmtTime(claim.published_at)} · +{fmtMs(0)}</p>
+              </li>
+            )}
             {claim.events.map((e, i) => (
               <li key={i} className="relative pb-5 pl-5 last:pb-0">
                 <span aria-hidden className={`absolute -left-[5px] top-1 size-[9px] rounded-full ${claimTone[e.state] === "ok" ? "bg-c-ok" : claimTone[e.state] === "bad" ? "bg-c-bad" : claimTone[e.state] === "warn" ? "bg-c-warn" : "bg-c-info"}`} />
@@ -79,19 +84,23 @@ function ClaimDrawer({ claim, onClose }: { claim: Claim; onClose: () => void }) 
 }
 
 export function ClaimsView() {
-  const { tenant } = usePrototype();
   const [state, setState] = useState("all");
+  const list = useList<Claim>("claims", claims, state === "all" ? "" : `state=${encodeURIComponent(state)}`);
+  const { live, tenant } = list.source;
   const [query, setQuery] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
   const close = useCallback(() => setOpenId(null), []);
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return claims(tenant).filter(
+    return list.rows.filter(
       (c) => (state === "all" || c.state === state) && (!q || c.id.includes(q) || c.target_job_key.toLowerCase().includes(q) || c.lane.toLowerCase().includes(q)),
     );
-  }, [tenant, state, query]);
-  const open = openId ? claims(tenant).find((c) => c.id === openId) ?? null : null;
+  }, [list.rows, state, query]);
+  // The list carries no timelines; live, the drawer fetches the full claim (it refreshes with the stream).
+  const detail = useLiveGet<Claim>(live && openId ? `/v1/claims/${encodeURIComponent(openId)}` : null);
+  const listed = openId ? list.rows.find((c) => c.id === openId) ?? null : null;
+  const open = live ? (detail.data ?? listed) : listed;
 
   const columns: Column<Claim>[] = [
     {
@@ -109,14 +118,14 @@ export function ClaimsView() {
     { key: "state", header: p.columns.state, cell: (c) => <Badge tone={claimTone[c.state]}>{copy.claimStates[c.state]}</Badge> },
     { key: "worker", header: p.columns.worker, cell: (c) => <span className="font-mono text-[12.5px] text-c-text-2">{c.worker_id ?? "—"}</span> },
     { key: "token", header: p.columns.token, align: "right", cell: (c) => <span className="font-mono text-[12.5px] text-c-text-2">{c.fencing_token ?? "—"}</span> },
-    { key: "published", header: p.columns.published, cell: (c) => <span className="text-c-text-2" title={fmtTime(c.published_at)}>{fmtAgo(c.published_at)}</span> },
+    { key: "published", header: p.columns.published, cell: (c) => <span className="text-c-text-2" title={fmtTime(startOf(c))}>{fmtAgo(startOf(c))}</span> },
     { key: "total", header: p.columns.total, align: "right", cell: (c) => { const t = totalMs(c); return t === null ? "—" : fmtMs(t); } },
   ];
 
   return (
     <>
       <PageHeader title={p.title} description={p.description} actions={<MockTag />} />
-      <DataState copy={p}>
+      <DataState copy={p} status={list.status} onRetry={list.retry}>
         <Toolbar>
           <SearchInput id="claim-search" value={query} onChange={setQuery} placeholder={copy.common.searchPlaceholder} />
           <SelectFilter
@@ -128,6 +137,7 @@ export function ClaimsView() {
           />
         </Toolbar>
         <DataTable label={p.title} tenant={tenant} rows={rows} columns={columns} rowKey={(c) => c.id} resetKey={`${tenant}|${state}|${query}`} />
+        <LoadOlder hasMore={list.hasMore} loading={list.loadingMore} onMore={list.more} />
         {open && <ClaimDrawer claim={open} onClose={close} />}
       </DataState>
     </>

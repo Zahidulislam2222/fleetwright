@@ -28,9 +28,9 @@ from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncEngine
 
-from fw_coordinator import views
+from fw_coordinator import schemas, views
 from fw_coordinator.auth import Auth, BadCredentials, LockedOut, ip_prefix
-from fw_coordinator.demo import Demo, DemoConfig, load_demo
+from fw_coordinator.demo import Demo, DemoConfig, RunActive, load_demo
 from fw_core.crypto import Envelope
 from fw_core.db import make_engine, system_tx, tenant_tx
 from fw_core.logs import setup_logging
@@ -243,7 +243,7 @@ def create_app(cfg: CoordinatorSettings | None = None, demo_data: DemoConfig | N
 
     # ---------------- session and sign-in ----------------
 
-    @app.get("/v1/session")
+    @app.get("/v1/session", response_model=schemas.Session)
     async def session_info(svc: Svc, who: Who) -> dict[str, Any]:
         async with system_tx(svc.engine) as conn:
             tenant = (
@@ -262,7 +262,7 @@ def create_app(cfg: CoordinatorSettings | None = None, demo_data: DemoConfig | N
             "demo": {"tenant": demo_tenant, "can_control": demo_tenant and who.role in ("demo", "operator", "owner")},
         }
 
-    @app.post("/v1/auth/login")
+    @app.post("/v1/auth/login", response_model=schemas.LoginResult)
     async def login(body: LoginIn, request: Request, response: Response, svc: Svc) -> dict[str, bool]:
         token = await svc.auth.password_step(
             body.email, body.password, client_ip(request, svc.cfg.api.trusted_proxy_hops)
@@ -278,7 +278,7 @@ def create_app(cfg: CoordinatorSettings | None = None, demo_data: DemoConfig | N
         )
         return {"mfa_required": True}
 
-    @app.post("/v1/auth/mfa")
+    @app.post("/v1/auth/mfa", response_model=schemas.MfaResult)
     async def mfa(body: MfaIn, request: Request, response: Response, svc: Svc) -> dict[str, Any]:
         token, who = await svc.auth.mfa_step(
             request.cookies.get(svc.cfg.auth.mfa_cookie_name),
@@ -297,13 +297,13 @@ def create_app(cfg: CoordinatorSettings | None = None, demo_data: DemoConfig | N
         )
         return {"role": who.role, "csrf": who.csrf}
 
-    @app.post("/v1/auth/logout")
+    @app.post("/v1/auth/logout", response_model=schemas.SignedOut)
     async def logout(response: Response, svc: Svc, who: Mutator) -> dict[str, bool]:
         await sessions.revoke(svc.redis, who)
         response.delete_cookie(svc.cfg.auth.cookie_name, path="/")
         return {"signed_out": True}
 
-    @app.get("/v1/auth/demo-hint")
+    @app.get("/v1/auth/demo-hint", response_model=schemas.DemoHint)
     async def demo_hint(svc: Svc) -> dict[str, Any]:
         """The shared demo login, shown on the public login page by design (demo role only)."""
         password = svc.cfg.demo.account_password
@@ -316,22 +316,22 @@ def create_app(cfg: CoordinatorSettings | None = None, demo_data: DemoConfig | N
 
     # ---------------- reads ----------------
 
-    @app.get("/v1/overview")
+    @app.get("/v1/overview", response_model=schemas.Overview)
     async def overview(svc: Svc, who: Who) -> dict[str, Any]:
         async with tenant_tx(svc.engine, who.tenant_id) as conn:
             return await views.overview(conn, who.tenant_id, svc.cfg.api)
 
-    @app.get("/v1/workers")
+    @app.get("/v1/workers", response_model=schemas.WorkerPage)
     async def workers(svc: Svc, who: Who) -> dict[str, Any]:
         async with tenant_tx(svc.engine, who.tenant_id) as conn:
             return await views.workers(conn, who.tenant_id, svc.cfg.api)
 
-    @app.get("/v1/accounts")
+    @app.get("/v1/accounts", response_model=schemas.AccountPage)
     async def accounts(svc: Svc, who: Who) -> dict[str, Any]:
         async with tenant_tx(svc.engine, who.tenant_id) as conn:
             return await views.accounts(conn, who.tenant_id)
 
-    @app.get("/v1/claims")
+    @app.get("/v1/claims", response_model=schemas.ClaimPage)
     async def claims_page(
         svc: Svc,
         who: Who,
@@ -342,7 +342,7 @@ def create_app(cfg: CoordinatorSettings | None = None, demo_data: DemoConfig | N
         async with tenant_tx(svc.engine, who.tenant_id) as conn:
             return await views.claims(conn, who.tenant_id, cursor, _limit(svc, limit), state)
 
-    @app.get("/v1/claims/{claim_id}")
+    @app.get("/v1/claims/{claim_id}", response_model=schemas.Claim)
     async def claim_detail(claim_id: UUID, svc: Svc, who: Who) -> dict[str, Any]:
         async with tenant_tx(svc.engine, who.tenant_id) as conn:
             found = await views.claim(conn, who.tenant_id, claim_id)
@@ -350,23 +350,23 @@ def create_app(cfg: CoordinatorSettings | None = None, demo_data: DemoConfig | N
             raise HTTPException(404, "no such claim")
         return found
 
-    @app.get("/v1/filters")
+    @app.get("/v1/filters", response_model=schemas.FilterPage)
     async def filters_list(svc: Svc, who: Who) -> dict[str, Any]:
         async with tenant_tx(svc.engine, who.tenant_id) as conn:
             return await views.filters(conn, who.tenant_id)
 
-    @app.get("/v1/schedules")
+    @app.get("/v1/schedules", response_model=schemas.SchedulePage)
     async def schedules(svc: Svc, who: Who) -> dict[str, Any]:
         async with tenant_tx(svc.engine, who.tenant_id) as conn:
             return await views.schedules(conn, who.tenant_id)
 
-    @app.get("/v1/latency")
+    @app.get("/v1/latency", response_model=schemas.Latency)
     async def latency(svc: Svc, who: Who) -> dict[str, Any]:
         async with tenant_tx(svc.engine, who.tenant_id) as conn:
             stages = await views.latency(conn, who.tenant_id, svc.cfg.api.latency_window_s)
         return {"tenant_id": str(who.tenant_id), "window_s": svc.cfg.api.latency_window_s, "stages": stages}
 
-    @app.get("/v1/audit")
+    @app.get("/v1/audit", response_model=schemas.AuditPage)
     async def audit_page(
         svc: Svc,
         who: Who,
@@ -376,26 +376,37 @@ def create_app(cfg: CoordinatorSettings | None = None, demo_data: DemoConfig | N
         async with tenant_tx(svc.engine, who.tenant_id) as conn:
             return await views.audit(conn, who.tenant_id, cursor, _limit(svc, limit), who.redacted)
 
-    @app.get("/v1/users")
+    @app.get("/v1/users", response_model=schemas.UserPage)
     async def users(svc: Svc, who: Who) -> dict[str, Any]:
         async with tenant_tx(svc.engine, who.tenant_id) as conn:
             return await views.users(conn, who.tenant_id, who.redacted)
 
-    @app.get("/v1/cells")
+    @app.get("/v1/cells", response_model=schemas.CellList)
     async def cells(svc: Svc, who: Who) -> dict[str, Any]:
         async with system_tx(svc.engine) as conn:
-            rows = await views.cells(conn)
+            directory = await views.cells(conn)
+        async with tenant_tx(svc.engine, who.tenant_id) as conn:
+            mine = await views.workers_per_cell(conn, who.tenant_id, svc.cfg.api)
         own = str(who.tenant_id)
-        # Other tenants' ids are not this viewer's business: show counts only.
+        # Other tenants are counted, never named; worker counts are the viewer's own (RLS).
         return {
             "items": [
-                {**c, "tenants": [t for t in c["tenants"] if t == own], "tenant_count": len(c["tenants"])} for c in rows
+                {
+                    "id": c["id"],
+                    "name": c["name"],
+                    "region": c["region"],
+                    "capacity": c["capacity"],
+                    "tenant_count": len(c["tenants"]),
+                    "hosts_you": own in c["tenants"],
+                    "your_workers": mine.get(c["id"], 0),
+                }
+                for c in directory
             ]
         }
 
     # ---------------- filters ----------------
 
-    @app.post("/v1/filters", status_code=201)
+    @app.post("/v1/filters", status_code=201, response_model=schemas.Filter)
     async def filter_create(body: FilterIn, request: Request, svc: Svc, who: Mutator) -> dict[str, Any]:
         needs(who, "operator")
         filter_id = uuid4()
@@ -424,7 +435,7 @@ def create_app(cfg: CoordinatorSettings | None = None, demo_data: DemoConfig | N
         await _filters_changed(svc, who, request, "filter.create", body.name, json.dumps(body.model_dump()))
         return await _one_filter(svc, who, filter_id)
 
-    @app.patch("/v1/filters/{filter_id}")
+    @app.patch("/v1/filters/{filter_id}", response_model=schemas.Filter)
     async def filter_update(
         filter_id: UUID, body: FilterPatch, request: Request, svc: Svc, who: Mutator
     ) -> dict[str, Any]:
@@ -484,7 +495,7 @@ def create_app(cfg: CoordinatorSettings | None = None, demo_data: DemoConfig | N
 
     # ---------------- accounts ----------------
 
-    @app.post("/v1/accounts/{account_id}/otp", status_code=202)
+    @app.post("/v1/accounts/{account_id}/otp", status_code=202, response_model=schemas.Accepted)
     async def manual_otp(account_id: UUID, body: OtpIn, request: Request, svc: Svc, who: Mutator) -> dict[str, bool]:
         """An operator types the one-time code the target sent; the waiting worker picks it up."""
         needs(who, "operator")
@@ -507,20 +518,23 @@ def create_app(cfg: CoordinatorSettings | None = None, demo_data: DemoConfig | N
 
     # ---------------- demo ----------------
 
-    @app.get("/v1/demo")
+    @app.get("/v1/demo", response_model=schemas.DemoStatus)
     async def demo_status(svc: Svc, who: Who) -> dict[str, Any]:
         if who.tenant_id != await svc.demo_tenant_id():
             raise HTTPException(404, "this tenant has no demo")
         return await svc.demo.status()
 
-    @app.post("/v1/demo/run")
+    @app.post("/v1/demo/run", response_model=schemas.DemoStatus)
     async def demo_run(request: Request, svc: Svc, who: Mutator) -> dict[str, Any]:
         await can_control_demo(svc, who)
-        status = await svc.demo.start_run()
+        try:
+            status = await svc.demo.start_run()
+        except RunActive:
+            raise HTTPException(409, "a demo run is already going; wait for it to end") from None
         await audit(svc, who, request, "demo.run", "board", f"feed at {status['feed_rate_per_min']}/min")
         return status
 
-    @app.patch("/v1/demo/adversity")
+    @app.patch("/v1/demo/adversity", response_model=schemas.DemoStatus)
     async def demo_adversity(body: AdversityIn, request: Request, svc: Svc, who: Mutator) -> dict[str, Any]:
         await can_control_demo(svc, who)
         try:

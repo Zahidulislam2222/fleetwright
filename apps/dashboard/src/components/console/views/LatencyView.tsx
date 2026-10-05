@@ -1,10 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { ChartBar, Table2 } from "lucide-react";
-import { fmtMs, latency } from "@/mocks/data";
+import { fmtDuration, fmtMs, latency } from "@/mocks/data";
+import type { Latency } from "@/mocks/types";
+import { useObject } from "@/lib/live/useData";
+import { fill } from "@/lib/fill";
 import copy from "@/content/console.json";
-import { usePrototype } from "../prototypeStore";
 import { DataState, MockTag, PageHeader, Panel } from "../ui";
 import { GroupedBars } from "../charts";
 import { RadioGroup } from "../RadioGroup";
@@ -16,10 +18,13 @@ const KEYS = [
   { label: "p99", color: "var(--c-ord-3)" },
 ];
 
+const mock = (tenant: string): Latency => ({ tenant_id: tenant, window_s: 3600, stages: latency(tenant) });
+
 export function LatencyView() {
-  const { tenant } = usePrototype();
+  const got = useObject<Latency>("/v1/latency", mock);
   const [view, setView] = useState<"chart" | "table">("chart");
-  const stages = useMemo(() => latency(tenant, p.stages), [tenant]);
+  const stages = (got.data?.stages ?? []).map((s) => ({ ...s, label: p.stages[s.key] }));
+  const note = got.source.live && got.data ? fill(p.liveNote, { window: fmtDuration(got.data.window_s) }) : p.note;
 
   const toggle = (
     <RadioGroup
@@ -38,7 +43,7 @@ export function LatencyView() {
   return (
     <>
       <PageHeader title={p.title} description={p.description} actions={<MockTag />} />
-      <DataState copy={p} rows={5}>
+      <DataState copy={p} rows={5} status={got.status} onRetry={got.retry}>
         <Panel title={p.chartTitle} aside={toggle}>
           <div className="p-4 sm:p-5">
             {view === "chart" ? (
@@ -57,7 +62,8 @@ export function LatencyView() {
                       <th scope="col" className="py-2 pr-4 font-medium">{p.columns.stage}</th>
                       <th scope="col" className="py-2 pr-4 text-right font-medium">{p.columns.p50}</th>
                       <th scope="col" className="py-2 pr-4 text-right font-medium">{p.columns.p95}</th>
-                      <th scope="col" className="py-2 text-right font-medium">{p.columns.p99}</th>
+                      <th scope="col" className="py-2 pr-4 text-right font-medium">{p.columns.p99}</th>
+                      <th scope="col" className="py-2 text-right font-medium">{p.columns.samples}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -68,14 +74,15 @@ export function LatencyView() {
                         </th>
                         <td className="py-2.5 pr-4 text-right tabular">{fmtMs(s.p50)}</td>
                         <td className="py-2.5 pr-4 text-right tabular">{fmtMs(s.p95)}</td>
-                        <td className="py-2.5 text-right tabular">{fmtMs(s.p99)}</td>
+                        <td className="py-2.5 pr-4 text-right tabular">{fmtMs(s.p99)}</td>
+                        <td className="py-2.5 text-right tabular text-c-text-2">{s.samples}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             )}
-            <p className="mt-4 text-[12.5px] text-c-text-3">{p.note}</p>
+            <p className="mt-4 text-[12.5px] text-c-text-3">{note}</p>
           </div>
         </Panel>
       </DataState>

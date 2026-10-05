@@ -11,6 +11,7 @@ from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit, urlunsplit
 from uuid import UUID
 
 import httpx
@@ -78,10 +79,22 @@ class Api:
         return c
 
 
+# The demo's run/change keys are deployment-wide, so a test run would collide with a local stack
+# using the same Redis (a demo run started in the browser makes the run test get 409). The kit uses
+# its own database number on the same server; nothing else in the project uses this one.
+TEST_REDIS_DB = 15
+
+
+def isolated(url: SecretStr) -> SecretStr:
+    parts = urlsplit(url.get_secret_value())
+    return SecretStr(urlunsplit(parts._replace(path=f"/{TEST_REDIS_DB}")))
+
+
 def settings(board: Board, slug: str, demo_password: str) -> CoordinatorSettings:
     base = ApiTestSettings()  # type: ignore[call-arg]
     return base.model_copy(
         update={
+            "redis": base.redis.model_copy(update={"core_url": isolated(base.redis.core_url)}),
             "board_client": base.board_client.model_copy(update={"internal_url": board.url}),
             "auth": base.auth.model_copy(update={"cookie_secure": False}),
             "api": base.api.model_copy(update={"trusted_proxy_hops": 1}),

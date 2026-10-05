@@ -265,6 +265,20 @@ async def filters(conn: AsyncConnection, tenant_id: UUID) -> dict[str, Any]:
     return page(tenant_id, items, None, len(items))
 
 
+def _hour_cells(day: int, start: str, end: str) -> list[dict[str, int]]:
+    """A window as whole-hour spans on the console's week grid (0 = Monday, as the engine counts).
+    An overnight window (end <= start) runs to midnight and continues on the next day; partial hours
+    are drawn as the whole hour they touch."""
+    s = int(start[:2])
+    e = int(end[:2]) + (1 if end[3:5] != "00" else 0)
+    if e > s:
+        return [{"day": day, "start_hour": s, "end_hour": e}]
+    spans = [{"day": day, "start_hour": s, "end_hour": 24}]
+    if e > 0:
+        spans.append({"day": (day + 1) % 7, "start_hour": 0, "end_hour": e})
+    return spans
+
+
 async def schedules(conn: AsyncConnection, tenant_id: UUID) -> dict[str, Any]:
     rows = (
         await conn.execute(
@@ -277,9 +291,7 @@ async def schedules(conn: AsyncConnection, tenant_id: UUID) -> dict[str, Any]:
     items = []
     for r in rows:
         windows = [
-            {"day": day, "start_hour": int(w["start"][:2]), "end_hour": int(w["end"][:2]) or 24}
-            for w in r.windows
-            for day in sorted(w["days"])
+            cell for w in r.windows for day in sorted(w["days"]) for cell in _hour_cells(day, w["start"], w["end"])
         ]
         items.append(
             {
@@ -415,22 +427,48 @@ async def cells(conn: AsyncConnection) -> list[dict[str, Any]]:
     ]
 
 
-async def overview(conn: AsyncConnection, tenant_id: UUID, cfg: ApiSettings) -> dict[str, Any]:
-    counts = {
-        str(r.k): int(r.n)
+async def workers_per_cell(conn: AsyncConnection, tenant_id: UUID, cfg: ApiSettings) -> dict[str, int]:
+    """The tenant's live workers per cell (not stopped, heartbeat younger than the dead threshold)."""
+    return {
+        str(r.cell_id): int(r.n)
         for r in await conn.execute(
             text(
-                """SELECT coalesce(resolution, state) AS k, count(*) AS n FROM claims
-                   WHERE tenant_id = :t AND queued_at > clock_timestamp() - interval '24 hours' GROUP BY 1"""
+                """SELECT cell_id, count(*) AS n FROM workers
+                   WHERE tenant_id = :t AND state <> 'stopped'
+                     AND heartbeat_at > clock_timestamp() - make_interval(secs => :dead)
+                   GROUP BY cell_id"""
             ),
-            {"t": tenant_id},
+            {"t": tenant_id, "dead": cfg.worker_dead_after_s},
         )
     }
+
+
+async def overview(conn: AsyncConnection, tenant_id: UUID, cfg: ApiSettings) -> dict[str, Any]:
+    by_state = {
+        str(r.state): int(r.n)
+        for r in await conn.execute(
+            text(
+                """SELECT state, count(*) AS n FROM claims
+                   WHERE tenant_id = :t AND queued_at > clock_timestamp() - make_interval(mins => :m) GROUP BY 1"""
+            ),
+            {"t": tenant_id, "m": cfg.series_minutes},
+        )
+    }
+    confirmed = (
+        await conn.execute(
+            text(
+                """SELECT count(*) FROM claims
+                   WHERE tenant_id = :t AND queued_at > clock_timestamp() - make_interval(mins => :m)
+                     AND (state = 'CONFIRMED' OR resolution IN ('confirmed', 'confirmed_by_late_actor'))"""
+            ),
+            {"t": tenant_id, "m": cfg.series_minutes},
+        )
+    ).scalar_one()
     w = await workers(conn, tenant_id, cfg)
     a = await accounts(conn, tenant_id)
     stale = sum(x["status"] == "stale" for x in w["items"])
     attention = sum(x["session_state"] in ("expiring", "expired", "otp_required") for x in a["items"])
-    unknown = counts.get("UNKNOWN", 0)
+    unknown = by_state.get("UNKNOWN", 0)
     alerts = []
     if stale:
         alerts.append({"id": "stale-workers", "severity": "warning", "kind": "stale_workers", "count": stale})
@@ -440,7 +478,13 @@ async def overview(conn: AsyncConnection, tenant_id: UUID, cfg: ApiSettings) -> 
         alerts.append({"id": "unknown", "severity": "info", "kind": "claims_being_reconciled", "count": unknown})
     return {
         "tenant_id": str(tenant_id),
-        "claims_24h": counts,
+        "claims": {
+            "window_s": cfg.series_minutes * 60,
+            "total": sum(by_state.values()),
+            "confirmed": int(confirmed),
+            "finished": sum(by_state.get(s, 0) for s in ("CONFIRMED", "FAILED", "RECONCILED")),
+            "by_state": by_state,
+        },
         "series": await series(conn, tenant_id, cfg.series_minutes),
         "workers": {"total": len(w["items"]), "healthy": sum(x["status"] == "healthy" for x in w["items"])},
         "alerts": alerts,

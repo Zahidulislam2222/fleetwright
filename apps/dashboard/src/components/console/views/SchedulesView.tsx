@@ -1,8 +1,9 @@
 "use client";
 
 import { schedules } from "@/mocks/data";
+import type { Schedule } from "@/mocks/types";
+import { useList } from "@/lib/live/useData";
 import copy from "@/content/console.json";
-import { usePrototype } from "../prototypeStore";
 import { Badge, DataState, MockTag, PageHeader, Panel } from "../ui";
 
 const p = copy.pages.schedules;
@@ -10,13 +11,13 @@ const HOURS = Array.from({ length: 24 }, (_, h) => h);
 const hh = (h: number) => `${String(h).padStart(2, "0")}:00`;
 
 export function SchedulesView() {
-  const { tenant } = usePrototype();
-  const list = schedules(tenant);
+  const data = useList<Schedule>("schedules", schedules);
+  const list = data.rows;
 
   return (
     <>
       <PageHeader title={p.title} description={p.description} actions={<MockTag />} />
-      <DataState copy={p} rows={4}>
+      <DataState copy={p} rows={4} status={data.status} onRetry={data.retry}>
         <div className="grid gap-4">
           {list.map((s) => {
             const active = (day: number, hour: number) => s.windows.some((w) => w.day === day && hour >= w.start_hour && hour < w.end_hour);

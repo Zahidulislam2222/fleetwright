@@ -22,8 +22,27 @@ function contentSecurityPolicy() {
   return [...parts, ...(isDev ? [] : security.productionOnlyDirectives)].join("; ");
 }
 
+/*
+ * Local development only: proxy the console's same-origin API paths to the locally running API
+ * and live-update gateway (in production nginx does this). Set FWDEV_API_ORIGIN and
+ * FWDEV_GATEWAY_ORIGIN (see the root .env.example); without them the console runs as the prototype.
+ */
+function devRewrites() {
+  const api = process.env.FWDEV_API_ORIGIN;
+  const gateway = process.env.FWDEV_GATEWAY_ORIGIN;
+  return [
+    ...(gateway ? [{ source: "/v1/stream", destination: `${gateway}/v1/stream` }] : []),
+    ...(api ? [{ source: "/v1/:path*", destination: `${api}/v1/:path*` }] : []),
+  ];
+}
+
+const proxying = isDev && devRewrites().length > 0;
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // The dev server's gzip holds server-sent events in its buffer, so live updates would never
+  // arrive through the proxy. Only affects `next dev` with the proxy on; releases are static files.
+  ...(proxying ? { compress: false } : {}),
   ...(isExport
     ? { output: "export" }
     : {
@@ -33,6 +52,9 @@ const nextConfig: NextConfig = {
             ...Object.entries(security.headers).map(([key, value]) => ({ key, value })),
           ];
           return [{ source: "/:path*", headers }];
+        },
+        async rewrites() {
+          return devRewrites();
         },
       }),
 };

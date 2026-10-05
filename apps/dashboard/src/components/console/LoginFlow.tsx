@@ -3,11 +3,47 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Info, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Info, ShieldCheck, Sparkles } from "lucide-react";
 import { FleetMark } from "@/components/brand/FleetMark";
 import copy from "@/content/prototype.json";
+import type { DemoHint, MfaResult } from "@/mocks/types";
+import { apiGet, apiSend, ApiError } from "@/lib/live/api";
+import { refreshSession, useLive } from "@/lib/live/store";
+import { fill } from "@/lib/fill";
 
 const a = copy.auth;
+
+function liveError(err: unknown): string {
+  if (err instanceof ApiError) {
+    if (err.status === 429) return fill(a.errors.locked, { minutes: Math.max(1, Math.ceil((err.retryAfterS ?? 60) / 60)) });
+    if (err.status === 401) return a.errors.wrong;
+    if (err.status === 422) return a.errors.wrong;
+  }
+  return a.errors.network;
+}
+
+/** The shared demo login, published by the API on purpose (role `demo`: capped controls only). */
+function DemoHintBox({ hint, onFill }: { hint: DemoHint; onFill: () => void }) {
+  return (
+    <section aria-labelledby="demo-hint-title" className="mt-4 rounded-2xl border border-c-border bg-c-surface p-5 text-[13.5px]">
+      <h2 id="demo-hint-title" className="flex items-center gap-2 font-semibold text-c-text">
+        <Sparkles aria-hidden className="size-4 text-c-accent-text" /> {a.demo.title}
+      </h2>
+      <p className="mt-1 text-c-text-2">{a.demo.body}</p>
+      <dl className="mt-3 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 font-mono text-[12.5px]">
+        <dt className="text-c-text-3">{a.demo.email}</dt>
+        <dd className="truncate text-c-text">{hint.email}</dd>
+        <dt className="text-c-text-3">{a.demo.password}</dt>
+        <dd className="break-all text-c-text">{hint.password}</dd>
+        <dt className="text-c-text-3">{a.demo.code}</dt>
+        <dd className="tracking-[0.2em] text-c-text">{hint.code}</dd>
+      </dl>
+      <button type="button" onClick={onFill} className="mt-3 h-9 rounded-lg border border-c-border px-3 text-[13px] text-c-text hover:bg-c-surface-2">
+        {a.demo.fill}
+      </button>
+    </section>
+  );
+}
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function Field({
@@ -34,6 +70,11 @@ export function Field({
 
 export function LoginFlow() {
   const router = useRouter();
+  const { mode, session } = useLive();
+  const live = mode === "live";
+  const [hint, setHint] = useState<DemoHint | null>(null);
+  const [busy, setBusy] = useState(false);
+  const passwordRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState<"password" | "mfa">("password");
   const [email, setEmail] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -45,6 +86,16 @@ export function LoginFlow() {
     if (step === "mfa") codeRef.current?.focus();
     else if (returned) emailRef.current?.focus();
   }, [step, returned]);
+
+  // The demo hint carries the current code, so fetch it again for the code step.
+  useEffect(() => {
+    if (!live) return;
+    const ctrl = new AbortController();
+    apiGet<DemoHint>("/v1/auth/demo-hint", ctrl.signal)
+      .then(setHint)
+      .catch(() => setHint(null));
+    return () => ctrl.abort();
+  }, [live, step]);
 
   // Move focus to the first invalid field so the error is announced and fixable.
   useEffect(() => {
@@ -61,8 +112,20 @@ export function LoginFlow() {
     setErrors(next);
     if (Object.keys(next).length) return;
     // The password is never kept in state: the form field is the only holder, discarded on step change.
-    setEmail(String(form.get("email")));
-    setStep("mfa");
+    const typed = String(form.get("email"));
+    if (!live) {
+      setEmail(typed);
+      setStep("mfa");
+      return;
+    }
+    setBusy(true);
+    apiSend("POST", "/v1/auth/login", { email: typed, password: String(form.get("password")) })
+      .then(() => {
+        setEmail(typed);
+        setStep("mfa");
+      })
+      .catch((err: unknown) => setErrors({ password: liveError(err) }))
+      .finally(() => setBusy(false));
   };
 
   const submitCode = (e: React.FormEvent<HTMLFormElement>) => {
@@ -72,7 +135,28 @@ export function LoginFlow() {
       setErrors({ code: a.errors.code });
       return;
     }
-    router.push("/console");
+    if (!live) {
+      router.push("/console");
+      return;
+    }
+    setBusy(true);
+    apiSend<MfaResult>("POST", "/v1/auth/mfa", { code })
+      .then(async () => {
+        await refreshSession();
+        router.push("/console");
+      })
+      .catch((err: unknown) => setErrors({ code: liveError(err) }))
+      .finally(() => setBusy(false));
+  };
+
+  const fillDemo = () => {
+    if (!hint) return;
+    if (step === "password") {
+      if (emailRef.current) emailRef.current.value = hint.email;
+      if (passwordRef.current) passwordRef.current.value = hint.password;
+    } else if (codeRef.current) {
+      codeRef.current.value = hint.code;
+    }
   };
 
   return (
@@ -92,8 +176,8 @@ export function LoginFlow() {
                 <p className="mt-1 text-[14px] text-c-text-2">{a.subtitle}</p>
               </div>
               <Field ref={emailRef} id="email" name="email" type="email" label={a.email} autoComplete="username" inputMode="email" defaultValue={email} error={errors.email} />
-              <Field id="password" name="password" type="password" label={a.password} autoComplete="current-password" error={errors.password} />
-              <button type="submit" className="h-11 w-full rounded-lg bg-c-text text-[15px] font-semibold text-c-bg transition-opacity hover:opacity-90">
+              <Field ref={passwordRef} id="password" name="password" type="password" label={a.password} autoComplete="current-password" error={errors.password} />
+              <button type="submit" disabled={busy} aria-busy={busy} className="disabled:opacity-60 h-11 w-full rounded-lg bg-c-text text-[15px] font-semibold text-c-bg transition-opacity hover:opacity-90">
                 {a.submit}
               </button>
             </form>
@@ -119,10 +203,10 @@ export function LoginFlow() {
                 className="tracking-[0.4em]"
                 error={errors.code}
               />
-              <button type="submit" className="h-11 w-full rounded-lg bg-c-text text-[15px] font-semibold text-c-bg transition-opacity hover:opacity-90">
+              <button type="submit" disabled={busy} aria-busy={busy} className="h-11 w-full rounded-lg bg-c-text text-[15px] font-semibold text-c-bg transition-opacity hover:opacity-90 disabled:opacity-60">
                 {a.verify}
               </button>
-              <p className="text-[12.5px] text-c-text-3">{a.lockoutNote}</p>
+              {!live && <p className="text-[12.5px] text-c-text-3">{a.lockoutNote}</p>}
               <button
                 type="button"
                 onClick={() => {
@@ -137,9 +221,15 @@ export function LoginFlow() {
             </form>
           )}
         </div>
+        {live && hint && <DemoHintBox hint={hint} onFill={fillDemo} />}
         <p className="mt-4 flex items-start gap-2 text-[12.5px] text-c-text-3">
-          <Info aria-hidden className="mt-px size-4 shrink-0" /> {a.prototypeNote}
+          <Info aria-hidden className="mt-px size-4 shrink-0" /> {live ? a.liveNote : a.prototypeNote}
         </p>
+        {live && session && !session.authenticated && (
+          <p className="mt-3 text-[13px]">
+            <Link href="/console" className="text-c-accent-text underline-offset-2 hover:underline">{a.browse}</Link>
+          </p>
+        )}
       </main>
     </div>
   );

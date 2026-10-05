@@ -1,10 +1,10 @@
 """Generate Fleetwright media through OpenRouter (images + video).
 
 Usage:
-    python tools/media/generate.py image <prompt-id>
-    python tools/media/generate.py video <prompt-id>
-    python tools/media/generate.py resume <prompt-id>     # poll an already-submitted video job
-    python tools/media/generate.py resubmit <prompt-id>   # submit again after a lost submit response
+    uv run python tools/media/generate.py image <prompt-id>
+    uv run python tools/media/generate.py video <prompt-id>
+    uv run python tools/media/generate.py resume <prompt-id>     # poll an already-submitted video job
+    uv run python tools/media/generate.py resubmit <prompt-id>   # submit again after a lost submit response
 
 Configuration lives in tools/media/config.json; prompts in tools/media/prompts.json.
 The API key is read from the file named by the env var in config["key_file_env"]; it is never printed.
@@ -21,11 +21,11 @@ import os
 import ssl
 import sys
 import time
-import urllib.error
-import urllib.request
 from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit
+
+import httpx
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
@@ -39,24 +39,17 @@ API_HOST = urlsplit(API).hostname
 TLS = ssl.create_default_context()
 
 
-class _NoRedirect(urllib.request.HTTPRedirectHandler):
-    """Never follow redirects automatically: the caller decides where credentials may go."""
-
-    def redirect_request(self, req, fp, code, msg, headers, newurl):
-        return None
-
-
-_OPENER = urllib.request.build_opener(urllib.request.HTTPSHandler(context=TLS), _NoRedirect())
+# Verifying TLS (chain + hostname) and no automatic redirects: the caller decides where credentials go.
+_CLIENT = httpx.Client(verify=TLS, follow_redirects=False, timeout=CONFIG["request_timeout_s"])
 
 
 def _fetch(method: str, url: str, body: bytes | None, headers: dict) -> tuple[int, bytes, str | None]:
-    """One HTTPS exchange: (status, payload, Location header). Callers validate the URL first."""
-    req = urllib.request.Request(url, data=body, headers=headers, method=method)
-    try:
-        with _OPENER.open(req, timeout=CONFIG["request_timeout_s"]) as resp:
-            return resp.status, resp.read(), resp.headers.get("Location")
-    except urllib.error.HTTPError as err:
-        return err.code, err.read(), err.headers.get("Location")
+    """One HTTPS exchange: (status, payload, Location header). Any other scheme is refused."""
+    parts = urlsplit(url)
+    if parts.scheme != "https" or not parts.hostname:
+        raise ValueError(f"refusing a non-HTTPS URL (host {parts.hostname!r})")
+    resp = _CLIENT.request(method, url, content=body, headers=headers)
+    return resp.status_code, resp.content, resp.headers.get("Location")
 
 
 def _key() -> str:

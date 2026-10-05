@@ -14,10 +14,24 @@
     "errors": {
       "email": "Enter a valid email address.",
       "password": "Enter your password.",
-      "code": "Enter the 6 digits from your authenticator app."
+      "code": "Enter the 6 digits from your authenticator app.",
+      "wrong": "Wrong email, password or code.",
+      "locked": "Too many attempts. Try again in {minutes} minutes.",
+      "expired": "That step expired. Start again with your email and password.",
+      "network": "Couldn't reach the server. Check your connection and try again."
     },
     "lockoutNote": "After 5 failed codes the account locks for 15 minutes (planned behaviour).",
-    "brand": "Fleetwright"
+    "brand": "Fleetwright",
+    "liveNote": "Your password and code go only to this site's API. Repeated failed attempts lock sign-in for a while.",
+    "demo": {
+      "title": "Try the public demo",
+      "body": "A shared demo login with limited controls. The code below is today's current code; it changes every 30 seconds.",
+      "email": "Email",
+      "password": "Password",
+      "code": "Current code",
+      "fill": "Fill in the demo login"
+    },
+    "browse": "Or browse the public demo without signing in"
   },
   "agent": {
     "title": "Fleetwright Agent",

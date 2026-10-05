@@ -17,6 +17,7 @@ import type {
   CrawlStatus,
   Filter,
   LatencyStage,
+  Overview,
   Page,
   Role,
   Schedule,
@@ -98,6 +99,7 @@ export function accounts(tenant: TenantId): Account[] {
         id: `${tenant}-acct-${pad(i + 1, 2)}`,
         label: `${t.name.split(" ")[0]} dispatch ${i + 1}`,
         target: seed.target.name,
+        enabled: true,
         session_state: state,
         session_expires_in_s: expiresIn,
         session_ttl_s: ttl,
@@ -172,9 +174,11 @@ export function claims(tenant: TenantId): Claim[] {
       if (state === "CONFIRMED") events.push({ at: iso(done), state: "CONFIRMED", actor: N.boardActor, note: N.confirmed });
       if (state === "FAILED") events.push({ at: iso(done), state: "FAILED", actor: N.boardActor, note: pick(rand, N.failed) });
       if (state === "UNKNOWN" || state === "RECONCILED") events.push({ at: iso(done), state: "UNKNOWN", actor: w.id, note: N.lost });
+      let resolution: string | null = null;
       if (state === "RECONCILED") {
         // The reconciler resolves UNKNOWN against the board: found → confirmed; not found → released (a failure, not a booking).
         const found = rand() < 0.6;
+        if (found) resolution = "confirmed";
         events.push({ at: iso(done + 41_000), state: found ? "RECONCILED" : "FAILED", actor: N.reconcilerActor, note: found ? N.reconciledFound : N.reconciledReleased });
         if (!found) state = "FAILED";
       }
@@ -189,6 +193,8 @@ export function claims(tenant: TenantId): Claim[] {
         lane: `${o} → ${dest}`,
         rate_usd: between(rand, [1200, 3600]),
         state,
+        resolution,
+        result: null,
         worker_id: reached >= 2 ? w.id : null,
         account_id: reached >= 2 ? w.account_id : null,
         fencing_token: reached >= 2 ? fence : null,
@@ -310,23 +316,18 @@ export function audit(tenant: TenantId): AuditEntry[] {
   });
 }
 
-export function cells(): Cell[] {
-  return cached("cells", () =>
-    seed.cells.map((c) => {
-      const ts = seed.tenants.filter((t) => t.cell === c.id);
-      const ws = ts.flatMap((t) => workers(t.id));
-      return {
-        id: c.id,
-        name: c.name,
-        region: c.region,
-        status: ws.some((w) => w.status === "dead") ? "degraded" : "healthy",
-        workers: ws.filter((w) => w.status !== "dead").length,
-        capacity: c.capacity,
-        tenants: ts.map((t) => t.id),
-        claims_per_min: Math.round(ts.reduce((s, t) => s + t.claimsPerHour, 0) / 60),
-        redis_lag_ms: between(rng(`cell:${c.id}`), [1, 7]),
-      };
-    }),
+/** The cell directory as one tenant sees it: other tenants are counted, workers are its own. */
+export function cells(tenant: TenantId): Cell[] {
+  return cached(`cells:${tenant}`, () =>
+    seed.cells.map((c) => ({
+      id: c.id,
+      name: c.name,
+      region: c.region,
+      capacity: c.capacity,
+      tenant_count: seed.tenants.filter((t) => t.cell === c.id).length,
+      hosts_you: tenantOf(tenant).cell === c.id,
+      your_workers: tenantOf(tenant).cell === c.id ? workers(tenant).filter((w) => w.status !== "dead").length : 0,
+    })),
   );
 }
 
@@ -347,7 +348,7 @@ const STAGE_FIELDS: Record<LatencyStage["key"], [keyof Claim, keyof Claim]> = {
 };
 
 /** Percentiles computed from the mock claims' own timestamps (nearest-rank). */
-export function latency(tenant: TenantId, labels: Record<LatencyStage["key"], string>): LatencyStage[] {
+export function latency(tenant: TenantId): LatencyStage[] {
   const list = claims(tenant);
   return STAGES.map((key) => {
     const [from, to] = STAGE_FIELDS[key];
@@ -355,35 +356,55 @@ export function latency(tenant: TenantId, labels: Record<LatencyStage["key"], st
       .filter((c) => c[from] && c[to])
       .map((c) => Date.parse(c[to] as string) - Date.parse(c[from] as string))
       .sort((a, b) => a - b);
-    return { key, label: labels[key], p50: percentile(values, 50), p95: percentile(values, 95), p99: percentile(values, 99) };
+    return { key, samples: values.length, p50: percentile(values, 50), p95: percentile(values, 95), p99: percentile(values, 99) };
   });
 }
 
 /** Claims bucketed per 5 minutes over the last hour. */
-export function claimSeries(tenant: TenantId): { confirmed: SeriesPoint[]; total: SeriesPoint[] } {
+export function claimSeries(tenant: TenantId): { total: SeriesPoint[]; confirmed: SeriesPoint[] } {
   const bucket = 5 * 60_000;
   const start = AS_OF - 3600_000;
   const n = 12;
   const total = Array.from({ length: n }, (_, i) => ({ t: iso(start + (i + 1) * bucket), v: 0 }));
   const confirmed = total.map((p) => ({ ...p }));
   for (const c of claims(tenant)) {
-    const i = Math.min(n - 1, Math.max(0, Math.floor((Date.parse(c.published_at) - start) / bucket)));
+    const i = Math.min(n - 1, Math.max(0, Math.floor((Date.parse(c.published_at ?? c.seen_at) - start) / bucket)));
     total[i].v++;
     if (c.state === "CONFIRMED" || c.state === "RECONCILED") confirmed[i].v++;
   }
-  return { confirmed, total };
+  return { total, confirmed };
 }
 
-export function alerts(tenant: TenantId, copy: { staleWorkers: string; expiring: string; crawlAlarm: string }): Alert[] {
+export function alerts(tenant: TenantId): Alert[] {
   const out: Alert[] = [];
-  const stale = workers(tenant).filter((w) => w.status === "stale" || w.status === "dead");
-  if (stale.length) out.push({ id: "a-workers", severity: "critical", title: fill(copy.staleWorkers, { n: stale.length }), detail: stale.map((w) => w.id).join(", "), at: seed.asOf });
-  const exp = accounts(tenant).filter((a) => a.session_state !== "fresh");
-  if (exp.length) out.push({ id: "a-sessions", severity: "warning", title: fill(copy.expiring, { n: exp.length }), detail: exp.map((a) => a.label).join(", "), at: seed.asOf });
-  for (const c of crawlJobs(tenant).filter((j) => j.alarm)) {
-    out.push({ id: `a-${c.id}`, severity: "warning", title: fill(copy.crawlAlarm, { name: c.name }), detail: c.alarm ?? "", at: c.last_run_at });
-  }
+  const stale = workers(tenant).filter((w) => w.status === "stale").length;
+  if (stale) out.push({ id: "stale-workers", severity: "warning", kind: "stale_workers", count: stale });
+  const attention = accounts(tenant).filter((a) => a.session_state !== "fresh").length;
+  if (attention) out.push({ id: "sessions", severity: "warning", kind: "sessions_need_attention", count: attention });
+  const unknown = claims(tenant).filter((c) => c.state === "UNKNOWN").length;
+  if (unknown) out.push({ id: "unknown", severity: "info", kind: "claims_being_reconciled", count: unknown });
   return out;
+}
+
+/** The `/v1/overview` object, computed from the mock data (same window as the chart: one hour). */
+export function overview(tenant: TenantId): Overview {
+  const cs = claims(tenant);
+  const ws = workers(tenant);
+  const by_state: Record<string, number> = {};
+  for (const c of cs) by_state[c.state] = (by_state[c.state] ?? 0) + 1;
+  return {
+    tenant_id: tenant,
+    claims: {
+      window_s: 3600,
+      total: cs.length,
+      confirmed: cs.filter((c) => c.state === "CONFIRMED" || c.resolution === "confirmed").length,
+      finished: cs.filter((c) => ["CONFIRMED", "FAILED", "RECONCILED"].includes(c.state)).length,
+      by_state,
+    },
+    series: claimSeries(tenant),
+    workers: { total: ws.length, healthy: ws.filter((w) => w.status === "healthy").length },
+    alerts: alerts(tenant),
+  };
 }
 
 /* ─── Cursor pagination (mirrors the planned API shape) ───────────── */
@@ -407,8 +428,14 @@ export const fmtTime = (isoStr: string) => timeFmt.format(new Date(isoStr));
 export const fmtDateTime = (isoStr: string) => `${dateTimeFmt.format(new Date(isoStr))} ${seed.displayTimeZone}`;
 export const tz = seed.displayTimeZone;
 
+/** The prototype's clock is frozen at AS_OF (identical server and client markup); live data uses real time. */
+let realClock = false;
+export function setRealClock(on: boolean) {
+  realClock = on;
+}
+
 export function fmtAgo(isoStr: string) {
-  const s = Math.round((AS_OF - Date.parse(isoStr)) / 1000);
+  const s = Math.round(((realClock ? Date.now() : AS_OF) - Date.parse(isoStr)) / 1000);
   if (s < 0) return `in ${fmtDuration(-s)}`;
   return `${fmtDuration(s)} ago`;
 }

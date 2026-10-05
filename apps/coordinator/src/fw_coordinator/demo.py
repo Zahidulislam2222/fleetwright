@@ -102,6 +102,10 @@ def load_demo(config_dir: Path) -> DemoConfig:
     return load_yaml(config_dir, "demo.yaml", DemoConfig)
 
 
+class RunActive(Exception):
+    """A demo run is already going; runs do not stack or extend."""
+
+
 class Demo:
     """Talks to the board's admin API. State that must survive a restart lives in core Redis."""
 
@@ -141,12 +145,16 @@ class Demo:
     async def start_run(self) -> dict[str, Any]:
         run = {k: v for k, v in self.data.run.items() if k in RUN_KEYS}
         run["feed_rate_per_min"] = min(float(run.get("feed_rate_per_min", 0)), self.cfg.run_max_rate_per_min)
-        await self._patch(run)
-        ttl = self.cfg.run_max_minutes * 60
-        async with self.redis.pipeline(transaction=True) as pipe:
-            pipe.set(keys.demo_run(), "1", ex=ttl)
-            pipe.set(keys.demo_run_dirty(), "1")
-            await pipe.execute()
+        # Claim the run first and atomically, so two visitors pressing at once start one run, and a run
+        # cannot be kept going forever by pressing again before it ends.
+        if not await self.redis.set(keys.demo_run(), "1", ex=self.cfg.run_max_minutes * 60, nx=True):
+            raise RunActive
+        try:
+            await self._patch(run)
+        except BaseException:
+            await self.redis.delete(keys.demo_run())
+            raise
+        await self.redis.set(keys.demo_run_dirty(), "1")
         return await self.status()
 
     async def change_adversity(self, changes: dict[str, Any]) -> dict[str, Any]:

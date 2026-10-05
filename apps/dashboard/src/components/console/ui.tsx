@@ -1,8 +1,10 @@
 "use client";
 
 import { CircleAlert, CircleCheck, CircleDashed, CircleX, Inbox, Loader, Lock, OctagonAlert, RefreshCw, TriangleAlert, type LucideIcon } from "lucide-react";
+import Link from "next/link";
 import copy from "@/content/console.json";
-import { usePrototype } from "./prototypeStore";
+import { useLive } from "@/lib/live/store";
+import type { DataStateKind } from "./prototypeStore";
 
 /* ─── Page header ─────────────────────────────────────────────────── */
 
@@ -117,9 +119,20 @@ export function Skeleton({ rows = 6 }: { rows?: number }) {
   );
 }
 
-/** Renders the prototype-selected state; children render only when "ready". */
-export function DataState({ copy: c, rows, children }: { copy: { empty: StateCopy; error: StateCopy; denied: StateCopy }; rows?: number; children: React.ReactNode }) {
-  const { state, setState } = usePrototype();
+/** Renders the data state from the screen's data hook; children render only when "ready". */
+export function DataState({
+  copy: c,
+  rows,
+  status: state,
+  onRetry,
+  children,
+}: {
+  copy: { empty: StateCopy; error: StateCopy; denied: StateCopy };
+  rows?: number;
+  status: DataStateKind;
+  onRetry: () => void;
+  children: React.ReactNode;
+}) {
   if (state === "loading") return <Skeleton rows={rows} />;
   if (state === "empty") return <StatePanel icon={Inbox} tone="neutral" {...c.empty} />;
   if (state === "error")
@@ -130,7 +143,7 @@ export function DataState({ copy: c, rows, children }: { copy: { empty: StateCop
           tone="bad"
           {...c.error}
           action={
-            <Button onClick={() => setState("ready")}>
+            <Button onClick={onRetry}>
               <RefreshCw aria-hidden className="size-4" /> {copy.common.retry}
             </Button>
           }
@@ -138,12 +151,38 @@ export function DataState({ copy: c, rows, children }: { copy: { empty: StateCop
       </div>
     );
   if (state === "denied")
-    return <StatePanel icon={Lock} tone="warn" {...c.denied} action={<Button disabled title={copy.common.prototypeOnly}>{copy.common.requestAccess}</Button>} />;
+    return <StatePanel icon={Lock} tone="warn" {...c.denied} action={<DeniedAction />} />;
   return <>{children}</>;
+}
+
+/** Fetches the next server page of a cursor-paged list (live mode only; renders nothing otherwise). */
+export function LoadOlder({ hasMore, loading, onMore }: { hasMore: boolean; loading: boolean; onMore: () => void }) {
+  if (!hasMore) return null;
+  return (
+    <div className="mt-3 flex justify-center">
+      <Button onClick={onMore} disabled={loading} aria-busy={loading}>
+        {loading ? copy.live.loadingOlder : copy.live.loadOlder}
+      </Button>
+    </div>
+  );
+}
+
+function DeniedAction() {
+  const { mode } = useLive();
+  if (mode === "live")
+    return (
+      <Link href="/login" className="inline-flex h-9 items-center rounded-lg bg-c-text px-3.5 text-[13.5px] font-medium text-c-bg hover:opacity-90">
+        {copy.live.signIn}
+      </Link>
+    );
+  return <Button disabled title={copy.common.prototypeOnly}>{copy.common.requestAccess}</Button>;
 }
 
 /* ─── Mock label ──────────────────────────────────────────────────── */
 
+/** Labels mock data; renders nothing once the console is connected to the real API. */
 export function MockTag() {
+  const { mode } = useLive();
+  if (mode === "live") return null;
   return <span className="rounded-md border border-c-border px-1.5 py-0.5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-c-text-3">{copy.common.mock}</span>;
 }

@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import AsyncIterator
+from uuid import uuid4
 
 import httpx
 import pyotp
@@ -68,7 +69,9 @@ async def test_sign_in_needs_password_then_code(api: Api, owner: httpx.AsyncClie
 
 async def test_unknown_user_and_wrong_password_get_the_same_answer(api: Api) -> None:
     async with api.client() as c:
-        unknown = await c.post("/v1/auth/login", json={"email": "nobody@example.test", "password": PASSWORD})
+        unknown = await c.post(
+            "/v1/auth/login", json={"email": f"nobody-{uuid4().hex[:8]}@example.test", "password": PASSWORD}
+        )
         wrong = await c.post("/v1/auth/login", json={"email": api.users["viewer"].email, "password": "nope"})
     assert unknown.status_code == wrong.status_code == 401
     assert unknown.json() == wrong.json()
@@ -122,9 +125,11 @@ async def test_every_read_endpoint_answers_in_the_contract_shape(api: Api, viewe
     assert len(accounts) == 4 and {a["target"] for a in accounts} == {"demo-board"}
     assert {f["name"] for f in items(await viewer.get("/v1/filters"))} >= {"Everything over $900", "Texas outbound"}
     overview = (await viewer.get("/v1/overview")).json()
-    assert {"claims_24h", "series", "workers", "alerts"} <= set(overview)
+    assert {"claims", "series", "workers", "alerts"} <= set(overview)
     assert "stages" in (await viewer.get("/v1/latency")).json()
-    assert (await viewer.get("/v1/cells")).status_code == 200
+    cells = items(await viewer.get("/v1/cells"))
+    assert [c for c in cells if c["hosts_you"]], "the tenant's own cell is marked"
+    assert all("tenants" not in c for c in cells)  # other tenants are counted, never listed
     assert (await viewer.get("/v1/demo")).json()["caps"]
 
 
@@ -210,6 +215,8 @@ async def test_the_demo_is_capped_and_resets_itself(api: Api, demo: httpx.AsyncC
     run = await demo.post("/v1/demo/run")
     assert run.status_code == 200
     assert run.json()["run_active"] and run.json()["feed_rate_per_min"] <= api.cfg.demo.run_max_rate_per_min
+    # a second press neither stacks nor extends the run
+    assert (await demo.post("/v1/demo/run")).status_code == 409
     # time passes: the run and the change window end, and the reset loop restores the idle preset
     svc = api.app.state.services
     await svc.redis.delete(keys.demo_run(), keys.demo_changed())
@@ -229,3 +236,45 @@ async def test_sign_out_ends_the_session(api: Api) -> None:
         assert me["role"] == "public"
     finally:
         await c.aclose()
+
+
+async def test_claims_and_workers_come_back_in_the_contract_shape(api: Api, viewer: httpx.AsyncClient) -> None:
+    """Real rows (not just empty lists) pass the strict response models, including NULL times."""
+    engine = api.app.state.services.engine
+    claim_id, worker_id = uuid4(), f"w-{uuid4().hex[:8]}"
+    async with tenant_tx(engine, api.tenant_id) as conn:
+        await conn.execute(
+            text(
+                """INSERT INTO claims (tenant_id, id, target_job_key, state, cell_id, lane, rate_usd, seen_at,
+                                       worker_id, fence, leased_at)
+                   VALUES (:t, :c, :k, 'LEASED', 'cell-a', 'Dallas, TX -> Denver, CO', 1450, clock_timestamp(),
+                           :w, 7, clock_timestamp())"""
+            ),
+            {"t": api.tenant_id, "c": claim_id, "k": f"job-{claim_id.hex[:8]}", "w": worker_id},
+        )
+        await conn.execute(
+            text(
+                "INSERT INTO claim_events (tenant_id, claim_id, state, actor, note) VALUES (:t, :c, 'QUEUED', 'dispatcher', NULL)"
+            ),
+            {"t": api.tenant_id, "c": claim_id},
+        )
+        await conn.execute(
+            text(
+                """INSERT INTO workers (tenant_id, id, process_id, cell_id, mode, version, memory_mb, cpu_pct)
+                   VALUES (:t, :w, 'p-test', 'cell-a', 'claimer', 'test', 310, 12.5)"""
+            ),
+            {"t": api.tenant_id, "w": worker_id},
+        )
+    listed = items(await viewer.get("/v1/claims"))
+    mine = next(c for c in listed if c["id"] == str(claim_id))
+    assert mine["published_at"] is None and mine["fencing_token"] == 7
+    detail = (await viewer.get(f"/v1/claims/{claim_id}")).json()
+    assert [e["state"] for e in detail["events"]] == ["QUEUED"]
+    assert (await viewer.get(f"/v1/claims/{uuid4()}")).status_code == 404
+    worker = next(w for w in items(await viewer.get("/v1/workers")) if w["id"] == worker_id)
+    assert worker["status"] == "healthy" and worker["mode"] == "claimer"
+    cell = next(c for c in items(await viewer.get("/v1/cells")) if c["id"] == "cell-a")
+    assert cell["your_workers"] >= 1
+    overview = (await viewer.get("/v1/overview")).json()
+    assert overview["claims"]["by_state"].get("LEASED", 0) >= 1 and overview["workers"]["total"] >= 1
+    assert overview["claims"]["total"] >= 1 and overview["claims"]["window_s"] == api.cfg.api.series_minutes * 60

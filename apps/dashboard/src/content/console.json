@@ -127,7 +127,8 @@
     "percent": "{n}%",
     "megabytes": "{n} MB",
     "perMinute": "{n}/min",
-    "version": "v{n}"
+    "version": "v{n}",
+    "minutes": "{n} min"
   },
   "pages": {
     "overview": {
@@ -135,9 +136,10 @@
       "description": "Workers, claims and cells for the selected tenant over the last hour.",
       "tiles": {
         "workers": "Live workers",
-        "claims": "Claims · last hour",
-        "confirmRate": "Confirmed or reconciled",
-        "duplicates": "Duplicate confirmations"
+        "claims": "Claims · last {window}",
+        "confirmRate": "Booked, of finished claims",
+        "duplicates": "Duplicate confirmations",
+        "reconciling": "Being reconciled"
       },
       "duplicatesNote": "Design: a unique key per job makes a second confirmation impossible",
       "chartTitle": "Claims per 5 minutes",
@@ -149,9 +151,9 @@
       "alertsTitle": "Needs attention",
       "recentTitle": "Recent claims",
       "alerts": {
-        "staleWorkers": "{n} workers stale or dead",
-        "expiring": "{n} sessions expiring or need OTP",
-        "crawlAlarm": "Crawl alarm: {name}"
+        "stale_workers": "{n} workers missed their heartbeat",
+        "sessions_need_attention": "{n} account sessions need attention",
+        "claims_being_reconciled": "{n} claims being reconciled with the board"
       },
       "empty": {
         "title": "No workers registered yet",
@@ -165,7 +167,16 @@
         "title": "You don't have access to this tenant",
         "body": "Your role has no grant on this tenant. Ask an owner to add you."
       },
-      "cellLine": "{workers}/{capacity} workers · {cpm} claims/min · Redis lag {lag} ms · {tenants} tenants"
+      "cellLine": "{workers} of your workers here · {tenants} tenants on this cell · capacity {capacity}",
+      "alertDetails": {
+        "stale_workers": "See Workers for which ones and since when.",
+        "sessions_need_attention": "See Accounts: expiring, expired or waiting for a one-time code.",
+        "claims_being_reconciled": "The act's reply was lost; the reconciler is asking the board what happened."
+      },
+      "noAlerts": "Nothing needs attention.",
+      "yourCell": "Your cell",
+      "reconcilingNote": "The act's reply was lost; the reconciler asks the board what happened",
+      "otherCells": "{n} other cells run other tenants in this deployment."
     },
     "workers": {
       "title": "Workers",
@@ -264,13 +275,13 @@
       "title": "Schedules",
       "description": "When the fleet is allowed to act, per timezone.",
       "days": [
-        "Sun",
         "Mon",
         "Tue",
         "Wed",
         "Thu",
         "Fri",
-        "Sat"
+        "Sat",
+        "Sun"
       ],
       "active": "Active",
       "paused": "Paused",
@@ -336,7 +347,8 @@
         "stage": "Stage",
         "p50": "p50",
         "p95": "p95",
-        "p99": "p99"
+        "p99": "p99",
+        "samples": "Samples"
       },
       "empty": {
         "title": "No completed claims yet",
@@ -349,7 +361,8 @@
       "denied": {
         "title": "Latency is restricted",
         "body": "Viewing metrics needs the operator role."
-      }
+      },
+      "liveNote": "Measured from the claims' own timestamps over the last {window} (nearest-rank). Stages with no samples show 0."
     },
     "crawl": {
       "title": "Crawl jobs",
@@ -438,7 +451,8 @@
       "roles": {
         "owner": "Owner",
         "operator": "Operator",
-        "viewer": "Viewer"
+        "viewer": "Viewer",
+        "demo": "Demo"
       },
       "mfaOn": "TOTP on",
       "mfaOff": "No MFA",
@@ -455,7 +469,8 @@
       "denied": {
         "title": "Settings are owner-only",
         "body": "Only owners can change tenant settings."
-      }
+      },
+      "liveNote": "Renaming a tenant is not available yet; ask an owner to change it on the server."
     }
   },
   "status": {
@@ -483,5 +498,73 @@
   "meta": {
     "titleTemplate": "%s · {product} console",
     "title": "{product} console"
+  },
+  "live": {
+    "banner": "Live",
+    "publicView": "Public demo · read-only",
+    "signedInAs": "{name} · {role}",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "checking": "Connecting…",
+    "streaming": "Live updates",
+    "polling": "Refreshing every {s} s",
+    "loadOlder": "Load older",
+    "loadingOlder": "Loading older…",
+    "roles": {
+      "public": "Visitor",
+      "viewer": "Viewer",
+      "demo": "Demo",
+      "operator": "Operator",
+      "owner": "Owner"
+    },
+    "needsRole": "Needs the {role} role",
+    "failed": "Not saved: {detail}",
+    "saved": "Saved",
+    "notBuilt": {
+      "title": "Not built yet",
+      "body": "This screen is a design preview. The live system does not run crawl jobs yet; see the public roadmap."
+    },
+    "workerActionsNote": "Drain and restart are not available from the live console yet.",
+    "otp": {
+      "enter": "Enter code",
+      "label": "One-time code for {account}",
+      "submit": "Send code",
+      "sent": "Code sent to the waiting worker",
+      "note": "The code goes straight to the worker waiting for it; it is not stored or logged."
+    },
+    "filter": {
+      "title": "New filter",
+      "name": "Name",
+      "origin": "Origin",
+      "destination": "Destination",
+      "minRate": "Minimum rate (USD)",
+      "equipment": "Equipment (comma-separated)",
+      "maxWeight": "Max weight (lb)",
+      "create": "Create filter",
+      "cancel": "Cancel",
+      "any": "Any",
+      "created": "Filter “{name}” created; dispatchers reloaded",
+      "toggled": "“{name}” {state}; dispatchers reloaded"
+    },
+    "demo": {
+      "title": "Demo controls",
+      "intro": "This tenant runs against the mock freight board. Start a burst of loads or add trouble, and watch the claims and the timeline react.",
+      "signInToControl": "Sign in with the public demo login (on the sign-in page) to use these controls.",
+      "run": "Start a {minutes}-minute run",
+      "running": "Run active · ends in {t}",
+      "feed": "Board feed: {n} loads/min",
+      "adversity": "Adversity",
+      "apply": "Apply",
+      "resetNote": "Everything returns to the calm preset {t} after the last change.",
+      "fields": {
+        "ack_loss_rate": "Lost confirmations",
+        "error_rate": "Board errors",
+        "slow_rate": "Slow responses",
+        "slow_ms": "Slow response delay (ms)",
+        "competitor_share": "Competitors' share",
+        "layout_variant": "Page layout"
+      },
+      "max": "max {n}"
+    }
   }
 }

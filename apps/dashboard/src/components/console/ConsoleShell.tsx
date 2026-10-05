@@ -5,13 +5,76 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDialog } from "@/lib/useDialog";
 import { RadioGroup } from "./RadioGroup";
-import { CircleDashed, Menu, Monitor, Moon, Sun, X } from "lucide-react";
+import { CircleDashed, LogIn, LogOut, Menu, Monitor, Moon, Sun, X } from "lucide-react";
 import { FleetMark } from "@/components/brand/FleetMark";
 import { fmtDateTime, tenants } from "@/mocks/data";
 import seed from "@/mocks/seed.json";
 import copy from "@/content/console.json";
 import { navIcons } from "./icons";
 import { usePrototype, type DataStateKind, type ThemeChoice } from "./prototypeStore";
+import { refreshSession, useLive } from "@/lib/live/store";
+import { apiSend } from "@/lib/live/api";
+import config from "@/config/live.json";
+import { fill } from "@/lib/fill";
+
+const L = copy.live;
+
+/** Where the data comes from, said plainly in the header. */
+function SourceBanner() {
+  const { mode, session, streaming } = useLive();
+  const pill = "hidden min-w-0 truncate rounded-full border border-c-border bg-c-surface px-3 py-1 font-mono text-[11.5px] text-c-text-2 sm:block";
+  if (mode === "checking") return <p className={pill}>{L.checking}</p>;
+  if (mode === "prototype")
+    return (
+      <p className={pill}>
+        <span className="mr-1.5 inline-block size-1.5 -translate-y-px rounded-full bg-c-accent align-middle" aria-hidden />
+        {copy.mockBanner} {fmtDateTime(seed.asOf)}
+      </p>
+    );
+  return (
+    <p className={pill}>
+      <span className={`mr-1.5 inline-block size-1.5 -translate-y-px rounded-full align-middle ${streaming ? "bg-c-ok" : "bg-c-warn"}`} aria-hidden />
+      {L.banner} · {session?.tenant.name} · {streaming ? L.streaming : fill(L.polling, { s: Math.round(config.pollMs / 1000) })}
+    </p>
+  );
+}
+
+function Account() {
+  const { mode, session } = useLive();
+  const [busy, setBusy] = useState(false);
+  if (mode !== "live") return null;
+  if (!session?.authenticated)
+    return (
+      <Link href="/login" className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-c-border bg-c-surface px-3 text-[13px] text-c-text hover:bg-c-surface-2">
+        <LogIn aria-hidden className="size-4" />
+        <span className="hidden sm:inline">{session ? L.publicView : L.signIn}</span>
+        <span className="sm:hidden">{L.signIn}</span>
+      </Link>
+    );
+  return (
+    <div className="flex items-center gap-2">
+      <span className="hidden text-[12.5px] text-c-text-2 md:inline">{fill(L.signedInAs, { name: session.name ?? "", role: L.roles[session.role] })}</span>
+      <button
+        type="button"
+        disabled={busy}
+        onClick={() => {
+          setBusy(true);
+          apiSend("POST", "/v1/auth/logout")
+            .catch(() => undefined)
+            .finally(() => {
+              setBusy(false);
+              void refreshSession();
+            });
+        }}
+        className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-c-border bg-c-surface px-3 text-[13px] text-c-text hover:bg-c-surface-2 disabled:opacity-50"
+      >
+        <LogOut aria-hidden className="size-4" />
+        <span className="hidden sm:inline">{L.signOut}</span>
+        <span className="sr-only sm:hidden">{L.signOut}</span>
+      </button>
+    </div>
+  );
+}
 
 const STATES = Object.keys(copy.states) as DataStateKind[];
 const THEMES: { id: ThemeChoice; icon: typeof Sun }[] = [
@@ -115,6 +178,8 @@ function MobileDrawer({ pathname, onClose }: { pathname: string; onClose: () => 
 export function ConsoleShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const proto = usePrototype();
+  const { mode } = useLive();
+  const live = mode === "live";
   const [open, setOpen] = useState(false);
   const closeDrawer = useCallback(() => setOpen(false), []);
 
@@ -137,11 +202,10 @@ export function ConsoleShell({ children }: { children: React.ReactNode }) {
             <button onClick={() => setOpen(true)} aria-label={copy.shell.openMenu} aria-expanded={open} className="grid size-10 place-items-center rounded-lg text-c-text-2 hover:bg-c-surface-2 lg:hidden">
               <Menu aria-hidden className="size-5" />
             </button>
-            <p className="hidden min-w-0 truncate rounded-full border border-c-border bg-c-surface px-3 py-1 font-mono text-[11.5px] text-c-text-2 sm:block">
-              <span className="mr-1.5 inline-block size-1.5 -translate-y-px rounded-full bg-c-accent align-middle" aria-hidden />
-              {copy.mockBanner} {fmtDateTime(seed.asOf)}
-            </p>
+            <SourceBanner />
             <div className="ml-auto flex items-center gap-2">
+              {!live && (
+              <>
               <label className="sr-only" htmlFor="tenant-select">{copy.shell.tenantLabel}</label>
               <select
                 id="tenant-select"
@@ -153,6 +217,9 @@ export function ConsoleShell({ children }: { children: React.ReactNode }) {
                   <option key={t.id} value={t.id}>{t.name}</option>
                 ))}
               </select>
+              </>
+              )}
+              <Account />
               <RadioGroup
                 label={copy.shell.themeLabel}
                 value={proto.theme}
@@ -163,6 +230,7 @@ export function ConsoleShell({ children }: { children: React.ReactNode }) {
               />
             </div>
           </div>
+          {!live && (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-c-border px-4 py-2 lg:px-8">
             <span id="state-label" className="shrink-0 font-mono text-[11px] uppercase tracking-[0.14em] text-c-text-3">{copy.shell.stateLabel}</span>
             <RadioGroup
@@ -174,6 +242,7 @@ export function ConsoleShell({ children }: { children: React.ReactNode }) {
               optionClass={(on) => `rounded-full px-3 py-1 text-[12.5px] transition-colors ${on ? "bg-c-text text-c-bg" : "border border-c-border text-c-text-2 hover:text-c-text"}`}
             />
           </div>
+          )}
         </header>
         <main id="console-main" tabIndex={-1} className="mx-auto max-w-[1360px] px-4 py-6 outline-none lg:px-8 lg:py-8">
           {children}

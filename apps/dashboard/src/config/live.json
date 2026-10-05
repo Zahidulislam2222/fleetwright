@@ -1,0 +1,8 @@
+{
+  "_note": "Live-mode behaviour of the console. API paths are same-origin (/v1, proxied by nginx in production and by next dev rewrites locally).",
+  "pollMs": 15000,
+  "eventThrottleMs": 750,
+  "listLimit": 200,
+  "recentClaims": 6,
+  "demoStatusPollMs": 5000
+}
