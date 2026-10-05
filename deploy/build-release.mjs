@@ -122,7 +122,7 @@ writeFileSync(join(out, "compose.yaml"), render("compose.yaml"));
 writeFileSync(join(out, `${config.slug}.caddy`), render("site.caddy"));
 mkdirSync(join(out, "infra"));
 cpSync(join(root, "infra", "postgres", "10-roles.sh"), join(out, "infra", "10-roles.sh"));
-const archive = git(["archive", "--format=tar", "-o", join(out, "src.tar"), "HEAD", "--", ...BACKEND_PATHS]);
+const archive = git(["-c", "core.autocrlf=false", "archive", "--format=tar", "-o", join(out, "src.tar"), "HEAD", "--", ...BACKEND_PATHS]);
 if (archive.status !== 0) throw new Error(`git archive failed: ${archive.stderr}`);
 writeFileSync(join(out, "RELEASE.json"), JSON.stringify({ releaseId, commit, appImage: `${config.backend.appImage}:${releaseId}` }, null, 2) + "\n");
 

@@ -25,9 +25,9 @@ def main() -> None:
     out.mkdir(parents=True, exist_ok=True)
     values: dict[str, str] = {}
     for name, target in zip(TEMPLATES, targets, strict=True):
-        target.write_text(
-            fill((ROOT / "deploy" / "env" / f"{name}.example").read_text(encoding="utf-8"), values), encoding="utf-8"
-        )
+        template = (ROOT / "deploy" / "env" / f"{name}.example").read_text(encoding="utf-8")
+        # LF even on Windows: Compose reads these on Linux, where a trailing \r would join the value.
+        target.write_text(fill(template, values), encoding="utf-8", newline="\n")
     print(f"wrote {', '.join(TEMPLATES)} to {out} with {len(values)} generated secrets (values not shown)")
 
 
