@@ -144,6 +144,11 @@ class AuthSettings(BaseModel):
     login_max_attempts: int = Field(default=5, ge=1)
     login_window_s: int = Field(default=900, ge=10)
     lockout_s: int = Field(default=900, ge=10)
+    # Every password attempt (right or wrong) per client address range within login_window_s; the
+    # demo password is public, so failures alone cannot bound the hashing work one client causes.
+    password_attempts_per_window: int = Field(default=30, ge=1)
+    # argon2 verifies at once (each holds ~64 MiB and a CPU core); the rest wait their turn.
+    hash_concurrency: int = Field(default=2, ge=1)
     totp_issuer: str = "Fleetwright"
     totp_valid_window: int = Field(default=1, ge=0, le=2)
 

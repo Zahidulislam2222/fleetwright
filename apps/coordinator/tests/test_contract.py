@@ -12,6 +12,7 @@ from apikit import ApiTestSettings
 from fw_coordinator import schemas
 from fw_coordinator.api import create_app
 from fw_coordinator.contract import CONTRACT, render
+from fw_queue.sessions import RANK
 
 ROOT = Path(__file__).resolve().parents[3]
 TYPES_TS = ROOT / "apps" / "dashboard" / "src" / "mocks" / "types.ts"
@@ -88,3 +89,12 @@ def test_typescript_types_match_the_wire_models() -> None:
     for extra in set(ts) - set(models) - TS_ONLY:
         problems.append(f"{extra}: in types.ts but not on the wire")
     assert not problems, "\n".join(problems)
+
+
+def test_the_dashboard_ranks_roles_like_the_server() -> None:
+    """roles.ts hides controls the server would refuse; a drift would show buttons that always fail."""
+    source = (ROOT / "apps" / "dashboard" / "src" / "lib" / "live" / "roles.ts").read_text(encoding="utf-8")
+    found = re.search(r"const RANK[^=]*=\s*\{([^}]*)\}", source)
+    assert found, "RANK not found in roles.ts"
+    dashboard = {k: int(v) for k, v in re.findall(r"(\w+)\s*:\s*(\d+)", found.group(1))}
+    assert dashboard == RANK

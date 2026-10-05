@@ -34,7 +34,10 @@
     "redisMaxMemory": "96mb",
     "workerMemory": "1536m",
     "workerCpus": 2.0,
-    "edgeSubnet": "172.30.90.0/24"
+    "edgeSubnet": "172.30.90.0/24",
+    "apiRatePerS": 10,
+    "apiBurst": 40,
+    "streamsPerIp": 6
   },
   "cloudflare": {
     "source": "https://www.cloudflare.com/ips-v4 and https://www.cloudflare.com/ips-v6 (checked 2026-10-06)",

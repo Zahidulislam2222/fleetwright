@@ -170,15 +170,27 @@ class Demo:
     async def reset_due(self) -> list[str]:
         """Restores idle presets whose time is up. Returns which parts were reset."""
         done = []
-        if not await self.redis.exists(keys.demo_run()) and await self.redis.exists(keys.demo_run_dirty()):
-            await self._patch({k: self.data.idle[k] for k in RUN_KEYS if k in self.data.idle})
-            await self.redis.delete(keys.demo_run_dirty())
+        if not await self.redis.exists(keys.demo_run()) and await self._claim(keys.demo_run_dirty()):
+            await self._restore(keys.demo_run_dirty(), {k: self.data.idle[k] for k in RUN_KEYS if k in self.data.idle})
             done.append("run")
-        if not await self.redis.exists(keys.demo_changed()) and await self.redis.exists(keys.demo_adversity_dirty()):
-            await self._patch({k: v for k, v in self.data.idle.items() if k not in RUN_KEYS})
-            await self.redis.delete(keys.demo_adversity_dirty())
+        if not await self.redis.exists(keys.demo_changed()) and await self._claim(keys.demo_adversity_dirty()):
+            await self._restore(
+                keys.demo_adversity_dirty(), {k: v for k, v in self.data.idle.items() if k not in RUN_KEYS}
+            )
             done.append("adversity")
         return done
+
+    async def _claim(self, dirty_key: str) -> bool:
+        """Takes the dirty flag before touching the board, so a change that lands during the reset
+        sets it again and is reset on the next pass instead of being forgotten."""
+        return bool(await self.redis.delete(dirty_key))
+
+    async def _restore(self, dirty_key: str, preset: dict[str, Any]) -> None:
+        try:
+            await self._patch(preset)
+        except BaseException:
+            await self.redis.set(dirty_key, "1")  # not reset: try again next pass
+            raise
 
     async def reset_loop(self, every_s: float, stopping: asyncio.Event) -> None:
         while not stopping.is_set():

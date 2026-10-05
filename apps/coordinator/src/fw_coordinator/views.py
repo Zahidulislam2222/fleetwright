@@ -312,6 +312,8 @@ async def schedules(conn: AsyncConnection, tenant_id: UUID) -> dict[str, Any]:
 
 async def audit(conn: AsyncConnection, tenant_id: UUID, cursor: str | None, limit: int, redact: bool) -> dict[str, Any]:
     after = _decode_cursor(cursor)
+    if after is not None and not after[1].isdigit():
+        after = None  # a malformed cursor starts from the first page, like any other bad cursor
     rows = (
         await conn.execute(
             text(

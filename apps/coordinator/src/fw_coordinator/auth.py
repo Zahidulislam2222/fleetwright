@@ -4,6 +4,7 @@ unknown email and a wrong password, and both take the same time (a dummy hash is
 
 from __future__ import annotations
 
+import asyncio
 import ipaddress
 import json
 import secrets
@@ -100,6 +101,7 @@ class Auth:
         self.engine = engine
         self.envelope = envelope
         self._cas = redis.register_script(_STEP_CAS)
+        self._hash_slots = asyncio.Semaphore(cfg.hash_concurrency)
 
     # ---------------- step 1: password ----------------
 
@@ -108,12 +110,9 @@ class Auth:
         email = email.strip().lower()
         subjects = self._subjects(email, client_ip)
         await self._check_lock(subjects)
+        await self._count_attempt(client_ip)
         user = await self._user(email)
-        try:
-            _HASHER.verify(user.password_hash if user else _DUMMY, password)
-            ok = user is not None
-        except (VerificationError, InvalidHashError):
-            ok = False
+        ok = await self._verify(user.password_hash if user else _DUMMY, password) and user is not None
         if not ok or user is None:
             await self._fail(subjects)
             raise BadCredentials
@@ -144,7 +143,7 @@ class Auth:
         user = await self._user(pending["email"])
         if user is None or user.totp is None or str(user.id) != pending["user_id"]:
             raise BadCredentials
-        if not await self._totp_ok(user, code):
+        if not await self._totp_ok(user, code, single_use=pending["email"] not in self.shared_emails):
             await self._fail(subjects)
             raise BadCredentials
         await self.redis.delete(pending_key, *(keys.login_failures(s) for s in subjects if s.startswith("email:")))
@@ -165,15 +164,40 @@ class Auth:
         )
 
     async def current_code(self, email: str) -> str | None:
-        """The live TOTP code of an account — used only for the public demo account."""
+        """The live TOTP code of the public demo account. Refuses any other role, so a misconfigured
+        demo email can never put a staff member's code on the public login page."""
         user = await self._user(email.strip().lower())
-        if user is None or user.totp is None:
+        if user is None or user.totp is None or user.role != "demo":
             return None
         return pyotp.TOTP(self._secret(user)).now()
 
     # ---------------- internals ----------------
 
-    async def _totp_ok(self, user: _User, code: str) -> bool:
+    async def _verify(self, password_hash: str, password: str) -> bool:
+        """argon2 off the event loop, a bounded number at a time."""
+        async with self._hash_slots:
+            try:
+                return await asyncio.to_thread(_HASHER.verify, password_hash, password)
+            except (VerificationError, InvalidHashError):
+                return False
+
+    async def _count_attempt(self, client_ip: str | None) -> None:
+        prefix = ip_prefix(client_ip)
+        if prefix is None:
+            return
+        key = keys.password_attempts(f"ip:{prefix}")
+        async with self.redis.pipeline(transaction=True) as pipe:
+            pipe.incr(key)
+            pipe.expire(key, self.cfg.login_window_s, nx=True)
+            pipe.ttl(key)
+            count, _, ttl = await pipe.execute()
+        if int(count) > self.cfg.password_attempts_per_window:
+            raise LockedOut(max(int(ttl), 1))
+
+    async def _totp_ok(self, user: _User, code: str, single_use: bool = True) -> bool:
+        """A valid code for the current step (± the allowed drift). Personal accounts may use each
+        step once. The shared demo account may not: its code is public and every visitor uses the
+        same one; each sign-in still needs its own single-use password-step token."""
         code = code.strip().replace(" ", "")
         if not code.isdigit() or len(code) != 6:
             return False
@@ -182,6 +206,8 @@ class Auth:
         for drift in range(-self.cfg.totp_valid_window, self.cfg.totp_valid_window + 1):
             step = totp.timecode(now) + drift
             if secrets.compare_digest(totp.generate_otp(step), code):
+                if not single_use:
+                    return True
                 ttl = totp.interval * (2 * self.cfg.totp_valid_window + 2)
                 return bool(await self._cas(keys=[keys.totp_used(user.id)], args=[step, ttl]))
         return False

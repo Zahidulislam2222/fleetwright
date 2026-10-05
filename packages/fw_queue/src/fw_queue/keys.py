@@ -73,6 +73,11 @@ def login_failures(subject: str) -> str:
     return f"{PREFIX}:login-fail:{subject}"
 
 
+def password_attempts(subject: str) -> str:
+    """All password attempts per client address range (fixed window counter)."""
+    return f"{PREFIX}:login-try:{subject}"
+
+
 def totp_used(user_id: UUID | str) -> str:
     """Last accepted TOTP time step, so a code cannot be replayed."""
     return f"{PREFIX}:totp-used:{user_id}"

@@ -298,8 +298,9 @@ def create_app(cfg: CoordinatorSettings | None = None, demo_data: DemoConfig | N
         return {"role": who.role, "csrf": who.csrf}
 
     @app.post("/v1/auth/logout", response_model=schemas.SignedOut)
-    async def logout(response: Response, svc: Svc, who: Mutator) -> dict[str, bool]:
+    async def logout(request: Request, response: Response, svc: Svc, who: Mutator) -> dict[str, bool]:
         await sessions.revoke(svc.redis, who)
+        await audit(svc, who, request, "auth.sign_out", "console", "signed out")
         response.delete_cookie(svc.cfg.auth.cookie_name, path="/")
         return {"signed_out": True}
 
@@ -541,6 +542,10 @@ def create_app(cfg: CoordinatorSettings | None = None, demo_data: DemoConfig | N
             status = await svc.demo.change_adversity(dict(body.changes))
         except ValueError as exc:
             raise HTTPException(422, str(exc)) from exc
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code in (400, 422):  # within the caps but not a value the board accepts
+                raise HTTPException(422, "the board rejected that value") from exc
+            raise
         await audit(svc, who, request, "demo.adversity", "board", json.dumps(body.changes))
         return status
 

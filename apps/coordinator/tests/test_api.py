@@ -4,6 +4,7 @@ anonymous and demo viewers, filter hot reload, manual codes, and the capped publ
 
 from __future__ import annotations
 
+import base64
 import json
 from collections.abc import AsyncIterator
 from uuid import uuid4
@@ -236,6 +237,18 @@ async def test_sign_out_ends_the_session(api: Api) -> None:
         assert me["role"] == "public"
     finally:
         await c.aclose()
+    async with tenant_tx(api.app.state.services.engine, api.tenant_id) as conn:
+        actors = (
+            (
+                await conn.execute(
+                    text("SELECT actor FROM audit_log WHERE tenant_id = :t AND action = 'auth.sign_out'"),
+                    {"t": api.tenant_id},
+                )
+            )
+            .scalars()
+            .all()
+        )
+    assert api.users["signout"].email in actors  # signing out is audited like every other mutation
 
 
 async def test_claims_and_workers_come_back_in_the_contract_shape(api: Api, viewer: httpx.AsyncClient) -> None:
@@ -278,3 +291,45 @@ async def test_claims_and_workers_come_back_in_the_contract_shape(api: Api, view
     overview = (await viewer.get("/v1/overview")).json()
     assert overview["claims"]["by_state"].get("LEASED", 0) >= 1 and overview["workers"]["total"] >= 1
     assert overview["claims"]["total"] >= 1 and overview["claims"]["window_s"] == api.cfg.api.series_minutes * 60
+
+
+async def test_many_visitors_can_use_the_demo_login_in_the_same_step(api: Api) -> None:
+    # Review blocker: per-user replay protection let only the first visitor per 30 s step in.
+    hint = (await api.client().get("/v1/auth/demo-hint")).json()
+    for _ in range(3):
+        c = api.client()
+        r = await c.post("/v1/auth/login", json={"email": hint["email"], "password": hint["password"]})
+        assert r.status_code == 200, r.text
+        r = await c.post("/v1/auth/mfa", json={"code": hint["code"]})
+        assert r.status_code == 200, r.text
+        assert (await c.get("/v1/session")).json()["role"] == "demo"
+    # personal accounts keep one use per step: covered by the "replay" user's test above
+
+
+async def test_password_attempts_are_limited_per_address_even_when_correct(api: Api) -> None:
+    # Review major: the demo password is public, so successful attempts must be bounded too.
+    c = api.client()
+    hint = (await c.get("/v1/auth/demo-hint")).json()
+    body = {"email": hint["email"], "password": hint["password"]}
+    for _ in range(api.cfg.auth.password_attempts_per_window):
+        assert (await c.post("/v1/auth/login", json=body)).status_code == 200
+    r = await c.post("/v1/auth/login", json=body)
+    assert r.status_code == 429 and int(r.headers["retry-after"]) > 0
+
+
+async def test_the_demo_hint_never_reveals_a_staff_members_code(api: Api) -> None:
+    auth = api.app.state.services.auth
+    assert await auth.current_code(api.users["owner"].email) is None
+    assert await auth.current_code(api.cfg.demo.account_email) is not None
+
+
+async def test_a_malformed_audit_cursor_starts_over_instead_of_failing(viewer: httpx.AsyncClient) -> None:
+    bad = base64.urlsafe_b64encode(b"2026-01-01T00:00:00+00:00|abc").decode()
+    r = await viewer.get("/v1/audit", params={"cursor": bad})
+    assert r.status_code == 200, r.text
+
+
+async def test_a_value_the_board_rejects_is_a_client_error(api: Api) -> None:
+    demo = await demo_client(api)
+    r = await demo.patch("/v1/demo/adversity", json={"changes": {"slow_ms": 100.5}})
+    assert r.status_code == 422, r.text
