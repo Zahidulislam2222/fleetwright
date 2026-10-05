@@ -333,3 +333,22 @@ async def test_a_value_the_board_rejects_is_a_client_error(api: Api) -> None:
     demo = await demo_client(api)
     r = await demo.patch("/v1/demo/adversity", json={"changes": {"slow_ms": 100.5}})
     assert r.status_code == 422, r.text
+
+
+async def test_slots_stopped_on_purpose_do_not_count_as_missing(api: Api, viewer: httpx.AsyncClient) -> None:
+    # Found in the release rehearsal: after a redeploy the old container's slots made it "4/8 workers".
+    async def total() -> int:
+        return int((await viewer.get("/v1/overview")).json()["workers"]["total"])
+
+    before = await total()
+    engine = api.app.state.services.engine
+    insert = text(
+        """INSERT INTO workers (tenant_id, id, process_id, cell_id, mode, version, state)
+           VALUES (:t, :w, 'p-test', 'cell-a', 'claimer', 'test', :s)"""
+    )
+    async with tenant_tx(engine, api.tenant_id) as conn:
+        await conn.execute(insert, {"t": api.tenant_id, "w": f"w-{uuid4().hex[:8]}", "s": "stopped"})
+    assert await total() == before
+    async with tenant_tx(engine, api.tenant_id) as conn:
+        await conn.execute(insert, {"t": api.tenant_id, "w": f"w-{uuid4().hex[:8]}", "s": "running"})
+    assert await total() == before + 1

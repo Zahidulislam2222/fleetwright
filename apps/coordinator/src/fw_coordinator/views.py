@@ -429,6 +429,17 @@ async def cells(conn: AsyncConnection) -> list[dict[str, Any]]:
     ]
 
 
+_STOPPED_RECENTLY = text(
+    """SELECT count(*) FROM workers
+       WHERE tenant_id = :t AND state = 'stopped' AND heartbeat_at > clock_timestamp() - make_interval(secs => :recent)"""
+)
+
+
+async def _stopped_recently(conn: AsyncConnection, tenant_id: UUID, cfg: ApiSettings) -> int:
+    """Rows the workers view lists that were stopped deliberately (same window as that view)."""
+    return int((await conn.execute(_STOPPED_RECENTLY, {"t": tenant_id, "recent": cfg.worker_recent_s})).scalar_one())
+
+
 async def workers_per_cell(conn: AsyncConnection, tenant_id: UUID, cfg: ApiSettings) -> dict[str, int]:
     """The tenant's live workers per cell (not stopped, heartbeat younger than the dead threshold)."""
     return {
@@ -488,6 +499,10 @@ async def overview(conn: AsyncConnection, tenant_id: UUID, cfg: ApiSettings) -> 
             "by_state": by_state,
         },
         "series": await series(conn, tenant_id, cfg.series_minutes),
-        "workers": {"total": len(w["items"]), "healthy": sum(x["status"] == "healthy" for x in w["items"])},
+        # Slots stopped on purpose (a redeploy, a re-plan) are not expected to be live; crashed ones are.
+        "workers": {
+            "total": len(w["items"]) - await _stopped_recently(conn, tenant_id, cfg),
+            "healthy": sum(x["status"] == "healthy" for x in w["items"]),
+        },
         "alerts": alerts,
     }
