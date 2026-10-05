@@ -1,0 +1,35 @@
+# GENERATED from deploy/templates/compose.yaml by deploy/build-release.mjs — edit the template.
+name: {{slug}}
+services:
+  web:
+    image: {{webImage}}
+    pull_policy: never
+    entrypoint: ["nginx"]
+    command: ["-g", "daemon off;"]
+    user: "101:101"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: unless-stopped
+    read_only: true
+    ports:
+      - "127.0.0.1:{{loopbackPort}}:{{containerPort}}"
+    mem_limit: {{memory}}
+    cpus: {{cpus}}
+    pids_limit: {{pids}}
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m,mode=1777
+    volumes:
+      - ./dist:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:{{containerPort}}{{healthPath}}"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 5s

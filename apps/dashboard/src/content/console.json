@@ -1,0 +1,487 @@
+{
+  "product": "Fleetwright",
+  "mockBanner": "Prototype · mock data · clock frozen at",
+  "nav": [
+    {
+      "href": "/console",
+      "label": "Overview",
+      "icon": "LayoutDashboard"
+    },
+    {
+      "href": "/console/workers",
+      "label": "Workers",
+      "icon": "Cpu"
+    },
+    {
+      "href": "/console/accounts",
+      "label": "Accounts & sessions",
+      "icon": "KeyRound"
+    },
+    {
+      "href": "/console/filters",
+      "label": "Filters",
+      "icon": "Funnel"
+    },
+    {
+      "href": "/console/schedules",
+      "label": "Schedules",
+      "icon": "CalendarClock"
+    },
+    {
+      "href": "/console/claims",
+      "label": "Claims",
+      "icon": "Crosshair"
+    },
+    {
+      "href": "/console/latency",
+      "label": "Latency",
+      "icon": "Timer"
+    },
+    {
+      "href": "/console/crawl-jobs",
+      "label": "Crawl jobs",
+      "icon": "Radar"
+    },
+    {
+      "href": "/console/audit",
+      "label": "Audit log",
+      "icon": "ScrollText"
+    },
+    {
+      "href": "/console/settings",
+      "label": "Settings",
+      "icon": "Settings"
+    }
+  ],
+  "navSecondary": [
+    {
+      "href": "/agent",
+      "label": "Agent window",
+      "icon": "Bot"
+    },
+    {
+      "href": "/board",
+      "label": "Mock load board",
+      "icon": "Truck"
+    },
+    {
+      "href": "/login",
+      "label": "Sign out",
+      "icon": "LogOut"
+    },
+    {
+      "href": "/",
+      "label": "Back to site",
+      "icon": "ArrowLeft"
+    }
+  ],
+  "shell": {
+    "tenantLabel": "Tenant",
+    "stateLabel": "Prototype state",
+    "stateHelp": "Preview how every screen behaves",
+    "themeLabel": "Theme",
+    "themes": {
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "openMenu": "Open navigation",
+    "closeMenu": "Close navigation",
+    "signOut": "Sign out",
+    "user": "Rina Okafor · owner",
+    "skipLink": "Skip to content",
+    "drawerLabel": "Console navigation",
+    "navLabel": "Console"
+  },
+  "states": {
+    "ready": "Ready",
+    "loading": "Loading",
+    "empty": "Empty",
+    "error": "Error",
+    "denied": "Denied"
+  },
+  "common": {
+    "loadMore": "Load more",
+    "showing": "Showing {shown} of {total}",
+    "retry": "Retry",
+    "requestAccess": "Request access",
+    "mock": "Mock data",
+    "viewTable": "Table",
+    "viewChart": "Chart",
+    "close": "Close",
+    "search": "Search",
+    "noMatches": "No rows match this filter.",
+    "prototypeAction": "Prototype: “{action}” on {target} recorded locally — nothing was sent.",
+    "searchPlaceholder": "Search by ID or name",
+    "actions": "Actions",
+    "viewLabel": "View",
+    "loading": "Loading",
+    "prototypeOnly": "Prototype only",
+    "ago": "{t} ago",
+    "started": "started {t}",
+    "updated": "updated {t}",
+    "seen": "seen {t}",
+    "weightLb": "{n} lb",
+    "none": "—",
+    "nextCursor": "next_cursor={cursor}",
+    "percent": "{n}%",
+    "megabytes": "{n} MB",
+    "perMinute": "{n}/min",
+    "version": "v{n}"
+  },
+  "pages": {
+    "overview": {
+      "title": "Fleet overview",
+      "description": "Workers, claims and cells for the selected tenant over the last hour.",
+      "tiles": {
+        "workers": "Live workers",
+        "claims": "Claims · last hour",
+        "confirmRate": "Confirmed or reconciled",
+        "duplicates": "Duplicate confirmations"
+      },
+      "duplicatesNote": "Design: a unique key per job makes a second confirmation impossible",
+      "chartTitle": "Claims per 5 minutes",
+      "chartSeries": {
+        "total": "Detected",
+        "confirmed": "Confirmed"
+      },
+      "cellsTitle": "Cells",
+      "alertsTitle": "Needs attention",
+      "recentTitle": "Recent claims",
+      "alerts": {
+        "staleWorkers": "{n} workers stale or dead",
+        "expiring": "{n} sessions expiring or need OTP",
+        "crawlAlarm": "Crawl alarm: {name}"
+      },
+      "empty": {
+        "title": "No workers registered yet",
+        "body": "Start a worker with the cell's join token and it appears here within one heartbeat."
+      },
+      "error": {
+        "title": "Couldn't load the overview",
+        "body": "The API returned 503 for /v1/overview. Nothing is lost — workers keep claiming while the console reconnects."
+      },
+      "denied": {
+        "title": "You don't have access to this tenant",
+        "body": "Your role has no grant on this tenant. Ask an owner to add you."
+      },
+      "cellLine": "{workers}/{capacity} workers · {cpm} claims/min · Redis lag {lag} ms · {tenants} tenants"
+    },
+    "workers": {
+      "title": "Workers",
+      "description": "Every browser worker, its mode, its account and its last heartbeat.",
+      "columns": {
+        "id": "Worker",
+        "mode": "Mode",
+        "status": "Status",
+        "account": "Account",
+        "contexts": "Contexts",
+        "cpu": "CPU",
+        "memory": "Memory",
+        "heartbeat": "Heartbeat",
+        "version": "Version"
+      },
+      "actions": {
+        "drain": "Drain",
+        "restart": "Restart"
+      },
+      "filterAll": "All statuses",
+      "empty": {
+        "title": "No workers in this tenant",
+        "body": "Workers register themselves on start. Check the cell's join token and the worker logs."
+      },
+      "error": {
+        "title": "Couldn't load workers",
+        "body": "Request to /v1/workers timed out after 10 s. Try again; the fleet is unaffected."
+      },
+      "denied": {
+        "title": "Workers are restricted",
+        "body": "Viewing workers needs the operator role."
+      }
+    },
+    "accounts": {
+      "title": "Accounts & sessions",
+      "description": "Board accounts the claimers act as, with session freshness and OTP channel.",
+      "columns": {
+        "label": "Account",
+        "session": "Session",
+        "expires": "Expires in",
+        "refreshed": "Last refresh",
+        "otp": "OTP channel",
+        "rate": "Rate limit"
+      },
+      "refresh": "Refresh session",
+      "sessionStates": {
+        "fresh": "Fresh",
+        "expiring": "Expiring",
+        "expired": "Expired",
+        "otp_required": "OTP needed"
+      },
+      "credentialNote": "Passwords and cookies are encrypted at rest and never shown here.",
+      "empty": {
+        "title": "No accounts connected",
+        "body": "Add a board account; its password is encrypted and never shown again."
+      },
+      "error": {
+        "title": "Couldn't load accounts",
+        "body": "The session service did not respond. Sessions keep refreshing in the background."
+      },
+      "denied": {
+        "title": "Accounts are owner-only",
+        "body": "Only owners can see board accounts and sessions."
+      }
+    },
+    "filters": {
+      "title": "Filters",
+      "description": "Which loads each account group may claim. Filters are data, versioned on every edit.",
+      "columns": {
+        "name": "Filter",
+        "lane": "Lane",
+        "rate": "Min rate",
+        "equipment": "Equipment",
+        "weight": "Max weight",
+        "group": "Account group",
+        "matched": "Matched 24h",
+        "version": "Version"
+      },
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "new": "New filter",
+      "empty": {
+        "title": "No filters yet",
+        "body": "Without a filter, watchers detect loads but nothing is claimed."
+      },
+      "error": {
+        "title": "Couldn't load filters",
+        "body": "Filter service returned 500. Existing filters stay active."
+      },
+      "denied": {
+        "title": "Filters are restricted",
+        "body": "Editing and viewing filters needs the operator role."
+      }
+    },
+    "schedules": {
+      "title": "Schedules",
+      "description": "When the fleet is allowed to act, per timezone.",
+      "days": [
+        "Sun",
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat"
+      ],
+      "active": "Active",
+      "paused": "Paused",
+      "empty": {
+        "title": "No schedules",
+        "body": "With no schedule the fleet watches but never acts."
+      },
+      "error": {
+        "title": "Couldn't load schedules",
+        "body": "The scheduler did not respond."
+      },
+      "denied": {
+        "title": "Schedules are restricted",
+        "body": "Viewing schedules needs the operator role."
+      }
+    },
+    "claims": {
+      "title": "Claims",
+      "description": "Every detected load and what happened to it, with the full state timeline.",
+      "columns": {
+        "id": "Claim",
+        "job": "Job",
+        "lane": "Lane",
+        "rate": "Rate",
+        "state": "State",
+        "worker": "Worker",
+        "token": "Fence",
+        "published": "Published",
+        "total": "Publish → done"
+      },
+      "filterAll": "All states",
+      "timeline": "Timeline",
+      "detailTitle": "Claim {id}",
+      "empty": {
+        "title": "No claims in this window",
+        "body": "Watchers are running but no load matched a filter in the last hour."
+      },
+      "error": {
+        "title": "Couldn't load claims",
+        "body": "The claims query was cancelled. Try again."
+      },
+      "denied": {
+        "title": "Claims are restricted",
+        "body": "Viewing claims needs the operator role."
+      },
+      "publishedEvent": "published_at",
+      "publishedActor": "board",
+      "tenantLabel": "tenant_id"
+    },
+    "latency": {
+      "title": "Latency",
+      "description": "Each stage measured separately — publish→detect is never averaged into detect→action.",
+      "chartTitle": "Stage latency by percentile",
+      "note": "Computed from the mock claims' own timestamps (nearest-rank). Real numbers publish after the Phase 5 load test.",
+      "stages": {
+        "publish_to_seen": "Publish → seen",
+        "seen_to_queued": "Seen → queued",
+        "queued_to_leased": "Queued → leased",
+        "leased_to_act": "Leased → act sent",
+        "act_to_confirmed": "Act → confirmed"
+      },
+      "columns": {
+        "stage": "Stage",
+        "p50": "p50",
+        "p95": "p95",
+        "p99": "p99"
+      },
+      "empty": {
+        "title": "No completed claims yet",
+        "body": "Percentiles appear once claims reach each stage."
+      },
+      "error": {
+        "title": "Couldn't compute latency",
+        "body": "The metrics query failed."
+      },
+      "denied": {
+        "title": "Latency is restricted",
+        "body": "Viewing metrics needs the operator role."
+      }
+    },
+    "crawl": {
+      "title": "Crawl jobs",
+      "description": "Crawls defined as data, with per-cycle item counts and anomaly alarms.",
+      "columns": {
+        "name": "Job",
+        "status": "Status",
+        "series": "Items per cycle (12)",
+        "last": "Last cycle",
+        "diff": "Diff +/~/−",
+        "dlq": "DLQ",
+        "next": "Next run"
+      },
+      "statuses": {
+        "running": "Running",
+        "succeeded": "Succeeded",
+        "failed": "Failed",
+        "alarm": "Alarm",
+        "queued": "Queued"
+      },
+      "personalData": "Personal data · DPIA required",
+      "empty": {
+        "title": "No crawl jobs",
+        "body": "Define a crawl as data: seeds, selectors and politeness."
+      },
+      "error": {
+        "title": "Couldn't load crawl jobs",
+        "body": "The crawl service did not respond."
+      },
+      "denied": {
+        "title": "Crawl jobs are restricted",
+        "body": "Viewing crawls needs the operator role."
+      },
+      "meta": "{seeds} seeds · robots: {robots} · last {last} · next {next}"
+    },
+    "audit": {
+      "title": "Audit log",
+      "description": "Append-only. Every mutation and every claim action is recorded.",
+      "columns": {
+        "at": "Time",
+        "actor": "Actor",
+        "action": "Action",
+        "target": "Target",
+        "detail": "Detail",
+        "ip": "IP"
+      },
+      "appendOnly": "Append-only · cannot be edited or deleted from the console",
+      "empty": {
+        "title": "No audit entries",
+        "body": "Entries appear as soon as anyone changes anything."
+      },
+      "error": {
+        "title": "Couldn't load the audit log",
+        "body": "The audit store did not respond."
+      },
+      "denied": {
+        "title": "Audit log is owner-only",
+        "body": "Only owners can read the audit log."
+      }
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Tenant, people and security.",
+      "sections": {
+        "tenant": "Tenant",
+        "people": "People",
+        "security": "Security",
+        "retention": "Data retention"
+      },
+      "fields": {
+        "tenantName": "Tenant name",
+        "tenantId": "Tenant ID",
+        "cell": "Cell",
+        "mfa": "Require TOTP for every user",
+        "sessionTimeout": "Console session timeout",
+        "retentionAudit": "Audit log",
+        "retentionClaims": "Claim records",
+        "retentionCrawl": "Crawl snapshots"
+      },
+      "values": {
+        "sessionTimeout": "30 minutes idle",
+        "retentionAudit": "Forever (append-only)",
+        "retentionClaims": "400 days",
+        "retentionCrawl": "30 days"
+      },
+      "roles": {
+        "owner": "Owner",
+        "operator": "Operator",
+        "viewer": "Viewer"
+      },
+      "mfaOn": "TOTP on",
+      "mfaOff": "No MFA",
+      "save": "Save changes",
+      "prototypeNote": "Prototype: changes are not saved.",
+      "empty": {
+        "title": "Nothing to configure",
+        "body": "This tenant has no settings yet."
+      },
+      "error": {
+        "title": "Couldn't load settings",
+        "body": "The settings service did not respond."
+      },
+      "denied": {
+        "title": "Settings are owner-only",
+        "body": "Only owners can change tenant settings."
+      }
+    }
+  },
+  "status": {
+    "healthy": "Healthy",
+    "draining": "Draining",
+    "stale": "Stale",
+    "dead": "Dead",
+    "degraded": "Degraded",
+    "offline": "Offline"
+  },
+  "claimStates": {
+    "DETECTED": "Detected",
+    "QUEUED": "Queued",
+    "LEASED": "Leased",
+    "ACTING": "Acting",
+    "CONFIRMED": "Confirmed",
+    "FAILED": "Failed",
+    "UNKNOWN": "Unknown",
+    "RECONCILED": "Reconciled"
+  },
+  "charts": {
+    "lineKeys": "{title}. Use the left and right arrow keys to read each point.",
+    "cycle": "Cycle {i}: {v}"
+  },
+  "meta": {
+    "titleTemplate": "%s · {product} console",
+    "title": "{product} console"
+  }
+}

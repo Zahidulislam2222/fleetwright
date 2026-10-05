@@ -1,0 +1,306 @@
+{
+  "meta": {
+    "title": "Fleetwright — Browser fleets that never collide",
+    "description": "One control plane for Playwright claim workers, crawlers and a local AI agent. Database-enforced single claims, crash-safe leases and latency you can audit stage by stage.",
+    "themeColor": "#000000",
+    "titleTemplate": "%s · Fleetwright"
+  },
+  "nav": {
+    "brand": "Fleetwright",
+    "links": [
+      {
+        "label": "Platform",
+        "href": "#platform"
+      },
+      {
+        "label": "Claim engine",
+        "href": "#claim-engine"
+      },
+      {
+        "label": "Latency",
+        "href": "#latency"
+      },
+      {
+        "label": "Cells",
+        "href": "#cells"
+      }
+    ],
+    "cta": {
+      "label": "Console",
+      "href": "/console"
+    },
+    "menuLabel": "Open menu",
+    "closeLabel": "Close menu",
+    "primaryLabel": "Primary",
+    "mobileLabel": "Mobile"
+  },
+  "hero": {
+    "badge": "Phase 1 design prototype · mock data",
+    "workerTypes": [
+      {
+        "id": "crawler",
+        "label": "Crawler"
+      },
+      {
+        "id": "claimer",
+        "label": "Claimer"
+      },
+      {
+        "id": "agent",
+        "label": "Agent"
+      }
+    ],
+    "headline": [
+      "Browser Fleets",
+      "That Never Collide"
+    ],
+    "subhead": "Designed to coordinate 70+ Playwright workers, crawlers and a local AI agent from one control plane — with database-enforced single claims and latency you can audit stage by stage.",
+    "cta": {
+      "label": "Open the console",
+      "href": "/console"
+    },
+    "scrollCue": "Scroll",
+    "statsCaption": "Design targets. Measured results publish after the Phase 5 load test.",
+    "stats": [
+      {
+        "glyph": "=",
+        "value": 0,
+        "decimals": 0,
+        "prefix": "",
+        "suffix": "",
+        "label": "Duplicate confirmations"
+      },
+      {
+        "glyph": "#",
+        "value": 70,
+        "decimals": 0,
+        "prefix": "",
+        "suffix": "+",
+        "label": "Workers in the test fleet"
+      },
+      {
+        "glyph": ">",
+        "value": 6,
+        "decimals": 0,
+        "prefix": "",
+        "suffix": "",
+        "label": "Latency stages traced"
+      },
+      {
+        "glyph": "*",
+        "value": 2,
+        "decimals": 0,
+        "prefix": "",
+        "suffix": "",
+        "label": "Isolated cells in the demo"
+      }
+    ],
+    "videoPause": "Pause background video",
+    "videoPlay": "Play background video"
+  },
+  "problem": {
+    "eyebrow": "The failure everyone ships",
+    "text": "Fifty workers watch the same board. A load appears. Twelve of them click Book in the same second. Without one source of truth, you just booked the same load twelve times — and the client finds out from the broker.",
+    "emphasis": [
+      "twelve",
+      "times"
+    ]
+  },
+  "claimRace": {
+    "id": "claim-engine",
+    "eyebrow": "Claim engine",
+    "title": "Many vessels. Exactly one lands.",
+    "fallbackNote": "Interactive 3D view unavailable — the steps below describe the same sequence.",
+    "steps": [
+      {
+        "state": "DETECTED",
+        "title": "A watcher sees the load",
+        "body": "Watchers read the board's JSON responses, not the DOM, and publish a DETECTED event with a seen_at timestamp."
+      },
+      {
+        "state": "QUEUED",
+        "title": "Every matching actor races",
+        "body": "Filters route the job to pre-warmed actors whose sessions are already logged in. Redis gives a fast first filter — never the final word."
+      },
+      {
+        "state": "LEASED",
+        "title": "Postgres picks one winner",
+        "body": "INSERT … ON CONFLICT DO NOTHING on (tenant_id, target_job_key). The database's unique key decides. Everyone else gets nothing to act on."
+      },
+      {
+        "state": "ACTING",
+        "title": "A fencing token guards the click",
+        "body": "The lease carries a monotonic token. A worker that paused past its lease is rejected by the database clock, not its own."
+      },
+      {
+        "state": "CONFIRMED",
+        "title": "Confirmed — or reconciled, never retried blind",
+        "body": "A crash mid-action becomes UNKNOWN. The reconciler checks the board's bookings before it confirms or releases the job."
+      }
+    ],
+    "stateLabel": "state"
+  },
+  "workers": {
+    "id": "platform",
+    "eyebrow": "One core, three worker types",
+    "title": "Built for the three jobs clients actually post.",
+    "cards": [
+      {
+        "id": "claimer",
+        "kicker": "Post 2 · Distributed Playwright",
+        "title": "Claim worker",
+        "body": "Watchers, actors and a coordinator that scale from 50 to 70+ workers without duplicate bookings. Sessions stay warm; OTP refresh is automatic.",
+        "points": [
+          "Exactly-one claims enforced in Postgres",
+          "Warm logged-in pages per account",
+          "Crash recovery, verified by chaos tests (Phase 5)"
+        ]
+      },
+      {
+        "id": "crawler",
+        "kicker": "Post 1 · Proxy-aware crawling",
+        "title": "Crawler",
+        "body": "Crawl jobs defined as data, per-domain politeness, retries with jitter, and alarms that catch the silent layout change before the client does.",
+        "points": [
+          "Proxy and captcha adapters per client",
+          "Zero-result and sudden-drop alarms",
+          "SSRF egress guard on every fetch (planned)"
+        ]
+      },
+      {
+        "id": "agent",
+        "kicker": "Post 3 · Local AI agent",
+        "title": "Fleetwright Agent",
+        "body": "A lightweight local app that drives your own Chrome across tabs. It drafts, researches and fills — and asks before it publishes, sends or buys.",
+        "points": [
+          "Runs on Ollama by default",
+          "Human approval for risky actions",
+          "Page text treated as untrusted data"
+        ]
+      }
+    ],
+    "note": "What each worker type is designed to do. The panels are illustrative mock data; measured results publish after the Phase 5 load test."
+  },
+  "latency": {
+    "id": "latency",
+    "eyebrow": "Latency you can audit",
+    "title": "Six timestamps. No averaged-away excuses.",
+    "note": "Every claim is stamped at each stage. Reports split publish→detect from detect→action, with p50 / p95 / p99 per stage.",
+    "stages": [
+      {
+        "key": "published_at",
+        "label": "Published",
+        "body": "Ground truth from the board's own event log."
+      },
+      {
+        "key": "seen_at",
+        "label": "Seen",
+        "body": "A watcher's response listener fires."
+      },
+      {
+        "key": "queued_at",
+        "label": "Queued",
+        "body": "Filters matched; the job enters the cell's stream."
+      },
+      {
+        "key": "leased_at",
+        "label": "Leased",
+        "body": "Postgres grants the single lease and its fencing token."
+      },
+      {
+        "key": "act_sent_at",
+        "label": "Act sent",
+        "body": "The warm page clicks, or the session's HTTP action fires."
+      },
+      {
+        "key": "confirmed_at",
+        "label": "Confirmed",
+        "body": "The board confirms the booking; the audit log closes the loop."
+      }
+    ]
+  },
+  "cells": {
+    "id": "cells",
+    "eyebrow": "Cell architecture",
+    "title": "When one cell fails, the fleet keeps claiming.",
+    "body": "A cell is a Redis, its watchers and its worker pool. The coordinator routes each tenant to a cell, so adding capacity is a config change — and a failing cell takes nothing else down with it.",
+    "toggleOn": "Fail cell A",
+    "toggleOff": "Restore cell A",
+    "coordinator": "Coordinator",
+    "cellLabels": [
+      "Cell A",
+      "Cell B"
+    ],
+    "statusHealthy": "claiming",
+    "statusFailed": "offline",
+    "liveRegionFailed": "Cell A is offline. Its tenants are rerouted to cell B, which keeps claiming.",
+    "liveRegionRestored": "Cell A is restored and claiming again.",
+    "reroutedNote": "Tenants rerouted to cell B",
+    "tenants": [
+      {
+        "id": "t-acme",
+        "home": 0
+      },
+      {
+        "id": "t-north",
+        "home": 0
+      },
+      {
+        "id": "t-delta",
+        "home": 1
+      }
+    ],
+    "workersPerCell": 12
+  },
+  "guardrails": {
+    "eyebrow": "Guardrails",
+    "title": "Strict by default.",
+    "items": [
+      {
+        "title": "MFA for every operator",
+        "body": "TOTP enforced; argon2id hashing; RBAC checked server-side on every endpoint."
+      },
+      {
+        "title": "Tenant isolation in the database",
+        "body": "tenant_id on every row with Postgres Row-Level Security."
+      },
+      {
+        "title": "Append-only audit log",
+        "body": "Every mutation and every claim action is recorded."
+      },
+      {
+        "title": "No third-party captcha defeat",
+        "body": "Solver services are added per client, after legal review and written authorisation."
+      },
+      {
+        "title": "US + EU law register",
+        "body": "CFAA, GDPR, AI Act Art. 50 and the CRA mapped to design rules — reviewed before any real target."
+      },
+      {
+        "title": "Secrets never logged",
+        "body": "OTP codes and cookies are redacted by a logging filter, with tests that fail if one ever appears in a log."
+      }
+    ],
+    "note": "Design commitments from the build plan. Each ships with automated tests in its phase — none is claimed as done until those tests pass."
+  },
+  "closing": {
+    "title": [
+      "Walk The Fleet",
+      "Before It Exists"
+    ],
+    "body": "The console prototype runs on mock data generated from the same contract the backend will implement.",
+    "cta": {
+      "label": "Open the console",
+      "href": "/console"
+    },
+    "secondary": {
+      "label": "See the agent",
+      "href": "/agent"
+    }
+  },
+  "footer": {
+    "note": "Fleetwright is a portfolio project. The demo target is a fictitious load board we built — nothing here points at a real third-party site.",
+    "copyright": "Fleetwright"
+  },
+  "skipLink": "Skip to content"
+}

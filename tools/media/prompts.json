@@ -1,0 +1,16 @@
+{
+  "hero-still": {
+    "kind": "image",
+    "purpose": "Hero first frame and video poster; also the image-to-video start frame",
+    "params": { "aspect_ratio": "16:9", "quality": "high", "n": 1 },
+    "prompt": "Cinematic night photograph, wide low-angle view across a calm black ocean toward the horizon. Hundreds of tiny vessels, each a small softly glowing rectangle of cool white light like a lit browser window, glide in neat parallel lanes across the water, all converging on one distant warm amber beacon light at the exact centre of the horizon. A thin band of warm peach-and-amber haze sits along the horizon in the lower-middle of the frame; the upper two thirds are a deep, almost pure black sky with very faint stars. Gentle reflections of the vessel lights streak across the dark water in the foreground. Calm, precise, orderly, quiet. Anamorphic lens, shallow haze, subtle film grain, high dynamic range, photoreal. Keep the centre of the frame uncluttered and fairly dark so white headline text can sit over it. No text, no letters, no numbers, no logos, no people, no boats with masts."
+  },
+  "hero-video": {
+    "kind": "video",
+    "purpose": "Hero background loop (desktop; mobile uses a centred cover crop)",
+    "first_frame": "hero-still",
+    "params": { "duration": 8, "resolution": "720p", "aspect_ratio": "16:9", "generate_audio": false },
+    "estimate": { "width": 1280, "height": 720, "fps": 24 },
+    "prompt": "The camera glides slowly and steadily forward, low over the dark water, following the lanes of small glowing rectangular vessels. Every vessel keeps moving forward at the same calm speed toward the single amber beacon on the horizon; the beacon pulses softly. Light reflections ripple on the water. One continuous shot, no cuts, no camera shake, no new objects appear, the sky stays black, no text."
+  }
+}

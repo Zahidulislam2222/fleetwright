@@ -1,0 +1,16 @@
+{
+  "slug": "fleetwright",
+  "hostname": "fleetwright.zahidul-islam.com",
+  "loopbackPort": 18090,
+  "containerPort": 8080,
+  "webImage": "nginx:stable-alpine@sha256:dc5069ad14f19660b141b21236140b91656bf89bbc3e2417c70ae650cd66104c",
+  "limits": { "memory": "128m", "cpus": 0.5, "pids": 64 },
+  "releaseRoot": "/srv/apps/fleetwright/releases",
+  "caddySite": "/etc/caddy/sites.d/fleetwright.caddy",
+  "healthPath": "/healthz",
+  "cache": {
+    "immutablePrefix": "/_next/static/",
+    "mediaPrefix": "/media/",
+    "mediaMaxAgeS": 3600
+  }
+}

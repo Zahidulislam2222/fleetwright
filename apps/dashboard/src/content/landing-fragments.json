@@ -1,0 +1,66 @@
+{
+  "label": "Illustrative · mock data",
+  "claimer": {
+    "title": "Claims · last 60 s",
+    "rows": [
+      {
+        "job": "LD-48213",
+        "state": "CONFIRMED",
+        "worker": "w-17",
+        "ms": "212"
+      },
+      {
+        "job": "LD-48214",
+        "state": "LEASED",
+        "worker": "w-04",
+        "ms": "—"
+      },
+      {
+        "job": "LD-48209",
+        "state": "UNKNOWN",
+        "worker": "w-31",
+        "ms": "—"
+      },
+      {
+        "job": "LD-48207",
+        "state": "CONFIRMED",
+        "worker": "w-22",
+        "ms": "198"
+      }
+    ],
+    "footer": "0 duplicate confirmations · audit clean",
+    "columns": {
+      "job": "job",
+      "state": "state",
+      "worker": "worker",
+      "ms": "act→ok"
+    },
+    "msUnit": "{n} ms"
+  },
+  "crawler": {
+    "title": "catalogue-crawl · items per cycle",
+    "series": [
+      412,
+      418,
+      409,
+      421,
+      415,
+      419,
+      0
+    ],
+    "alarm": "Zero-result anomaly — selector may have changed",
+    "alarmAction": "Trace saved",
+    "seriesLabel": "Items per crawl cycle: {values}"
+  },
+  "agent": {
+    "title": "Agent · task 3 of 5",
+    "log": [
+      "Opened 3 tabs: brief, drafts, calendar",
+      "Drafted post from the product brief",
+      "Labelled as AI-generated"
+    ],
+    "approval": "Publish to the Demo Studio page?",
+    "approve": "Approve",
+    "reject": "Reject"
+  }
+}

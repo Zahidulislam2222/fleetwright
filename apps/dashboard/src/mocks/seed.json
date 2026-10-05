@@ -1,0 +1,411 @@
+{
+  "_note": "Deterministic seed for the Phase 1 console prototype. Every record generated from this file is MOCK DATA; nothing here is measured.",
+  "seed": 20261005,
+  "asOf": "2026-10-05T14:00:00.000Z",
+  "displayTimeZone": "UTC",
+  "pageSize": 25,
+  "target": {
+    "id": "demo-board",
+    "name": "Demo Freight Exchange",
+    "note": "Fictitious load board we built for the demo"
+  },
+  "tenants": [
+    {
+      "id": "t-acme",
+      "name": "Acme Haulage",
+      "cell": "cell-a",
+      "workers": 36,
+      "accounts": 14,
+      "claimsPerHour": 160
+    },
+    {
+      "id": "t-north",
+      "name": "Northline Freight",
+      "cell": "cell-a",
+      "workers": 20,
+      "accounts": 8,
+      "claimsPerHour": 90
+    },
+    {
+      "id": "t-delta",
+      "name": "Delta Carriers",
+      "cell": "cell-b",
+      "workers": 16,
+      "accounts": 6,
+      "claimsPerHour": 70
+    }
+  ],
+  "cells": [
+    {
+      "id": "cell-a",
+      "name": "Cell A",
+      "region": "us-east (local)",
+      "capacity": 64
+    },
+    {
+      "id": "cell-b",
+      "name": "Cell B",
+      "region": "us-east (local)",
+      "capacity": 32
+    }
+  ],
+  "workerModes": {
+    "watcher": 0.25,
+    "claimer": 0.6,
+    "crawler": 0.15
+  },
+  "workerStatus": {
+    "healthy": 0.86,
+    "draining": 0.06,
+    "stale": 0.05,
+    "dead": 0.03
+  },
+  "workerVersions": [
+    "0.1.0-proto",
+    "0.1.0-proto",
+    "0.1.0-proto",
+    "0.0.9-proto"
+  ],
+  "claimStates": {
+    "CONFIRMED": 0.78,
+    "FAILED": 0.08,
+    "UNKNOWN": 0.03,
+    "RECONCILED": 0.04,
+    "ACTING": 0.03,
+    "LEASED": 0.02,
+    "QUEUED": 0.02
+  },
+  "stageMs": {
+    "publish_to_seen": [
+      90,
+      420
+    ],
+    "seen_to_queued": [
+      4,
+      28
+    ],
+    "queued_to_leased": [
+      2,
+      14
+    ],
+    "leased_to_act": [
+      35,
+      210
+    ],
+    "act_to_confirmed": [
+      280,
+      1400
+    ]
+  },
+  "cities": [
+    "Dallas, TX",
+    "Atlanta, GA",
+    "Chicago, IL",
+    "Memphis, TN",
+    "Phoenix, AZ",
+    "Denver, CO",
+    "Columbus, OH",
+    "Laredo, TX",
+    "Charlotte, NC",
+    "Kansas City, MO",
+    "Reno, NV",
+    "Savannah, GA"
+  ],
+  "equipment": [
+    "Van",
+    "Reefer",
+    "Flatbed"
+  ],
+  "operators": [
+    {
+      "id": "u-1",
+      "name": "Rina Okafor",
+      "role": "owner",
+      "emailLocal": "rina"
+    },
+    {
+      "id": "u-2",
+      "name": "Tomás Lindqvist",
+      "role": "operator",
+      "emailLocal": "tomas"
+    },
+    {
+      "id": "u-3",
+      "name": "Mei Hart",
+      "role": "operator",
+      "emailLocal": "mei"
+    },
+    {
+      "id": "u-4",
+      "name": "Jon Abara",
+      "role": "viewer",
+      "emailLocal": "jon"
+    },
+    {
+      "id": "u-5",
+      "name": "Priya Sen",
+      "role": "viewer",
+      "emailLocal": "priya"
+    }
+  ],
+  "auditActions": [
+    {
+      "action": "filter.update",
+      "detail": "min_rate_usd changed",
+      "target": "filter"
+    },
+    {
+      "action": "filter.enable",
+      "detail": "filter enabled",
+      "target": "filter"
+    },
+    {
+      "action": "schedule.update",
+      "detail": "window edited",
+      "target": "schedule"
+    },
+    {
+      "action": "worker.drain",
+      "detail": "drain requested",
+      "target": "worker"
+    },
+    {
+      "action": "account.otp_refresh",
+      "detail": "OTP refreshed via mailbox connector",
+      "target": "account"
+    },
+    {
+      "action": "claim.reconcile",
+      "detail": "UNKNOWN resolved against board bookings",
+      "target": "claim"
+    },
+    {
+      "action": "user.login",
+      "detail": "TOTP verified",
+      "target": "session"
+    },
+    {
+      "action": "crawl.run",
+      "detail": "manual run started",
+      "target": "crawl"
+    },
+    {
+      "action": "settings.update",
+      "detail": "retention days changed",
+      "target": "settings"
+    }
+  ],
+  "crawlJobs": [
+    {
+      "name": "catalogue-crawl",
+      "seeds": 40,
+      "base": 415,
+      "alarm": "Zero-result anomaly — selector may have changed",
+      "status": "alarm"
+    },
+    {
+      "name": "lane-rates-weekly",
+      "seeds": 12,
+      "base": 980,
+      "alarm": null,
+      "status": "succeeded"
+    },
+    {
+      "name": "carrier-directory",
+      "seeds": 25,
+      "base": 2200,
+      "alarm": null,
+      "status": "running"
+    },
+    {
+      "name": "fuel-index",
+      "seeds": 3,
+      "base": 52,
+      "alarm": null,
+      "status": "succeeded"
+    },
+    {
+      "name": "port-schedules",
+      "seeds": 8,
+      "base": 310,
+      "alarm": "Item count dropped 62% vs 7-day median",
+      "status": "alarm"
+    },
+    {
+      "name": "broker-notices",
+      "seeds": 6,
+      "base": 75,
+      "alarm": null,
+      "status": "failed"
+    },
+    {
+      "name": "weather-advisories",
+      "seeds": 4,
+      "base": 120,
+      "alarm": null,
+      "status": "queued"
+    }
+  ],
+  "filters": [
+    {
+      "name": "TX outbound vans",
+      "origin": "Dallas, TX",
+      "destination": "Any",
+      "min_rate_usd": 1800,
+      "equipment": [
+        "Van"
+      ],
+      "max_weight_lb": 42000
+    },
+    {
+      "name": "Reefer Southeast",
+      "origin": "Atlanta, GA",
+      "destination": "Charlotte, NC",
+      "min_rate_usd": 1350,
+      "equipment": [
+        "Reefer"
+      ],
+      "max_weight_lb": 40000
+    },
+    {
+      "name": "Midwest flatbed",
+      "origin": "Chicago, IL",
+      "destination": "Any",
+      "min_rate_usd": 2100,
+      "equipment": [
+        "Flatbed"
+      ],
+      "max_weight_lb": 45000
+    },
+    {
+      "name": "Border lane",
+      "origin": "Laredo, TX",
+      "destination": "Memphis, TN",
+      "min_rate_usd": 2400,
+      "equipment": [
+        "Van",
+        "Reefer"
+      ],
+      "max_weight_lb": 44000
+    },
+    {
+      "name": "Mountain west",
+      "origin": "Denver, CO",
+      "destination": "Phoenix, AZ",
+      "min_rate_usd": 1600,
+      "equipment": [
+        "Van"
+      ],
+      "max_weight_lb": 40000
+    },
+    {
+      "name": "Night reefer",
+      "origin": "Any",
+      "destination": "Savannah, GA",
+      "min_rate_usd": 1900,
+      "equipment": [
+        "Reefer"
+      ],
+      "max_weight_lb": 43000
+    }
+  ],
+  "schedules": [
+    {
+      "name": "Weekday core hours",
+      "timezone": "America/Chicago",
+      "windows": [
+        [
+          1,
+          6,
+          20
+        ],
+        [
+          2,
+          6,
+          20
+        ],
+        [
+          3,
+          6,
+          20
+        ],
+        [
+          4,
+          6,
+          20
+        ],
+        [
+          5,
+          6,
+          18
+        ]
+      ]
+    },
+    {
+      "name": "Weekend skeleton",
+      "timezone": "America/Chicago",
+      "windows": [
+        [
+          6,
+          8,
+          14
+        ],
+        [
+          0,
+          10,
+          14
+        ]
+      ]
+    },
+    {
+      "name": "Overnight reefer",
+      "timezone": "America/New_York",
+      "windows": [
+        [
+          1,
+          0,
+          5
+        ],
+        [
+          2,
+          0,
+          5
+        ],
+        [
+          3,
+          0,
+          5
+        ],
+        [
+          4,
+          0,
+          5
+        ],
+        [
+          5,
+          0,
+          5
+        ]
+      ]
+    }
+  ],
+  "eventNotes": {
+    "watcherActor": "watcher {cell}",
+    "notified": "{n} matching actors notified",
+    "wonLease": "won lease; {n} actors got nothing",
+    "fencing": "fencing token {token}",
+    "confirmed": "booking confirmed",
+    "failed": [
+      "load already taken",
+      "rate changed",
+      "session expired mid-action"
+    ],
+    "lost": "worker lost before confirmation",
+    "reconciledFound": "booking found on the board → confirmed",
+    "reconciledReleased": "no booking on the board → job released",
+    "reconcilerActor": "reconciler",
+    "boardActor": "board",
+    "coordinatorActor": "coordinator"
+  },
+  "emailDomain": "{tenant}.example"
+}

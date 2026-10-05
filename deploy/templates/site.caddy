@@ -1,0 +1,5 @@
+# GENERATED from deploy/templates/site.caddy by deploy/build-release.mjs — edit the template.
+{{hostname}} {
+    reverse_proxy 127.0.0.1:{{loopbackPort}}
+    log
+}

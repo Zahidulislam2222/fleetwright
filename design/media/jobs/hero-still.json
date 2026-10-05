@@ -1,0 +1,17 @@
+[
+  {
+    "kind": "image",
+    "model": "openai/gpt-image-2.5-sunburst",
+    "params": {
+      "aspect_ratio": "16:9",
+      "quality": "high",
+      "n": 1
+    },
+    "started": "2026-10-05T08:44:28+00:00",
+    "finished": "2026-10-05T08:44:53+00:00",
+    "files": [
+      "design\\media\\originals\\hero-still-20261005T084453-0.png"
+    ],
+    "reported_cost_usd": 0.03332
+  }
+]

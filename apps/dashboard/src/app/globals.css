@@ -1,0 +1,277 @@
+@import "tailwindcss";
+
+/*
+ * Fleetwright design tokens — the single presentation source of truth.
+ * Rationale: the landing page follows the MotionSites "AI Runtime" reference (pure black, white type,
+ * dot-matrix display face) with one signal accent: beacon amber, the colour of the single claim that lands.
+ * Status colours are functional only (ok / warn / bad / info) and always paired with a text or shape cue.
+ * Contrast of every text pair is checked by scripts/check-contrast.mjs (WCAG 2.2 AA).
+ */
+
+:root {
+  /* Landing (always dark) */
+  --ink-0: #000000;
+  --ink-1: #08080a;
+  --ink-2: #111114;
+  --ink-3: #1a1a1e;
+  --pill-dark: #28282a;
+  --pill-dark-hover: #323234;
+  --text-hi: #ffffff;
+  --text-mid: #d0d0d0;
+  --text-lo: #8e8e8e;
+  --text-on-light: #2e2e2e;
+  --text-on-light-2: #5f5f5f;
+  --sign-in-text: #c8c8c8;
+  --hairline: rgba(255, 255, 255, 0.12);
+  --hairline-strong: rgba(255, 255, 255, 0.4);
+  --beacon: #ffb547;
+  --beacon-deep: #ff8a1f;
+  --signal-ok: #4ade80;
+  --signal-bad: #ff6b6b;
+  --scene-idle: #7c7c86;
+  --scene-hot: #e8eefc;
+
+  /* Elevation */
+  --shadow-soft: 0 4px 14px rgba(0, 0, 0, 0.16);
+  --glow-cta: 0 0 0 1px rgba(255, 255, 255, 0.15), 0 0 22px rgba(255, 255, 255, 0.32), 0 0 44px rgba(255, 255, 255, 0.12);
+  --glow-cta-hover: 0 0 0 1px rgba(255, 255, 255, 0.25), 0 0 28px rgba(255, 255, 255, 0.45), 0 0 64px rgba(255, 255, 255, 0.18);
+
+  /* Motion */
+  --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 160ms;
+  --dur-base: 280ms;
+  --dur-slow: 850ms;
+
+  /* Layout */
+  --gutter: clamp(16px, 3vw, 32px);
+  --content-max: 1200px;
+  --radius-pill: 999px;
+  --radius-lg: 28px;
+  --radius-md: 16px;
+  --radius-sm: 10px;
+
+  /* Layers */
+  --z-base: 0;
+  --z-content: 1;
+  --z-sticky: 20;
+  --z-header: 40;
+  --z-overlay: 60;
+  --z-toast: 80;
+}
+
+/*
+ * Console themes: every token is defined once as light-dark(light, dark). The OS preference decides
+ * by default; the theme toggle pins it via <html data-console-theme>, set before paint by a tiny
+ * inline script in the root layout (no flash of the wrong theme).
+ * Chart colours are validated with the dataviz palette checker against --c-surface in both modes;
+ * --c-input-border is the form-control boundary (>= 3:1, WCAG 1.4.11).
+ */
+.console-theme {
+  color-scheme: light dark;
+  --c-bg: light-dark(#f4f4f1, #0b0b0d);
+  --c-surface: light-dark(#ffffff, #131316);
+  --c-surface-2: light-dark(#f0f0ec, #1b1b1f);
+  --c-surface-3: light-dark(#e6e6e1, #24242a);
+  --c-border: light-dark(#dcdcd5, #2c2c33);
+  --c-border-strong: light-dark(#c2c2ba, #3d3d46);
+  --c-input-border: light-dark(#8a8a94, #6e6e7a);
+  --c-text: light-dark(#111113, #f4f4f5);
+  --c-text-2: light-dark(#50505a, #a8a8b3);
+  --c-text-3: light-dark(#63636d, #8b8b96);
+  --c-accent: #ffb547;
+  --c-accent-text: light-dark(#8f4a00, #ffc670);
+  --c-on-accent: #1a1206;
+  --c-ok: light-dark(#0f6833, #4ade80);
+  --c-ok-bg: light-dark(rgba(19, 122, 61, 0.1), rgba(74, 222, 128, 0.12));
+  --c-warn: light-dark(#8a5a00, #fbbf24);
+  --c-warn-bg: light-dark(rgba(178, 120, 0, 0.12), rgba(251, 191, 36, 0.12));
+  --c-bad: light-dark(#b42323, #ff7a7a);
+  --c-bad-bg: light-dark(rgba(180, 35, 35, 0.08), rgba(255, 122, 122, 0.12));
+  --c-info: light-dark(#1d58b8, #8ab8ff);
+  --c-info-bg: light-dark(rgba(29, 88, 184, 0.08), rgba(138, 184, 255, 0.12));
+  --c-series-1: light-dark(#2a78d6, #3987e5);
+  --c-series-2: light-dark(#eb6834, #d95926);
+  --c-ord-1: light-dark(#86b6ef, #184f95);
+  --c-ord-2: light-dark(#2a78d6, #3987e5);
+  --c-ord-3: light-dark(#184f95, #9ec5f4);
+  --c-grid: light-dark(#ecece7, #232328);
+  --c-focus: light-dark(#111113, #ffffff);
+  /* light-dark() takes colours only, so the shadow is built from two colour tokens. */
+  --c-shadow-near: light-dark(rgba(17, 17, 19, 0.06), rgba(0, 0, 0, 0.3));
+  --c-shadow-far: light-dark(rgba(17, 17, 19, 0.06), rgba(0, 0, 0, 0.35));
+  --c-shadow: 0 1px 2px var(--c-shadow-near), 0 10px 28px var(--c-shadow-far);
+}
+
+:root[data-console-theme="light"] .console-theme {
+  color-scheme: light;
+}
+
+:root[data-console-theme="dark"] .console-theme {
+  color-scheme: dark;
+}
+
+/* Mock load board: deliberately a different, "third-party" look (light, utilitarian). */
+.board-theme {
+  --b-bg: #eef2f6;
+  --b-surface: #ffffff;
+  --b-border: #d3dbe4;
+  --b-input-border: #7b8794;
+  --b-text: #13202f;
+  --b-text-2: #4a5a6b;
+  --b-brand: #0f5ea8;
+  --b-brand-text: #ffffff;
+  --b-ok: #146c37;
+  --b-bad: #b3261e;
+  --b-warn-bg: #fff4d6;
+  --b-focus: #0f5ea8;
+  color-scheme: light;
+}
+
+.board-theme :focus-visible {
+  outline-color: var(--b-focus);
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans), "Segoe UI", system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-pixel: var(--font-geist-pixel-circle), var(--font-geist-mono), monospace;
+
+  --color-ink-0: var(--ink-0);
+  --color-ink-1: var(--ink-1);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-pill: var(--pill-dark);
+  --color-hi: var(--text-hi);
+  --color-mid: var(--text-mid);
+  --color-lo: var(--text-lo);
+  --color-beacon: var(--beacon);
+  --color-ok: var(--signal-ok);
+  --color-bad: var(--signal-bad);
+
+  --color-c-bg: var(--c-bg);
+  --color-c-surface: var(--c-surface);
+  --color-c-surface-2: var(--c-surface-2);
+  --color-c-surface-3: var(--c-surface-3);
+  --color-c-border: var(--c-border);
+  --color-c-border-strong: var(--c-border-strong);
+  --color-c-input-border: var(--c-input-border);
+  --color-c-text: var(--c-text);
+  --color-c-text-2: var(--c-text-2);
+  --color-c-text-3: var(--c-text-3);
+  --color-c-accent: var(--c-accent);
+  --color-c-accent-text: var(--c-accent-text);
+  --color-c-on-accent: var(--c-on-accent);
+  --color-c-ok: var(--c-ok);
+  --color-c-ok-bg: var(--c-ok-bg);
+  --color-c-warn: var(--c-warn);
+  --color-c-warn-bg: var(--c-warn-bg);
+  --color-c-bad: var(--c-bad);
+  --color-c-bad-bg: var(--c-bad-bg);
+  --color-c-info: var(--c-info);
+  --color-c-info-bg: var(--c-info-bg);
+  --color-c-series-1: var(--c-series-1);
+  --color-c-series-2: var(--c-series-2);
+  --color-c-ord-1: var(--c-ord-1);
+  --color-c-ord-2: var(--c-ord-2);
+  --color-c-ord-3: var(--c-ord-3);
+  --color-c-grid: var(--c-grid);
+  --color-b-bg: var(--b-bg);
+  --color-b-surface: var(--b-surface);
+  --color-b-border: var(--b-border);
+  --color-b-input-border: var(--b-input-border);
+  --color-b-text: var(--b-text);
+  --color-b-text-2: var(--b-text-2);
+  --color-b-brand: var(--b-brand);
+  --color-b-brand-text: var(--b-brand-text);
+  --color-b-ok: var(--b-ok);
+  --color-b-bad: var(--b-bad);
+  --color-b-warn-bg: var(--b-warn-bg);
+
+  --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ─── Base ─────────────────────────────────────────────────────────── */
+
+html {
+  background: var(--ink-0);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--ink-0);
+  color: var(--text-hi);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--beacon);
+  color: #120c03;
+}
+
+:focus-visible {
+  outline: 2px solid var(--text-hi);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.on-light :focus-visible,
+.on-light:focus-visible {
+  outline-color: var(--ink-0);
+}
+
+.console-theme :focus-visible {
+  outline-color: var(--c-focus);
+}
+
+.skip-link {
+  position: fixed;
+  left: 16px;
+  top: -64px;
+  z-index: var(--z-toast);
+  padding: 10px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--text-hi);
+  color: var(--ink-0);
+  font-weight: 600;
+  transition: top var(--dur-base) var(--ease-out-expo);
+}
+
+.skip-link:focus {
+  top: 16px;
+}
+
+.sr-only-focusable:not(:focus):not(:focus-within) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Pixel display face never fakes bold */
+.font-pixel {
+  font-family: var(--font-pixel);
+  font-weight: 500;
+  font-synthesis: none;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

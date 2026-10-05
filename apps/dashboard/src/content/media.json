@@ -1,0 +1,10 @@
+{
+  "hero": {
+    "poster": "/media/hero-poster.webp",
+    "video": "/media/hero-fleet.mp4",
+    "videoMobile": "/media/hero-fleet-mobile.mp4",
+    "alt": "Night ocean: lanes of small lit vessels converge on one amber beacon on the horizon.",
+    "width": 1536,
+    "height": 864
+  }
+}

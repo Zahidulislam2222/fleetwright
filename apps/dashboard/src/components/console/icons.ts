@@ -1,0 +1,35 @@
+import {
+  ArrowLeft,
+  Bot,
+  CalendarClock,
+  Cpu,
+  Crosshair,
+  Funnel,
+  KeyRound,
+  LayoutDashboard,
+  LogOut,
+  Radar,
+  ScrollText,
+  Settings,
+  Timer,
+  Truck,
+  type LucideIcon,
+} from "lucide-react";
+
+/** Icon names used in content/console.json, resolved to components in one place. */
+export const navIcons: Record<string, LucideIcon> = {
+  ArrowLeft,
+  Bot,
+  CalendarClock,
+  Cpu,
+  Crosshair,
+  Funnel,
+  KeyRound,
+  LayoutDashboard,
+  LogOut,
+  Radar,
+  ScrollText,
+  Settings,
+  Timer,
+  Truck,
+};

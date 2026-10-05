@@ -1,0 +1,18 @@
+{
+  "api_base": "https://openrouter.ai/api/v1",
+  "key_file_env": "OPENROUTER_KEY_FILE",
+  "request_timeout_s": 180,
+  "video_poll_interval_s": 30,
+  "video_poll_ceiling_s": 3600,
+  "image": {
+    "model": "openai/gpt-image-2.5-sunburst",
+    "estimated_max_cost_usd": 0.6
+  },
+  "video": {
+    "model": "bytedance/seedance-2.5",
+    "price_per_video_token_usd": 0.0000107,
+    "estimated_safety_factor": 1.3
+  },
+  "output_dir": "design/media/originals",
+  "jobs_dir": "design/media/jobs"
+}

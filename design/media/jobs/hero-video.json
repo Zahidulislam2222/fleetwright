@@ -1,0 +1,27 @@
+[
+  {
+    "kind": "video",
+    "model": "bytedance/seedance-2.5",
+    "params": {
+      "duration": 8,
+      "resolution": "720p",
+      "aspect_ratio": "16:9",
+      "generate_audio": false
+    },
+    "first_frame": "hero-still",
+    "job_id": "gen-vid-1791189910-f54cKvR0dACp7ePU2KcK",
+    "submitted": "2026-10-05T08:45:08+00:00",
+    "status": "pending"
+  },
+  {
+    "kind": "video-result",
+    "job_id": "gen-vid-1791189910-f54cKvR0dACp7ePU2KcK",
+    "status": "completed",
+    "finished": "2026-10-05T08:52:55+00:00",
+    "files": [
+      "design\\media\\originals\\hero-video-gen-vid-1791189910-f54cKvR0dACp7ePU2KcK-0.mp4"
+    ],
+    "reported_cost_usd": 1.85859,
+    "error": null
+  }
+]
