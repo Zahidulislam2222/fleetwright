@@ -22,6 +22,9 @@ adversity:                  # switches a demo visitor may change, with the large
   competitor_share: {max: 0.6}
   layout_variant: {choices: [a, b]}
 seed:
+  tenant_name: Fleetwright Demo
+  cell: {name: Demo cell, region: local, capacity: 50}   # the id comes from FW_SEED__CELL
+  demo_user_name: Demo visitor
   board_accounts: 4         # demo tenant accounts created on the mock board
   filters:
     - {name: Everything over $900, min_rate_usd: 900}

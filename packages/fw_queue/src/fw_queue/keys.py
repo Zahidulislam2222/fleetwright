@@ -84,5 +84,15 @@ def demo_run() -> str:
 
 
 def demo_changed() -> str:
-    """Set when a demo visitor changes board adversity; cleared by the reset loop."""
+    """Set (with the reset delay as TTL) when a demo visitor changes board adversity."""
     return f"{PREFIX}:demo:changed"
+
+
+def demo_run_dirty() -> str:
+    """A demo run changed the feed rate; the reset loop restores it once the run key is gone."""
+    return f"{PREFIX}:demo:run-dirty"
+
+
+def demo_adversity_dirty() -> str:
+    """Adversity was changed; the reset loop restores the idle preset once demo_changed expires."""
+    return f"{PREFIX}:demo:adversity-dirty"

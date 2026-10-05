@@ -44,7 +44,7 @@ ignore = ["PLR0913", "PLR0917", "PLR2004", "PLR0911", "PLR0912", "PLR0915", "S10
 max-line-length = 140
 
 [tool.ruff.lint.isort]
-known-first-party = ["fw_core", "fw_queue", "fw_browser", "mockboard", "fw_coordinator", "fw_gateway", "fw_worker", "boardkit", "dbkit", "workerkit"]
+known-first-party = ["fw_core", "fw_queue", "fw_browser", "mockboard", "fw_coordinator", "fw_gateway", "fw_worker", "boardkit", "dbkit", "workerkit", "apikit"]
 
 [tool.ruff.lint.per-file-ignores]
 "**/tests/**" = ["S", "PLR", "ASYNC"]

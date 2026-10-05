@@ -136,7 +136,8 @@ class StorageSettings(BaseModel):
 
 class AuthSettings(BaseModel):
     cookie_name: str = "fw_session"
-    csrf_cookie_name: str = "fw_csrf"
+    mfa_cookie_name: str = "fw_mfa"  # short-lived, between the password and the code step
+    csrf_header: str = "X-CSRF-Token"  # mutations must echo the session's CSRF token here
     cookie_secure: bool = True
     session_ttl_s: int = Field(default=8 * 3600, ge=60)
     mfa_pending_ttl_s: int = Field(default=300, ge=30)
@@ -160,9 +161,12 @@ class DemoSettings(BaseModel):
     account_email: str = "demo@fleetwright.demo"
     account_password: SecretStr | None = None  # unset: no demo login
     reset_after_s: int = Field(default=900, ge=60)  # demo settings revert after this long
+    reset_check_s: float = Field(default=15.0, gt=0)  # how often the reset loop looks
 
 
 class ApiSettings(BaseModel):
+    host: str  # bind address of `python -m fw_coordinator.api`
+    port: int = Field(ge=1, le=65535)
     page_size_default: int = Field(default=25, ge=1)
     page_size_max: int = Field(default=200, ge=1)
     trusted_proxy_hops: int = Field(default=1, ge=0)  # for client IP (rate limits, audit)
@@ -174,6 +178,8 @@ class ApiSettings(BaseModel):
 
 
 class GatewaySettings(BaseModel):
+    host: str  # bind address of `python -m fw_gateway`
+    port: int = Field(ge=1, le=65535)
     keepalive_s: float = Field(default=15.0, gt=0)
     max_clients: int = Field(default=2000, ge=1)
     client_queue: int = Field(default=200, ge=1)  # per-client backlog before it is dropped
@@ -197,17 +203,15 @@ class BoardAppSettings(_Base):
 
 
 class CoordinatorSettings(_Base):
-    """Control-plane API and control loops (dispatcher, outbox relay, reconciler, scheduler)."""
+    """The console's `/v1` API (`fw_coordinator.api`)."""
 
     app_db: DatabaseSettings
     redis: RedisSettings
     board_client: BoardClientSettings
     vault: VaultSettings
-    claims: ClaimSettings = ClaimSettings()
     auth: AuthSettings = AuthSettings()
     demo: DemoSettings = DemoSettings()
-    api: ApiSettings = ApiSettings()
-    storage: StorageSettings
+    api: ApiSettings
 
 
 class SeedSettings(BaseModel):
@@ -251,7 +255,7 @@ class GatewayAppSettings(_Base):
     redis: RedisSettings
     auth: AuthSettings = AuthSettings()
     demo: DemoSettings = DemoSettings()
-    gateway: GatewaySettings = GatewaySettings()
+    gateway: GatewaySettings
 
 
 class WorkerAppSettings(_Base):
