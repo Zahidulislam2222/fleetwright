@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Dashboard (`apps/dashboard`)
 
-## Getting Started
+The public website and the operator console, built with Next.js 16 and React 19 as a **static
+export** (served by a plain web server or a CDN).
 
-First, run the development server:
+Live: <https://fleetwright.zahidul-islam.com>
+
+## Routes
+
+| Route | What it is |
+|---|---|
+| `/` | Landing page |
+| `/console/*` | Operator console: overview, workers, accounts, claims, filters, schedules, latency, crawl jobs, audit log, settings |
+| `/login` | Sign-in with password and one-time code (design) |
+| `/board` | Preview of the mock load board |
+| `/agent` | Preview of the local AI agent window |
+
+## Status
+
+The console is a **design prototype on mock data** (`src/mocks/`). Every screen has ready,
+loading, empty, error and permission-denied states, and light and dark themes. The data shapes in
+`src/mocks/types.ts` are the contract the real API implements; wiring the console to the live
+engine is in progress ([roadmap](../../docs/roadmap.md)). The mocks will stay as a contract-test
+fixture.
+
+## Develop
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm ci
+npm run dev          # http://localhost:3000
+npm run lint
+npm run typecheck
+npm run build        # production build
+npm run check:contrast   # WCAG contrast of every colour pair
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Release bundles for the server are built from the repository root with
+`node deploy/build-release.mjs <YYYYMMDD-name>` (static export, web server config and a SHA-256
+manifest for parity checks).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Notes for contributors
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- This Next.js version has breaking changes compared with older versions; read the guides in
+  `node_modules/next/dist/docs/` before changing framework-level code (see `AGENTS.md`).
+- Copy lives in `src/content/*.json`, not in components.
+- Security headers (Content-Security-Policy and others) are defined in
+  `deploy/security-headers.json` and applied by the web server.
