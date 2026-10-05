@@ -19,8 +19,22 @@ from fw_core.db import tenant_tx
 from fw_queue import keys, streams
 
 
-async def drain_tenant(engine: AsyncEngine, redis: Redis, tenant_id: UUID, batch: int, maxlen: int) -> int:
+async def drain_tenant(
+    engine: AsyncEngine, redis: Redis, tenant_id: UUID, batch: int, maxlen: int, cell_id: str | None = None
+) -> int:
+    """Publishes pending rows. With cell_id, only while the tenant still belongs to that cell: the
+    check holds a share lock on the tenant's cell row, so a move waits for this drain and every
+    later drain sees the new cell (an old cell never publishes after a move)."""
     async with tenant_tx(engine, tenant_id) as conn:
+        if cell_id is not None:
+            mine = (
+                await conn.execute(
+                    text("SELECT 1 FROM tenant_cells WHERE tenant_id = :t AND cell_id = :c FOR SHARE"),
+                    {"t": tenant_id, "c": cell_id},
+                )
+            ).one_or_none()
+            if mine is None:
+                return 0
         rows = (
             await conn.execute(
                 text(

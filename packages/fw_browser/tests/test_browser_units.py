@@ -14,8 +14,8 @@ from fw_browser.evidence import EvidenceStore
 from fw_browser.otp import extract_code
 from fw_browser.profiles import Profiles, load_profiles
 from fw_browser.proxy import ProxyConfig, ProxyPool, load_proxy_config
-from fw_browser.targets import load_targets
-from fw_browser.vault import StoredSession, session_expiry
+from fw_core.targets import load_targets
+from fw_core.vault import StoredSession, session_expiry
 
 CONFIG = Path(__file__).resolve().parents[3] / "config"
 

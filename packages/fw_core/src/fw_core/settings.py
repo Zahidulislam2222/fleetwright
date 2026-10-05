@@ -97,6 +97,17 @@ class ClaimSettings(BaseModel):
     filter_reload_s: float = Field(default=30.0, gt=0)  # safety net; pub/sub reload is immediate
 
 
+class ControlSettings(BaseModel):
+    """Per-cell control loops: dispatcher, outbox relay, reconciler."""
+
+    cell: str
+    tenant_refresh_s: float = Field(default=2.0, gt=0)  # how fast a tenant move is noticed
+    read_block_ms: int = Field(default=500, ge=10)
+    read_count: int = Field(default=200, ge=1)
+    unknown_grace_ms: int = Field(default=2000, ge=0)  # let a slow actor answer before checking the target
+    seen_ttl_s: int = Field(default=600, ge=1)  # fast-path duplicate window for detections
+
+
 class WorkerSettings(BaseModel):
     cell: str
     contexts: int = Field(default=4, ge=1, le=200)
@@ -191,6 +202,15 @@ class CoordinatorSettings(_Base):
     storage: StorageSettings
 
 
+class ControlAppSettings(_Base):
+    app_db: DatabaseSettings
+    redis: RedisSettings
+    board_client: BoardClientSettings
+    vault: VaultSettings
+    claims: ClaimSettings = ClaimSettings()
+    control: ControlSettings
+
+
 class MigrationSettings(_Base):
     """Schema migrations and seeding (role fw_owner); never used by a long-running service."""
 
@@ -221,6 +241,7 @@ class WorkerAppSettings(_Base):
 SERVICE_SETTINGS: tuple[type[_Base], ...] = (
     BoardAppSettings,
     CoordinatorSettings,
+    ControlAppSettings,
     MigrationSettings,
     GatewayAppSettings,
     WorkerAppSettings,

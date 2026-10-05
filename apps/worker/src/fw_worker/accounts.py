@@ -9,7 +9,7 @@ from uuid import UUID
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from fw_browser.vault import Account
+from fw_core.vault import Account
 
 
 async def acquire(conn: AsyncConnection, tenant_id: UUID, slot_id: str, hold_s: float) -> Account | None:

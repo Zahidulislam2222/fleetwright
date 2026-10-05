@@ -35,6 +35,10 @@ class CaptchaSpec(_Spec):
     submit: str
 
 
+class ClickSpec(_Spec):
+    book_button: str  # "{ref}" is replaced by the job key
+
+
 class ApiSpec(_Spec):
     me: str
     loads: str
@@ -47,6 +51,8 @@ class TargetSpec(_Spec):
     name: str
     login: LoginSpec
     captcha: CaptchaSpec
+    feed_page: str
+    click: ClickSpec
     api: ApiSpec
     blocked_statuses: frozenset[int]
 

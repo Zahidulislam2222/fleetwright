@@ -11,9 +11,10 @@ import json
 import logging
 import os
 import socket
+import time
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from importlib.metadata import version
 from typing import Any, Literal
 from uuid import UUID
@@ -29,10 +30,10 @@ from fw_browser.evidence import EvidenceStore
 from fw_browser.otp import POLL_S, OtpProvider
 from fw_browser.profiles import Profiles
 from fw_browser.proxy import ProxyPool
-from fw_browser.targets import Targets
-from fw_browser.vault import Account, StoredSession, Vault
 from fw_core.db import system_tx, tenant_tx
-from fw_core.settings import WorkerSettings
+from fw_core.settings import ClaimSettings, WorkerSettings
+from fw_core.targets import Targets
+from fw_core.vault import Account, StoredSession, Vault
 from fw_queue import keys
 from fw_worker import accounts
 from fw_worker.otp_manual import ManualOtp
@@ -48,13 +49,37 @@ class SessionLost(Exception):
     """The target no longer accepts the slot's session."""
 
 
+class ProcessMeter:
+    """Memory and CPU of this process plus every child (Playwright driver, Chromium processes).
+
+    Memory is USS — memory unique to each process — because Chromium processes share a lot of
+    memory and summing resident sizes counts it many times. Process objects are kept between
+    samples: psutil's CPU % is measured against the previous sample of the same object."""
+
+    def __init__(self) -> None:
+        self._procs: dict[int, psutil.Process] = {}
+
+    def sample(self) -> tuple[int, float]:
+        me = psutil.Process()
+        current = {p.pid: p for p in (me, *me.children(recursive=True))}
+        self._procs = {pid: self._procs.get(pid, proc) for pid, proc in current.items()}
+        uss, cpu = 0, 0.0
+        for proc in self._procs.values():
+            with contextlib.suppress(psutil.Error):
+                uss += proc.memory_full_info().uss
+                cpu += proc.cpu_percent(None)
+        return uss // (1024 * 1024), cpu
+
+
 @dataclass
 class Fleet:
     """Everything a slot needs, created once per process (see fw_worker.__main__)."""
 
     cfg: WorkerSettings
+    claims_cfg: ClaimSettings
     engine: AsyncEngine
-    events: Redis
+    events: Redis  # core Redis: dashboard events
+    stream: Redis  # this cell's Redis: detected and act streams
     browser: Browser
     vault: Vault
     targets: Targets
@@ -68,29 +93,64 @@ class Fleet:
     slots: list[Slot] = field(default_factory=list)
     stopping: asyncio.Event = field(default_factory=asyncio.Event)
     memory_mb: int = 0
+    clock_offset_ms: float | None = None  # database clock minus this host's clock
+    tenants: list[UUID] = field(default_factory=list)
+    generation: int = 0
+    meter: ProcessMeter = field(default_factory=ProcessMeter)
     _tasks: list[asyncio.Task[None]] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        # The ACTING window must fit inside the lease, or a healthy but slow action is declared
+        # lost (UNKNOWN) while it is still running.
+        if self.claims_cfg.lease_ttl_ms <= self.cfg.action_timeout_ms:
+            raise ValueError("claims.lease_ttl_ms must be greater than worker.action_timeout_ms")
 
     # ---------------- lifecycle ----------------
 
     async def start(self) -> None:
+        await self.measure_clock()
+        await self._apply_plan(await self._tenants_in_cell())
+        self._tasks.append(asyncio.create_task(self._heartbeat_loop(), name="heartbeat"))
+        log.info("fleet started", extra={"slots": len(self.slots), "tenants": len(self.tenants), "cell": self.cfg.cell})
+
+    async def _tenants_in_cell(self) -> list[UUID]:
         async with system_tx(self.engine) as conn:
-            tenants = [
+            return [
                 r.tenant_id
                 for r in await conn.execute(
                     text("SELECT tenant_id FROM tenant_cells WHERE cell_id = :c ORDER BY tenant_id"),
                     {"c": self.cfg.cell},
                 )
             ]
+
+    async def _apply_plan(self, tenants: list[UUID]) -> None:
+        """(Re)plans the slots. On any change in the cell's tenants (a move) every current slot is
+        retired — it finishes its operation, releases its account and stops — and a fresh plan
+        starts. Simple and correct; moves are rare."""
+        for slot in self.slots:
+            slot.retired = True
+        self.generation += 1
+        self.tenants = tenants
         self.slots = plan_slots(self, tenants)
-        self._tasks = [asyncio.create_task(s.run(), name=s.id) for s in self.slots]
-        self._tasks.append(asyncio.create_task(self._heartbeat_loop(), name="heartbeat"))
-        log.info("fleet started", extra={"slots": len(self.slots), "tenants": len(tenants), "cell": self.cfg.cell})
+        self._tasks += [asyncio.create_task(s.run(), name=s.id) for s in self.slots]
+
+    async def measure_clock(self) -> None:
+        """Offset of the database clock from this host's clock, from a round trip (midpoint rule).
+        Detection times are corrected with it so latency is measured on one clock."""
+        t0 = time.time()
+        async with system_tx(self.engine) as conn:
+            db_now = (await conn.execute(text("SELECT clock_timestamp()"))).scalar_one()
+        t1 = time.time()
+        self.clock_offset_ms = (db_now.timestamp() - (t0 + t1) / 2) * 1000
+
+    def db_now(self) -> datetime:
+        return datetime.now(UTC) + timedelta(milliseconds=self.clock_offset_ms or 0.0)
 
     async def drain(self) -> None:
         """Stop taking work, let in-flight operations finish (bounded), release every account."""
         self.stopping.set()
         await self._heartbeat(state_override="draining")
-        slot_tasks = [t for t in self._tasks if t.get_name() != "heartbeat"]
+        slot_tasks = [t for t in self._tasks if t.get_name() != "heartbeat" and not t.done()]
         _, pending = await asyncio.wait(slot_tasks, timeout=self.cfg.drain_timeout_s) if slot_tasks else (set(), set())
         for task in pending:
             task.cancel()
@@ -108,6 +168,11 @@ class Fleet:
     async def _heartbeat_loop(self) -> None:
         while not self.stopping.is_set():
             try:
+                await self.measure_clock()
+                tenants = await self._tenants_in_cell()
+                if tenants != self.tenants:
+                    log.info("cell tenants changed; re-planning slots", extra={"cell": self.cfg.cell})
+                    await self._apply_plan(tenants)
                 await self._heartbeat()
             except Exception:
                 log.exception("heartbeat failed")
@@ -115,7 +180,7 @@ class Fleet:
                 await asyncio.wait_for(self.stopping.wait(), self.cfg.heartbeat_s)
 
     async def _heartbeat(self, state_override: str | None = None) -> None:
-        self.memory_mb, cpu = process_tree_usage()
+        self.memory_mb, cpu = self.meter.sample()
         per_slot = self.memory_mb // max(1, sum(s.context is not None for s in self.slots))
         for slot in self.slots:
             async with tenant_tx(self.engine, slot.tenant_id) as conn:
@@ -147,7 +212,7 @@ class Fleet:
                         "v": version("fw-worker"),
                         "mem": per_slot if slot.context is not None else None,
                         "cpu": cpu,
-                        "off": slot.clock_offset_ms,
+                        "off": self.clock_offset_ms,
                     },
                 )
 
@@ -186,20 +251,8 @@ def plan_slots(fleet: Fleet, tenants: list[UUID]) -> list[Slot]:
         tenant = tenants[n % len(tenants)]
         role: Role = "watcher" if watchers[tenant] < fleet.cfg.watchers else "claimer"
         watchers[tenant] += role == "watcher"
-        slots.append(Slot(fleet, f"{fleet.process_id}-s{n}", tenant, role))
+        slots.append(Slot(fleet, f"{fleet.process_id}-g{fleet.generation}-s{n}", tenant, role))
     return slots
-
-
-def process_tree_usage() -> tuple[int, float]:
-    """Resident memory (MB) and CPU % of this process plus every child (Playwright driver, Chromium)."""
-    me = psutil.Process()
-    procs = [me, *me.children(recursive=True)]
-    rss, cpu = 0, 0.0
-    for p in procs:
-        with contextlib.suppress(psutil.Error):
-            rss += p.memory_info().rss
-            cpu += p.cpu_percent(None)
-    return rss // (1024 * 1024), cpu
 
 
 @dataclass
@@ -218,7 +271,8 @@ class Slot:
     captchas: int = 0
     restores: int = 0
     hold_lost: bool = False
-    clock_offset_ms: float | None = None
+    retired: bool = False  # the fleet re-planned; finish, release the account, stop
+    csrf: str | None = None  # the target's anti-forgery token for this session
     last_error: str | None = None
     _cleanup: set[asyncio.Task[None]] = field(default_factory=set, repr=False)
 
@@ -227,7 +281,7 @@ class Slot:
         return self.fleet.cfg
 
     async def run(self) -> None:
-        while not self.fleet.stopping.is_set():
+        while not self.fleet.stopping.is_set() and not self.retired:
             try:
                 if not await self.prepare():
                     await self._pause(self.cfg.restart_backoff_s)
@@ -246,6 +300,14 @@ class Slot:
                 await self.close(release=False)
                 await self._pause(self.cfg.restart_backoff_s)
         await self._set_state("stopped")
+        if self.retired:
+            await self.close(release=True)
+            with contextlib.suppress(Exception):
+                async with tenant_tx(self.fleet.engine, self.tenant_id) as conn:
+                    await conn.execute(
+                        text("UPDATE workers SET state = 'stopped' WHERE tenant_id = :t AND id = :i"),
+                        {"t": self.tenant_id, "i": self.id},
+                    )
 
     async def prepare(self) -> bool:
         """Account held, context open, session valid. False if there is nothing to do yet."""
@@ -275,6 +337,7 @@ class Slot:
         """Behaviours call this between iterations and return when it is True."""
         return (
             self.fleet.stopping.is_set()
+            or self.retired
             or self.hold_lost
             or self.actions >= self.cfg.recycle_after_actions
             or self.session is None
@@ -410,6 +473,7 @@ class Slot:
         async with tenant_tx(self.fleet.engine, self.tenant_id) as conn:
             self.session = await self.fleet.vault.save(conn, account, dict(state))
         self.sign_ins += 1
+        self.csrf = None
         log.info("signed in", extra={"slot": self.id, "account_id": str(account.id)})
         await self.fleet.emit(self.tenant_id, {"type": "signed_in", "slot": self.id, "account_id": account.id})
 

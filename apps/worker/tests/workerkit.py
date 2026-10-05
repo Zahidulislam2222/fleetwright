@@ -24,15 +24,17 @@ from fw_browser.evidence import EvidenceStore
 from fw_browser.otp import MailpitOtp
 from fw_browser.profiles import load_profiles
 from fw_browser.proxy import ProxyPool, load_proxy_config
-from fw_browser.targets import load_targets
-from fw_browser.vault import CREDENTIAL_PURPOSE, Vault
+from fw_coordinator.control import Control
 from fw_core.crypto import aad_for
 from fw_core.db import system_tx, tenant_tx
-from fw_core.settings import RedisSettings, WorkerSettings, _Base
+from fw_core.settings import ClaimSettings, ControlSettings, RedisSettings, WorkerSettings, _Base
+from fw_core.targets import load_targets
+from fw_core.vault import CREDENTIAL_PURPOSE, Vault
 from fw_queue import client
 from fw_worker.runtime import Behaviour, Fleet, Role, idle
 
 ROOT = Path(__file__).resolve().parents[3]
+CELL_REDIS = "cell-a"  # test cells are database-only names; their streams live on this Redis
 FAST = {
     "contexts": 3,
     "watchers": 1,
@@ -41,7 +43,7 @@ FAST = {
     "restart_backoff_s": 0.5,
     "otp_wait_s": 20.0,
     "login_timeout_ms": 15000,
-    "action_timeout_ms": 8000,
+    "action_timeout_ms": 5000,  # must stay below the claim lease (8000 ms)
     "drain_timeout_s": 10.0,
 }
 
@@ -114,15 +116,21 @@ async def running_fleet(
     cell: str,
     evidence_dir: Path,
     behaviours: dict[Role, Behaviour] | None = None,
+    claims_cfg: ClaimSettings | None = None,
+    redis_cell: str = CELL_REDIS,
     **overrides: Any,
 ) -> AsyncIterator[Fleet]:
     cfg = WorkerSettings.model_validate({"cell": cell, **FAST, **overrides})
-    redis: Redis = client.core(RedisOnly().redis)  # type: ignore[call-arg]
+    redis_cfg = RedisOnly().redis  # type: ignore[call-arg]
+    redis: Redis = client.core(redis_cfg)
+    cell_redis: Redis = client.cell(redis_cfg, redis_cell, block_ms=int(cfg.heartbeat_s * 1000))
     otp = MailpitOtp(board.settings.mailpit.api_url)
     fleet = Fleet(
         cfg=cfg,
+        claims_cfg=claims_cfg or ClaimSettings(),
         engine=db.worker,
         events=redis,
+        stream=cell_redis,
         browser=browser,
         vault=Vault(db.envelope),
         targets=load_targets(ROOT / "config"),
@@ -140,6 +148,7 @@ async def running_fleet(
         await fleet.drain()
         await otp.aclose()
         await redis.aclose()
+        await cell_redis.aclose()
 
 
 async def wait_for(check: Callable[[], bool], timeout_s: float, what: str) -> None:
@@ -170,3 +179,44 @@ def _awaiting(task: asyncio.Task[Any]) -> str:
             lines.append(f"  {frame.f_code.co_filename}:{frame.f_lineno} in {frame.f_code.co_name}")
         coro = getattr(coro, "cr_await", None) or getattr(coro, "gi_yieldfrom", None)
     return "\n".join(lines)
+
+
+@asynccontextmanager
+async def running_control(db: Db, board: Board, cell: str, redis_cell: str = CELL_REDIS) -> AsyncIterator[Control]:
+    redis_cfg = RedisOnly().redis  # type: ignore[call-arg]
+    core, cell_redis = client.core(redis_cfg), client.cell(redis_cfg, redis_cell, block_ms=200)
+    http = httpx.AsyncClient(timeout=5)
+    control = Control(
+        cfg=ControlSettings(cell=cell, tenant_refresh_s=0.5, read_block_ms=200, unknown_grace_ms=500),
+        claims_cfg=ClaimSettings(reconcile_interval_s=0.5, outbox_poll_ms=100),
+        engine=db.app,
+        core=core,
+        cell_redis=cell_redis,
+        vault=Vault(db.envelope),
+        targets=load_targets(ROOT / "config"),
+        base_urls={"demo-board": board.url},
+        http=http,
+    )
+    await control.start()
+    try:
+        yield control
+    finally:
+        await control.stop()
+        await http.aclose()
+        await core.aclose()
+        await cell_redis.aclose()
+
+
+async def add_filter(db: Db, tenant_id: UUID, name: str = "everything", min_rate_usd: int = 0) -> UUID:
+    fid = uuid4()
+    async with tenant_tx(db.app, tenant_id) as conn:
+        await conn.execute(
+            text("INSERT INTO filters (tenant_id, id, name, min_rate_usd) VALUES (:t, :i, :n, :r)"),
+            {"t": tenant_id, "i": fid, "n": name, "r": min_rate_usd},
+        )
+    return fid
+
+
+def dump_tasks() -> str:
+    """Debug aid: what every running task is waiting on."""
+    return "\n".join(f"--- task {t.get_name()}\n" + _awaiting(t) for t in asyncio.all_tasks())

@@ -20,6 +20,9 @@ targets:
       operand_b: "#captcha-b"
       answer: "#answer"
       submit: "#captcha-form button[type=submit]"
+    feed_page: /loads               # the page whose own polling the watcher listens to
+    click:
+      book_button: 'button.book[data-ref="{ref}"]'
     api:
       me: /api/me
       loads: /api/loads

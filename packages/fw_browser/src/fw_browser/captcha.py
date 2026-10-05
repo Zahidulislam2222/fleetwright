@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from playwright.async_api import Page
 
-from fw_browser.targets import CaptchaSpec
+from fw_core.targets import CaptchaSpec
 
 
 class CaptchaNeedsOperator(Exception):

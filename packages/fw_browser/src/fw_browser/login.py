@@ -12,7 +12,7 @@ from playwright.async_api import Page
 
 from fw_browser import captcha
 from fw_browser.otp import OtpProvider
-from fw_browser.targets import TargetSpec
+from fw_core.targets import TargetSpec
 
 
 class SignInFailed(Exception):
