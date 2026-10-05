@@ -1,0 +1,33 @@
+# Public demo (product data, validated by fw_coordinator.demo). The caps here are enforced by the
+# API whatever a browser sends; the time limits come from settings (FW_DEMO__*).
+idle:                       # board settings between runs and after every reset
+  feed_rate_per_min: 6
+  rate_limit_per_min: 0
+  error_rate: 0
+  slow_rate: 0
+  slow_ms: 0
+  ack_loss_rate: 0
+  layout_variant: a
+  competitor_share: 0.2
+  captcha_enabled: true
+  captcha_after_requests: 600
+  single_session: false
+run:                        # what "Start a demo run" changes
+  feed_rate_per_min: 60
+adversity:                  # switches a demo visitor may change, with the largest allowed value
+  ack_loss_rate: {max: 0.3}
+  error_rate: {max: 0.2}
+  slow_rate: {max: 0.5}
+  slow_ms: {max: 1500}
+  competitor_share: {max: 0.6}
+  layout_variant: {choices: [a, b]}
+seed:
+  board_accounts: 4         # demo tenant accounts created on the mock board
+  filters:
+    - {name: Everything over $900, min_rate_usd: 900}
+    - {name: Texas outbound, origin: "Dallas, TX", min_rate_usd: 0}
+  schedules:
+    - name: Business hours (Chicago)
+      timezone: America/Chicago
+      windows: [{days: [0, 1, 2, 3, 4], start: "06:00", end: "20:00"}]
+      filters: [Texas outbound]
