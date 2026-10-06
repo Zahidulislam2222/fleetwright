@@ -65,7 +65,7 @@ services:
       - ./dist:/usr/share/nginx/html:ro
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     # No depends_on: the static site must stay up even if the backend fails to start. nginx finds
-    # api and gateway per request (Docker's resolver), so /v1 answers 502 until they are healthy.
+    # api and gateway per request (Docker's resolver), so /v1 answers 502/504 until they are up.
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:{{containerPort}}{{healthPath}}"]
       interval: 15s
