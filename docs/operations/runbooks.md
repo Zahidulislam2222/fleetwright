@@ -6,18 +6,28 @@ yet.
 
 ## Deploy (single server)
 
-When: shipping a change to the public site.
+When: shipping a change to the public site. The server runs one Compose project: the static site
+and API proxy (nginx), the console API, the live-update gateway, the control loops, a browser
+worker, the mock board, Postgres, two Redis instances and Mailpit. Only nginx has a port, bound to
+loopback behind the shared Caddy; everything else is on an internal network with no internet access.
 
-1. **Check drift first.** Fetch the live versions of every file you will replace and compare hashes
-   with local. If the server is ahead of local, stop and bring those changes into local first.
-2. Build an immutable release: `node deploy/build-release.mjs <YYYYMMDD-name>`. It writes the static
-   export, web server configuration and a `MANIFEST.sha256`.
-3. Upload the release folder to a new release directory on the server; never edit files in place.
-4. Switch the active release, reload the web container, and check the health path.
-5. **Confirm parity:** hash every deployed file on the server and compare with the manifest. Record
-   the result.
+1. **Check drift first.** Hash the live release against its local copy. If the server differs from
+   local, stop and bring those changes into local first.
+2. Commit, then build an immutable release: `node deploy/build-release.mjs <YYYYMMDD-name>`. It
+   refuses uncommitted backend changes and writes the static export, the rendered `compose.yaml`,
+   `nginx.conf` and Caddy site, the backend source at `HEAD` (`src.tar`) and a `MANIFEST.sha256`.
+3. **Rehearse locally:** build the image from `src.tar`, start the rendered stack under another
+   project name, and run the end-to-end smoke test (pages, headers, sign-in, demo controls and caps,
+   owner actions, audit, live stream, per-visitor limits) and the client-address test.
+4. Upload the release to a new release directory and verify every hash on the server. Install the
+   environment files (root-only, mode 600) if they changed.
+5. Build the app image on the server from `src.tar`; pull the pinned data images.
+6. `docker compose up -d --wait`: migrations and the idempotent seed run as one-shot jobs before
+   the API starts. Probe through nginx on the server, then the public URL through Cloudflare.
+7. **Confirm parity:** hash every deployed file on the server against the manifest and record it.
 
-Rollback: switch back to the previous release directory and reload; releases are never modified.
+Rollback: start the previous release's `compose.yaml` (same project name); data volumes are kept.
+Never use `down -v` on the server: it deletes the database.
 
 ## Rotate a secret
 

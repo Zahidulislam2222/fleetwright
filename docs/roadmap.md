@@ -18,7 +18,7 @@ review. Dates are not promised; order is.
 
 | Phase | Scope |
 |---|---|
-| 6. Live console | `/v1` API (OpenAPI contract), sign-in with password + TOTP, roles (owner, operator, viewer, demo), CSRF protection, anonymous read-only demo view with personal data masked, capped public demo controls with auto-reset, live updates over server-sent events, console wired to real data, metrics and alerting |
+| 6. Live console | **Shipped and live:** `/v1` API (OpenAPI contract), sign-in with password + TOTP, roles (owner, operator, viewer, demo), CSRF protection, audit log, anonymous read-only demo view with personal data masked, capped public demo controls with auto-reset, live updates over server-sent events, console wired to real data, single-server production deploy. **Remaining:** metrics and alerting |
 
 ## Next
 
@@ -46,4 +46,12 @@ See [scaling](scaling/README.md) for the stages. In short:
 - Detections in flight at the exact moment a tenant moves between cells may be dropped (claims
   already queued are handed over safely).
 - Re-planning slots after a tenant change restarts all slots in that worker process.
-- The public site is a single server and shows the design prototype, not the live engine.
+- The public site runs on a single server, so a server failure takes it offline; there is no backup
+  job yet (the demo data is re-created by the seed job). A restore drill is part of Phase 9.
+- No metrics or alerting yet; health is checked by container health checks and the deploy smoke test.
+- The audit entry for a console action is written in its own transaction right after the action, so
+  a crash between the two could lose the entry.
+- A revoked session keeps an already-open live-update stream until that stream reconnects.
+- The Content Security Policy still allows inline styles and scripts (`'unsafe-inline'`).
+- The refetch load caused by live updates with many open consoles has not been load-tested.
+- Tests share the local development databases (an isolated test database is planned).

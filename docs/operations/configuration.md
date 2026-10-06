@@ -14,6 +14,10 @@ hardcoded in business code (a test enforces this). See [ADR-008](../adr/0008-con
   `__PLACEHOLDER__` markers for secrets. A test fails if a settings field and `.env.example` drift
   apart.
 - `FWDEV_` variables are for the local Compose stack only (host ports, local database passwords).
+- The VPS uses the templates in [`deploy/env/`](../../deploy/env/): `fleetwright.env.example` (all
+  `FW_` settings, hostnames are Compose service names) and `postgres.env.example` (database role
+  passwords). `deploy/make_vps_env.py <dir>` fills both with one set of fresh secrets. A test fails
+  if `.env.example` and the VPS template define different `FW_` settings.
 
 ## Groups
 
@@ -28,7 +32,10 @@ hardcoded in business code (a test enforces this). See [ADR-008](../adr/0008-con
 | `FW_VAULT__*` | Control, workers | Master key (secret, base64) and key id |
 | `FW_STORAGE__*` | Workers | Evidence folder and retention days |
 | `FW_BOARD__*`, `FW_BOARD_CLIENT__*`, `FW_MAILPIT__*` | Mock board and its clients | Board admin token (secret), session and OTP lifetimes, feed rate and ceiling, internal and public URLs |
-| `FW_AUTH__*`, `FW_DEMO__*`, `FW_API__*`, `FW_GATEWAY__*` | Console API and gateway (in progress) | Cookie names and flags, session TTL, lockout, TOTP window; demo caps; page sizes; gateway client limits |
+| `FW_AUTH__*` | Console API | Cookie names and flags, CSRF header, session and pending-MFA lifetimes, lockout (failures per account and per address range), password attempts per address range (right or wrong), concurrent password hashes, TOTP window |
+| `FW_DEMO__*` | Console API | Public read-only view on/off, shared demo login (email, password, show its live code), run length and rate caps, reset delay, demo tenant |
+| `FW_API__*`, `FW_GATEWAY__*` | Console API, live-update gateway | Bind host and port (required), proxy hops to trust for the client address, page sizes, worker staleness thresholds; gateway keepalive and client limits |
+| `FW_SEED__*` | Seed job | Cell for the demo tenant, owner email, password and TOTP secret |
 
 Built-in guards: for example, a worker refuses to start if `FW_CLAIMS__LEASE_TTL_MS` is not larger
 than `FW_WORKER__ACTION_TIMEOUT_MS`, because an action could then outlive its lease.

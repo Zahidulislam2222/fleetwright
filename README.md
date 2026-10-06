@@ -4,7 +4,9 @@
 sessions, watches a job feed, and books each matching job **exactly once**, even when workers
 crash, networks drop or two machines race for the same job.
 
-- **Live site:** <https://fleetwright.zahidul-islam.com> (landing page and console design prototype)
+- **Live site:** <https://fleetwright.zahidul-islam.com>: the landing page and the live console. The engine
+  runs against the built-in mock board. Anyone can watch read-only; the shared demo login (shown on the
+  sign-in page) can start a capped run and switch on adversity, which resets automatically.
 - **Status:** active development. See [Project status](#project-status) for exactly what works today
   and what is still a design target.
 - **Demo target:** a fictitious load board built in this repository (`apps/mockboard`). Fleetwright
@@ -50,8 +52,10 @@ board. They are not projections. Scale targets are separate and are labelled as 
 | Data model, Postgres row-level security, claim state machine with fencing tokens, outbox | **Built and tested** |
 | Worker runtime (browser contexts, session vault, OTP, proxy and captcha adapters, failure evidence) | **Built and tested** |
 | Live engine (watcher, dispatcher, actor, reconciler, filters, schedules, cells, latency) | **Built and tested** |
-| Console UI | **Design prototype** with mock data (live at the URL above) |
-| Console API, login with MFA, roles, live updates | **In progress** (not in this release) |
+| Console UI wired to the live engine | **Built, tested and live** |
+| Console API (OpenAPI contract), sign-in with password + TOTP, roles, CSRF protection, audit log, live updates (server-sent events), public read-only view, capped demo controls with auto-reset | **Built, tested and live** |
+| Single-server production stack (hardened containers, internal network, per-visitor limits, release rehearsal and hash-parity deploys) | **Built and live** |
+| Metrics and alerting | Planned ([roadmap](docs/roadmap.md)) |
 | Crawler worker, local AI agent | Planned ([roadmap](docs/roadmap.md)) |
 | Monitoring stack, AWS reference, compliance pack | Planned ([roadmap](docs/roadmap.md)) |
 
