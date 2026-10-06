@@ -2,7 +2,7 @@
 of fresh secrets (so the Postgres role passwords and the DSNs agree). Refuses to overwrite.
 Secret values are never printed. Record them in CREDENTIALS.md afterwards (Rule 8).
 
-    python deploy/make_vps_env.py <out-dir>
+    python deploy/make_vps_env.py <out-dir>      # outside the repo, or under memory/
 """
 
 import sys
@@ -20,6 +20,11 @@ def main() -> None:
         sys.exit(__doc__)
     out = Path(sys.argv[1])
     targets = [out / name for name in TEMPLATES]
+    # Real secrets must never land where git could pick them up: outside the repository, or in
+    # memory/ (always gitignored, see .gitignore).
+    where = out.resolve()
+    if where.is_relative_to(ROOT) and not where.is_relative_to(ROOT / "memory"):
+        sys.exit(f"{out} is inside the repository; use memory/deployment/secrets or a folder outside it.")
     if any(t.exists() for t in targets):
         sys.exit(f"{out} already has env files; remove them deliberately to rotate every secret.")
     out.mkdir(parents=True, exist_ok=True)

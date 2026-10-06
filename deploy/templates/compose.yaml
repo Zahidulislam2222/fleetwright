@@ -64,9 +64,8 @@ services:
     volumes:
       - ./dist:/usr/share/nginx/html:ro
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      api: { condition: service_healthy }
-      gateway: { condition: service_healthy }
+    # No depends_on: the static site must stay up even if the backend fails to start. nginx finds
+    # api and gateway per request (Docker's resolver), so /v1 answers 502 until they are healthy.
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:{{containerPort}}{{healthPath}}"]
       interval: 15s
@@ -165,6 +164,9 @@ services:
   gateway:
     <<: *app
     command: ["python", "-m", "fw_gateway"]
+    environment:
+      # Kept above nginx's total stream cap (deploy.config.json), so nginx is the limit that answers.
+      FW_GATEWAY__MAX_CLIENTS: "{{gatewayMaxClients}}"
     mem_limit: 256m
     cpus: 0.5
     pids_limit: 128

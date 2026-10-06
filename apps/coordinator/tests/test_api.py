@@ -323,8 +323,9 @@ async def test_the_demo_hint_never_reveals_a_staff_members_code(api: Api) -> Non
     assert await auth.current_code(api.cfg.demo.account_email) is not None
 
 
-async def test_a_malformed_audit_cursor_starts_over_instead_of_failing(viewer: httpx.AsyncClient) -> None:
-    bad = base64.urlsafe_b64encode(b"2026-01-01T00:00:00+00:00|abc").decode()
+@pytest.mark.parametrize("key", ["abc", "²", "9" * 26])  # letters; a digit int() refuses; past bigint
+async def test_a_malformed_audit_cursor_starts_over_instead_of_failing(viewer: httpx.AsyncClient, key: str) -> None:
+    bad = base64.urlsafe_b64encode(f"2026-01-01T00:00:00+00:00|{key}".encode()).decode()
     r = await viewer.get("/v1/audit", params={"cursor": bad})
     assert r.status_code == 200, r.text
 

@@ -309,11 +309,15 @@ async def schedules(conn: AsyncConnection, tenant_id: UUID) -> dict[str, Any]:
 
 # ---------------- audit and users ----------------
 
+_BIGINT_LIMIT = 2**63  # audit_log.id is a Postgres bigint
+
 
 async def audit(conn: AsyncConnection, tenant_id: UUID, cursor: str | None, limit: int, redact: bool) -> dict[str, Any]:
     after = _decode_cursor(cursor)
-    if after is not None and not after[1].isdigit():
-        after = None  # a malformed cursor starts from the first page, like any other bad cursor
+    # A malformed key starts from the first page, like any other bad cursor. isdecimal() is ASCII
+    # digits plus other scripts' digits, which int() also reads; the bound keeps it a bigint.
+    if after is not None and not (after[1].isdecimal() and int(after[1]) < _BIGINT_LIMIT):
+        after = None
     rows = (
         await conn.execute(
             text(
