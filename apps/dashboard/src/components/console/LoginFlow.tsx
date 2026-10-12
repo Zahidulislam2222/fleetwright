@@ -72,6 +72,7 @@ export function LoginFlow() {
   const router = useRouter();
   const { mode, session } = useLive();
   const live = mode === "live";
+  const checking = mode === "checking";
   const [hint, setHint] = useState<DemoHint | null>(null);
   const [busy, setBusy] = useState(false);
   const passwordRef = useRef<HTMLInputElement>(null);
@@ -105,6 +106,7 @@ export function LoginFlow() {
 
   const submitPassword = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (checking || busy) return;
     const form = new FormData(e.currentTarget);
     const next: Record<string, string> = {};
     if (!EMAIL.test(String(form.get("email") ?? ""))) next.email = a.errors.email;
@@ -130,6 +132,7 @@ export function LoginFlow() {
 
   const submitCode = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (checking || busy) return;
     const code = String(new FormData(e.currentTarget).get("code") ?? "").replace(/\s/g, "");
     if (!/^\d{6}$/.test(code)) {
       setErrors({ code: a.errors.code });
@@ -177,7 +180,7 @@ export function LoginFlow() {
               </div>
               <Field ref={emailRef} id="email" name="email" type="email" label={a.email} autoComplete="username" inputMode="email" defaultValue={email} error={errors.email} />
               <Field ref={passwordRef} id="password" name="password" type="password" label={a.password} autoComplete="current-password" error={errors.password} />
-              <button type="submit" disabled={busy} aria-busy={busy} className="disabled:opacity-60 h-11 w-full rounded-lg bg-c-text text-[15px] font-semibold text-c-bg transition-opacity hover:opacity-90">
+              <button type="submit" disabled={busy || checking} aria-busy={busy || checking} className="disabled:opacity-60 h-11 w-full rounded-lg bg-c-text text-[15px] font-semibold text-c-bg transition-opacity hover:opacity-90">
                 {a.submit}
               </button>
             </form>
@@ -203,7 +206,7 @@ export function LoginFlow() {
                 className="tracking-[0.4em]"
                 error={errors.code}
               />
-              <button type="submit" disabled={busy} aria-busy={busy} className="h-11 w-full rounded-lg bg-c-text text-[15px] font-semibold text-c-bg transition-opacity hover:opacity-90 disabled:opacity-60">
+              <button type="submit" disabled={busy || checking} aria-busy={busy || checking} className="h-11 w-full rounded-lg bg-c-text text-[15px] font-semibold text-c-bg transition-opacity hover:opacity-90 disabled:opacity-60">
                 {a.verify}
               </button>
               {!live && <p className="text-[12.5px] text-c-text-3">{a.lockoutNote}</p>}
