@@ -16,6 +16,10 @@ from fw_core.vault import Account
 from fw_core.workflow_contracts import WorkflowSpec, digest
 
 
+class DestinationSessionExpired(Exception):
+    """The owned destination rejected a cached authentication state before any action."""
+
+
 class BrowserWorkflow:
     def __init__(self, cfg: WorkflowAppSettings, browser: Browser, otp: OtpProvider) -> None:
         self.cfg, self.browser, self.otp = cfg, browser, otp
@@ -58,8 +62,10 @@ class BrowserWorkflow:
             response = await context.request.get(
                 origin + target.api.me, max_redirects=0, timeout=self.cfg.workflows.action_timeout_ms
             )
-            if not response.ok or (await response.json()).get("username") != account.username:
-                raise ValueError("permitted destination account is not signed in")
+            if response.status == 401 or (response.ok and (await response.json()).get("username") != account.username):
+                raise DestinationSessionExpired("permitted destination account is not signed in")
+            if not response.ok:
+                raise ValueError("destination session check unavailable")
             return context, page
         except BaseException:
             await context.close()

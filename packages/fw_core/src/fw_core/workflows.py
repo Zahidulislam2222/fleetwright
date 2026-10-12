@@ -323,15 +323,7 @@ async def take(conn: AsyncConnection, tenant: UUID, job: UUID, worker: str, ttl_
     ).one_or_none()
     if row is None:
         return None
-    held = await conn.scalar(
-        text("""UPDATE accounts SET holder_worker=:w,holder_expires_at=clock_timestamp()+make_interval(secs=>:ttl)
-                WHERE tenant_id=:t AND id=:a AND enabled AND (holder_worker IS NULL OR holder_expires_at<clock_timestamp())
-                  AND NOT EXISTS (SELECT 1 FROM claims WHERE tenant_id=:t AND account_id=:a AND state IN ('LEASED','ACTING'))
-                  AND NOT EXISTS (SELECT 1 FROM workflow_jobs WHERE tenant_id=:t AND account_id=:a AND state IN ('LEASED','ACTING'))
-                RETURNING id"""),
-        {"t": tenant, "a": row.account_id, "w": worker, "ttl": ttl_s},
-    )
-    if held is None:
+    if not await _take_account(conn, tenant, row.account_id, worker, ttl_s):
         return None
     fence = await conn.scalar(
         text("""UPDATE workflow_jobs SET state='LEASED',worker_id=:w,fence=nextval('workflow_fence'),
@@ -341,6 +333,45 @@ async def take(conn: AsyncConnection, tenant: UUID, job: UUID, worker: str, ttl_
     )
     await event(conn, tenant, job, "leased", {"state": "LEASED", "fence": fence})
     return Held(tenant, job, int(fence), worker)
+
+
+async def _take_account(conn: AsyncConnection, tenant: UUID, account: UUID, worker: str, ttl_s: float) -> bool:
+    held = await conn.scalar(
+        text("""UPDATE accounts SET holder_worker=:w,holder_expires_at=clock_timestamp()+make_interval(secs=>:ttl)
+                WHERE tenant_id=:t AND id=:a AND enabled AND (holder_worker IS NULL OR holder_expires_at<clock_timestamp())
+                  AND NOT EXISTS (SELECT 1 FROM claims WHERE tenant_id=:t AND account_id=:a AND state IN ('LEASED','ACTING'))
+                  AND NOT EXISTS (SELECT 1 FROM workflow_jobs WHERE tenant_id=:t AND account_id=:a AND state IN ('LEASED','ACTING'))
+                RETURNING id"""),
+        {"t": tenant, "a": account, "w": worker, "ttl": ttl_s},
+    )
+    return held is not None
+
+
+async def reserve_reconciliation_account(
+    conn: AsyncConnection, tenant: UUID, job: UUID, worker: str, ttl_s: float
+) -> UUID | None:
+    account: UUID | None = await conn.scalar(
+        text("SELECT account_id FROM workflow_jobs WHERE tenant_id=:t AND id=:j AND state='UNKNOWN'"),
+        {"t": tenant, "j": job},
+    )
+    if account is None or not await _take_account(conn, tenant, account, worker, ttl_s):
+        return None
+    return account
+
+
+async def release_reconciliation_account(conn: AsyncConnection, tenant: UUID, account: UUID, worker: str) -> None:
+    await _release(conn, tenant, account, worker)
+
+
+async def account_owned(conn: AsyncConnection, tenant: UUID, account: UUID, worker: str) -> bool:
+    return (
+        await conn.scalar(
+            text("""SELECT id FROM accounts WHERE tenant_id=:t AND id=:a AND enabled
+        AND holder_worker=:w AND holder_expires_at>clock_timestamp() FOR UPDATE"""),
+            {"t": tenant, "a": account, "w": worker},
+        )
+        is not None
+    )
 
 
 async def begin_action(conn: AsyncConnection, held: Held, spec: WorkflowSpec, cfg: WorkflowSettings) -> bool:

@@ -10,15 +10,16 @@ from __future__ import annotations
 import asyncio
 import logging
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from typing import Any, Literal
 from uuid import UUID, uuid4
 
-from playwright.async_api import Browser, async_playwright
+from playwright.async_api import Browser, BrowserContext, Page, async_playwright
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from fw_browser.otp import MailpitOtp
-from fw_browser.workflows import BrowserWorkflow
+from fw_browser.workflows import BrowserWorkflow, DestinationSessionExpired
 from fw_core import workflows as jobs
 from fw_core.crypto import Envelope
 from fw_core.db import make_engine, system_tx, tenant_tx
@@ -38,10 +39,45 @@ class Runner:
     otp: MailpitOtp
     worker_id: str
 
-    async def run_one(self, tenant: UUID, job: UUID) -> bool:
-        specs = load_workflows(self.cfg.config_dir)
-        targets = load_targets(self.cfg.config_dir)
+    async def open_account(self, account: Account, reservation: str) -> tuple[BrowserContext, Page]:
         vault = Vault(Envelope(self.cfg.vault.master_key_b64.get_secret_value(), self.cfg.vault.key_id))
+        async with tenant_tx(self.engine, account.tenant_id) as conn:
+            if not await jobs.account_owned(conn, account.tenant_id, account.id, reservation):
+                raise jobs.Conflict("destination account reservation lost")
+            stored = await vault.load(conn, account)
+            cached = stored is not None and not stored.needs_refresh(
+                datetime.now(UTC), self.cfg.worker.session_refresh_share
+            )
+            password = None if cached else await vault.password(conn, account)
+        adapter = BrowserWorkflow(self.cfg, self.browser, self.otp)
+        target = load_targets(self.cfg.config_dir).authentication(account.target)
+        try:
+            context, page = await adapter.open(
+                account, target, password, stored.storage_state if cached and stored else None
+            )
+        except DestinationSessionExpired:
+            if password is not None:
+                raise
+            # Only a pre-action session rejection permits one fresh authentication attempt.
+            async with tenant_tx(self.engine, account.tenant_id) as conn:
+                if not await jobs.account_owned(conn, account.tenant_id, account.id, reservation):
+                    raise jobs.Conflict("destination account reservation lost") from None
+                await vault.mark(conn, account, "expired")
+                password = await vault.password(conn, account)
+            context, page = await adapter.open(account, target, password)
+        try:
+            async with tenant_tx(self.engine, account.tenant_id) as conn:
+                if not await jobs.account_owned(conn, account.tenant_id, account.id, reservation):
+                    raise jobs.Conflict("destination account reservation lost")
+                await vault.save(conn, account, dict(await context.storage_state()))
+            return context, page
+        except BaseException:
+            await context.close()
+            raise
+
+    async def run_one(self, tenant: UUID, job: UUID) -> bool:
+        deadline = asyncio.get_running_loop().time() + self.cfg.workflows.lease_s - self.cfg.workflows.lease_margin_s
+        specs = load_workflows(self.cfg.config_dir)
         async with tenant_tx(self.engine, tenant) as conn:
             held = await jobs.take(conn, tenant, job, self.worker_id, self.cfg.workflows.lease_s)
             if held is None:
@@ -74,22 +110,15 @@ class Runner:
                 account_row["account_group"],
                 account_row["otp_channel"],
             )
-            stored = await vault.load(conn, account)
-            password = None if stored and stored.state == "fresh" else await vault.password(conn, account)
         spec = specs.get(row["workflow"])
         adapter = BrowserWorkflow(self.cfg, self.browser, self.otp)
         context = None
         acting = False
         try:
-            context, page = await adapter.open(
-                account,
-                targets.authentication(account.target),
-                password,
-                stored.storage_state if stored and password is None else None,
-            )
-            await adapter.prepare(page, spec, row["inputs"])
+            async with asyncio.timeout_at(deadline):
+                context, page = await self.open_account(account, self.worker_id)
+                await adapter.prepare(page, spec, row["inputs"])
             async with tenant_tx(self.engine, tenant) as conn:
-                await vault.save(conn, account, dict(await context.storage_state()))
                 acting = await jobs.begin_action(conn, held, spec, self.cfg.workflows)
                 if not acting:
                     await jobs.reject_before_action(conn, held)
@@ -114,26 +143,35 @@ class Runner:
                 async with tenant_tx(self.engine, tenant) as conn:
                     await jobs.finish(conn, held, "UNKNOWN", {"reason": "response_interrupted"})
             return True
-        except Exception:
+        except Exception as error:
             # Pre-action failure is safe to retry after lease recovery; no action was authorized.
-            log.warning("workflow attempt interrupted", extra={"job_id": str(job), "acting": acting})
+            log.warning(
+                "workflow attempt interrupted",
+                extra={"job_id": str(job), "acting": acting, "error_type": type(error).__name__},
+            )
             return False
         finally:
             if context is not None:
                 await context.close()
 
     async def reconcile_one(self, tenant: UUID, row: dict[str, Any]) -> None:
+        deadline = asyncio.get_running_loop().time() + self.cfg.workflows.lease_s - self.cfg.workflows.lease_margin_s
         specs = load_workflows(self.cfg.config_dir)
         spec = specs.get(row["workflow"])
         if spec.fingerprint != row["contract_hash"]:
             return  # changed adapter cannot reinterpret old evidence
-        vault = Vault(Envelope(self.cfg.vault.master_key_b64.get_secret_value(), self.cfg.vault.key_id))
+        reservation = self.worker_id + "-receipt-" + uuid4().hex
         async with tenant_tx(self.engine, tenant) as conn:
+            account_id = await jobs.reserve_reconciliation_account(
+                conn, tenant, row["id"], reservation, self.cfg.workflows.lease_s
+            )
+            if account_id is None:
+                return
             account_row = (
                 (
                     await conn.execute(
                         text("SELECT * FROM accounts WHERE tenant_id=:t AND id=:a"),
-                        {"t": tenant, "a": row["account_id"]},
+                        {"t": tenant, "a": account_id},
                     )
                 )
                 .mappings()
@@ -148,24 +186,25 @@ class Runner:
                 account_row["account_group"],
                 account_row["otp_channel"],
             )
-            stored = await vault.load(conn, account)
-        if stored is None:
-            return
         adapter = BrowserWorkflow(self.cfg, self.browser, self.otp)
-        context, _page = await adapter.open(
-            account,
-            load_targets(self.cfg.config_dir).authentication(account.target),
-            None,
-            stored.storage_state,
-        )
+        context = None
         try:
-            verified, receipt_hash = await adapter.receipt(context, spec, row["inputs"])
-            async with tenant_tx(self.engine, tenant) as conn:
-                await jobs.reconcile(
-                    conn, tenant, row["id"], row["action_hash"], "CONFIRMED" if verified else None, receipt_hash
-                )
+            async with asyncio.timeout_at(deadline):
+                context, _page = await self.open_account(account, reservation)
+                verified, receipt_hash = await adapter.receipt(context, spec, row["inputs"])
+                async with tenant_tx(self.engine, tenant) as conn:
+                    if not await jobs.account_owned(conn, tenant, account.id, reservation):
+                        return
+                    await jobs.reconcile(
+                        conn, tenant, row["id"], row["action_hash"], "CONFIRMED" if verified else None, receipt_hash
+                    )
         finally:
-            await context.close()
+            try:
+                if context is not None:
+                    await context.close()
+            finally:
+                async with tenant_tx(self.engine, tenant) as conn:
+                    await jobs.release_reconciliation_account(conn, tenant, account.id, reservation)
 
     async def tick(self) -> None:
         async with system_tx(self.engine) as conn:
