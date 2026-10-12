@@ -189,6 +189,7 @@ services:
   worker:
     <<: *app
     command: ["python", "-m", "fw_worker"]
+    stop_grace_period: {{workerStopGraceS}}s
     mem_limit: {{workerMemory}}
     cpus: {{workerCpus}}
     pids_limit: 1024           # Chromium runs a process per renderer

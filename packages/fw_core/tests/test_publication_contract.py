@@ -2,7 +2,7 @@
 
 import json
 import re
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from dotenv import dotenv_values
 
@@ -41,6 +41,9 @@ def test_release_contains_workflow_runner_and_backup_service():
     compose = (ROOT / "deploy/templates/compose.yaml").read_text()
     assert "  workflow-worker:" in compose
     assert '"fw_worker.workflows"' in compose
+    assert "stop_grace_period: {{workerStopGraceS}}s" in compose
+    config = json.loads((ROOT / "deploy/deploy.config.json").read_text())
+    assert config["backend"]["workerStopGraceS"] > WorkerSettings(cell="test").drain_timeout_s
     unit = (ROOT / "deploy/templates/backup.service").read_text()
     assert "fw_coordinator.backup loop" in unit
     assert "UMask=0077" in unit
@@ -54,6 +57,7 @@ def test_backup_template_supplies_required_settings(tmp_path):
     config = json.loads((ROOT / "deploy/deploy.config.json").read_text())
     values = {**config, **config["backup"], "releaseId": "20261013-validation"}
     values["backupDatabases"] = json.dumps(config["backup"]["backupDatabases"])
+    values["buildDirectory"] = str(PurePosixPath(config["releaseRoot"]).parent / "build" / values["releaseId"])
     template = (ROOT / "deploy/templates/backup.env").read_text()
     rendered = re.sub(r"\{\{(\w+)\}\}", lambda match: str(values[match[1]]), template)
     path = tmp_path / "backup.env"
@@ -62,6 +66,18 @@ def test_backup_template_supplies_required_settings(tmp_path):
     assert cfg.backup.username
     assert cfg.backup.databases
     assert all(value is not None for value in dotenv_values(path).values())
+
+
+def test_backup_service_paths_are_absolute_and_normalized():
+    config = json.loads((ROOT / "deploy/deploy.config.json").read_text())
+    values = {**config, **config["backup"], "releaseId": "20261013-validation"}
+    values["buildDirectory"] = str(PurePosixPath(config["releaseRoot"]).parent / "build" / values["releaseId"])
+    unit = (ROOT / "deploy/templates/backup.service").read_text()
+    rendered = re.sub(r"\{\{(\w+)\}\}", lambda match: str(values[match[1]]), unit)
+    for key in ("WorkingDirectory", "ExecStart"):
+        value = re.search(rf"^{key}=(\S+)", rendered, re.M)[1]
+        assert PurePosixPath(value).is_absolute()
+        assert ".." not in PurePosixPath(value).parts
 
 
 def test_seed_workflow_pool_is_reserved_in_release_and_local_settings():

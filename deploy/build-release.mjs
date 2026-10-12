@@ -5,7 +5,7 @@
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
-import { dirname, join, relative } from "node:path";
+import { dirname, join, relative, posix } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const deployDir = dirname(fileURLToPath(import.meta.url));
@@ -106,6 +106,7 @@ const values = {
   ...config.backend,
   ...config.backup,
   backupDatabases: JSON.stringify(config.backup.backupDatabases),
+  buildDirectory: posix.join(posix.dirname(config.releaseRoot), "build", releaseId),
   releaseId,
   securityHeaders: headerLines,
   postgresImage: pinned("postgres"),

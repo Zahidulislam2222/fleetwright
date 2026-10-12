@@ -34,6 +34,7 @@
     "redisMaxMemory": "96mb",
     "workerMemory": "1536m",
     "workerCpus": 2.0,
+    "workerStopGraceS": 60,
     "workflowWorkerMemory": "768m",
     "workflowWorkerCpus": 1.0,
     "edgeSubnet": "172.30.90.0/24",

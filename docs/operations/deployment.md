@@ -4,6 +4,9 @@ The current deployment uses an existing single server, immutable release directo
 Compose. It is a release target; local committed source remains authoritative. Only the edge web
 service binds a loopback port behind the TLS proxy. Databases, Redis, owned destinations and
 workers share a private backend network without general internet egress.
+The freight worker's configured container stop grace must exceed its typed application drain
+timeout. Verify old slots become stopped across a replacement; retain historical records and
+investigate stale active rows rather than removing them from health checks.
 
 ## Release inputs and gates
 

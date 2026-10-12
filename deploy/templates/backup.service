@@ -7,9 +7,9 @@ After=docker.service
 [Service]
 Type=exec
 User=root
-WorkingDirectory={{releaseRoot}}/../build/{{releaseId}}
+WorkingDirectory={{buildDirectory}}
 EnvironmentFile={{backupEnvFile}}
-ExecStart={{releaseRoot}}/../build/{{releaseId}}/.venv/bin/python -m fw_coordinator.backup loop
+ExecStart={{buildDirectory}}/.venv/bin/python -m fw_coordinator.backup loop
 UMask=0077
 Restart=on-failure
 RestartSec={{backupRestartS}}
