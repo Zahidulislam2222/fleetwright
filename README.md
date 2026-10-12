@@ -8,6 +8,8 @@ destination receipt resolves it. Destinations without sufficient evidence requir
 **[Open Fleetwright](https://fleetwright.zahidul-islam.com)** ·
 **[Documentation](docs/README.md)** · **[MCP setup](docs/operations/reliable-browser.md)**
 
+Latest deployment: [13 October 2026 release evidence](docs/releases/2026-10-13.md).
+
 ## What is included
 
 - Two complete owned workflows: freight booking and maintenance-request creation.
@@ -28,7 +30,7 @@ working client integration is the dedicated MCP server.
 
 | Verification | Result and boundary |
 |---|---|
-| Combined backend suite, 2026-10-13 | 138 tests passed in 475.34 seconds |
+| Combined backend suite, 2026-10-13 | 147 tests passed in the final run; the contention benchmark passed separately in 205.19 seconds |
 | Database contention | 200 competitors, 10,000 jobs, zero duplicate action attempts; 9,895 confirmed/reconciled bookings |
 | Interrupted action | Real Chromium worker killed after destination acceptance; receipt reconciliation without another click |
 | Authorization | Changed, expired and replayed approval rejected; tenant isolation and grant revocation tested |

@@ -2,6 +2,8 @@
 
 Start with the product guide, then follow the operational or engineering path you need.
 
+Latest deployed release: [13 October 2026 — Reliable Browser Operations](releases/2026-10-13.md).
+
 | Area | Documents |
 |---|---|
 | Product and integration | [Product and boundaries](product.md) · [API and MCP reference](integrations.md) · [Reliable browser workflows](operations/reliable-browser.md) |

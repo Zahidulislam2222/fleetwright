@@ -1,7 +1,11 @@
 # Testing and evidence
 
-Release verification on 2026-10-13 passed **138/138 automated tests** together in 475.34 seconds
-against isolated PostgreSQL/Redis/Mailpit and real Chromium. This includes publication contracts,
+Release verification on 2026-10-13 exercised **148 automated cases** against isolated
+PostgreSQL/Redis/Mailpit and real Chromium. The final combined run had147passed and one
+`TooManyConnectionsError` in the contention benchmark (461.34seconds); an accidental overlapping
+test invocation was observed. After stopping the overlap, the unchanged benchmark passed
+separately in205.19seconds. All final cases therefore have passing evidence across those runs;
+this is not a claim that148passed together. The previous full147-case run passed in546.13seconds. This includes publication contracts,
 complete backup settings and reserved workflow-account coexistence rules. The previous core
 extension run passed132tests in467.58seconds; its evidence remains historical.
 
@@ -36,6 +40,9 @@ compare Fleetwright's own records with that log, so the system is never marking 
 | Backup restoration | `apps/coordinator/tests/test_backup.py` | Delayed initialization rejects temporary socket-only readiness; approved job, events, approval and audit restored into a fresh network-isolated database cluster |
 | Deterministic action contracts | `packages/fw_core/tests/test_workflow_contract_fingerprint.py` | Eight independent process hash seeds produce the same contract fingerprint; regression failed before canonical serialization |
 | General authentication | `test_workflow_auth_contract.py`, `apps/worker/tests/test_account_target_scope.py` | Non-freight targets need no freight endpoints; legacy slots leave service-only accounts available |
+| Cached session recovery | `apps/coordinator/tests/test_workflow_session_recovery.py` | Expired/revoked sessions renew before acting; receipt-only recovery respects account contention, authentication failure, lease deadlines and replacement holders |
+| Login readiness | `apps/coordinator/tests/test_login_readiness.py` | A delayed real session handshake cannot skip password authentication or advance early to MFA |
+| Shared audit contract | `apps/coordinator/tests/test_workflow_audit_contract.py` | Owner and public audit HTTP reads remain valid after workflow events are written |
 
 Actual Codex client submission, outcome inspection and evidence export passed for both owned
 workflows using the existing ChatGPT login. This is separate from SDK transport testing.
@@ -48,6 +55,8 @@ A green test means nothing if it cannot go red. Some checks were mutation-tested
 
 - Unsorted contract-set serialization produced different fingerprints across explicit process hash seeds; canonical serialization made the regression pass.
 - A delayed PostgreSQL initializer exposed false socket readiness; the bounded TCP readiness probe passed the restore regression.
+- Expired/revoked destination state and delayed/stolen authentication reservations failed before the bounded, ownership-checked renewal correction.
+- Submitting during a delayed login handshake failed before the readiness guard; mixed workflow audit history failed before its audit-only role was added to the wire contract.
 - Removing `FORCE ROW LEVEL SECURITY` from one table makes the RLS suite fail.
 - Writing a secret into a log line makes the log-leak test fail.
 - An early version of the load test booked only 77 of 10,000 jobs and still passed; coverage
@@ -74,7 +83,8 @@ Known limits of this evidence: one developer PC; the owned freight board, not a 
 ## Publication regression coverage
 
 `test_publication_contract.py` checks maintained display wording, public links/required topics,
-workflow runner/service release inputs, complete typed backup environment and reserved seed groups.
+workflow runner/service release inputs, complete typed backup environment, normalized service paths,
+container shutdown grace and reserved seed groups.
 The missing backup fields produced a failing regression before the fix. Same-target reserved-account
 acquisition is covered by `apps/worker/tests/test_account_target_scope.py`. Actual worker coexistence
 is also a release-rehearsal gate. GitHub quality CI covers static/config/publication gates; the full

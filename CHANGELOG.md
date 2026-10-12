@@ -1,6 +1,8 @@
 # Changelog
 
-## Release candidate (2026-10-13) — reliable browser operations
+## 2026-10-13 — reliable browser operations
+
+Deployed as `20261013-reliable-browser-rc5`; [release evidence and boundaries](docs/releases/2026-10-13.md).
 
 - Dedicated local MCP package for versioned freight-booking and maintenance-request workflows,
   with scoped revocable access, idempotent submissions and bounded paginated evidence.
@@ -13,7 +15,7 @@
 - Actual Codex MCP and real-browser verification; Claude verification deferred by the owner.
 - Dedicated reserved workflow account pool, supervised workflow worker and protected host backup service templates.
 - Complete public product/API/security/privacy/legal/operations/scaling/SLO/maintenance documentation and refreshed READMEs.
-- Publication/configuration regressions and quality CI; full release suite138/138passed475.34s.
+- Publication/configuration regressions and quality CI; final regression run147passed; unchanged contention benchmark passed separately in205.19s.
 
 All notable changes, newest first. Version numbers follow the workspace version in
 `pyproject.toml`.

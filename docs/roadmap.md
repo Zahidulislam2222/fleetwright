@@ -12,11 +12,14 @@ masked public access, capped shared controls, audit and live updates.
 Reliable Browser Operations adds versioned general workflow contracts, durable fenced jobs,
 exact-action approval, scoped/revocable MCP, bounded investigation/export, two owned browser
 workflows, authenticated health/metrics and verified backup/restore tools. The combined suite
-passed 132 tests on 2026-10-13; actual Codex ran both workflows. Claude's actual client run is
+passed all 148 cases across the final regression and isolated benchmark runs on 2026-10-13; actual Codex ran both workflows. Claude's actual client run is
 deferred while its subscription is inactive. Publication/deployment status belongs in the
 [changelog](../CHANGELOG.md); local test results alone are not release evidence.
 
 ## Prioritized milestones
+
+The [13 October release](releases/2026-10-13.md) verifies the first milestone below; preserve
+these release gates for every replacement. The next expansion priority is operational baseline.
 
 | Priority | Deliverable | Acceptance / exit evidence |
 |---|---|---|

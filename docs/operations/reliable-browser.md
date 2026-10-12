@@ -143,7 +143,9 @@ approval, events and audit. That is stronger evidence than counting tables in th
 The readiness probe waits for loopback TCP: the official image temporarily accepts Unix-socket
 connections during initialization before shutting down that server. A delayed-initialization
 regression verifies the final server is ready before one-time role bootstrap and restoration.
-This local proof does not establish off-site backup retention or production service installation.
+The [13 October release](../releases/2026-10-13.md) also verifies the protected production
+scheduler, current-release process directory and archive/source integrity. These checks do not
+establish off-site backup retention or full-host recovery.
 
 ## Verification
 
@@ -152,11 +154,11 @@ Claude's actual client run is explicitly deferred; Codex's actual run passed for
 
 | Gate | Verified result |
 |---|---|
-| Backend behavior | Release suite:138tests passed together in475.34s (previous core extension:132in467.58s), including the unchanged 200-worker/10,000-job contention benchmark and corrected fresh-cluster restore regression |
-| Python lint / formatting / types | Ruff clean, 151 files formatted; mypy clean on 66 source files |
+| Backend behavior | Final regression run:147passed; unchanged contention benchmark separately passed in205.19s (previous full147-case run:546.13s), including the unchanged 200-worker/10,000-job contention benchmark and corrected fresh-cluster restore regression |
+| Python lint / formatting / types | Ruff clean, 160 files formatted; mypy clean on 66 source files |
 | Dashboard | ESLint, TypeScript and production build passed |
 | Packaging / configuration | All eight Python wheel/sdist builds and Compose configuration passed; settings/config regressions passed |
-| Security | Bandit medium+ clean; Gitleaks history and public working snapshot clean; Semgrep 160 files, zero findings/errors |
+| Security | Bandit medium+ clean; Gitleaks history and public working snapshot clean; Semgrep117rules/276targets, zero findings/errors |
 | Dependency audit | Patched MCP SDK 1.28.1: Python audit clean; npm production audit clean. Full npm audit retains the development-only advisory described below |
 | Real workflows | Freight and maintenance portal, interrupted acknowledgement, OS-killed worker after acceptance, receipt reconciliation, owner approval and evidence download passed |
 | Operations | Idle-stream revocation, authenticated metrics, scheduled backup, corrupt-archive refusal and isolated fresh-cluster restoration passed |
@@ -164,8 +166,8 @@ Claude's actual client run is explicitly deferred; Codex's actual run passed for
 
 An earlier full run timed out in the legacy load benchmark before its final assertions. The
 unchanged isolated rerun passed; the original 900-second deadline and coverage were preserved.
-The timeout's root cause was not conclusively established. No production deployment or larger
-fleet capacity is implied by these local results.
+The timeout's root cause was not conclusively established. Deployment is verified separately in
+the [release evidence](../releases/2026-10-13.md); larger fleet capacity remains unproven.
 
 Full npm audit is **not clean**: the development-only Next ESLint dependency chain includes
 `braces` 3.0.3, affected by [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm).

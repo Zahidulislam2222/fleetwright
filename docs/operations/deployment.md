@@ -43,6 +43,9 @@ permissions, service restart behavior and source/config hash parity. The unit in
 typed backup loop; interval and retention are owned by `BackupSettings` / `FW_BACKUP__*`, rather
 than a second timer policy. Docker authority is host-administrator authority; never expose it to
 MCP clients or mount the host Docker socket into untrusted browser containers.
+When replacing an active unit with a newer immutable release, reload the service-manager
+configuration and explicitly restart it. Enabling an already-running unit does not replace its
+process. Verify the running process uses the new release directory and produces a fresh archive.
 See [systemd service semantics](https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html).
 
 Local archives do not establish off-host disaster protection. Add an approved independent encrypted
