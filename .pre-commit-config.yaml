@@ -25,5 +25,4 @@ repos:
         entry: python C:/Users/muham/.security-hooks/semgrep_wsl.py
         language: system
         types: [text]
-        # Semgrep is the slowest layer (seconds per commit). If it annoys you,
-        # comment this hook out here and keep Semgrep in CI only.
+        # Findings must be fixed; this gate remains enabled.

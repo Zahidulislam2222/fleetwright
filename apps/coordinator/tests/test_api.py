@@ -123,7 +123,7 @@ async def test_every_read_endpoint_answers_in_the_contract_shape(api: Api, viewe
         assert set(body) == {"tenant_id", "items", "next_cursor", "total_estimate"}, path
         assert all(i["tenant_id"] == str(api.tenant_id) for i in body["items"]), path
     accounts = items(await viewer.get("/v1/accounts"))
-    assert len(accounts) == 4 and {a["target"] for a in accounts} == {"demo-board"}
+    assert len(accounts) == 5 and {a["target"] for a in accounts} == {"demo-board"}
     assert {f["name"] for f in items(await viewer.get("/v1/filters"))} >= {"Everything over $900", "Texas outbound"}
     overview = (await viewer.get("/v1/overview")).json()
     assert {"claims", "series", "workers", "alerts"} <= set(overview)

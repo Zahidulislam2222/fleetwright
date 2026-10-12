@@ -14,7 +14,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, Field, SecretStr, field_validator
+from pydantic import BaseModel, Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -110,6 +110,7 @@ class ControlSettings(BaseModel):
 
 class WorkerSettings(BaseModel):
     cell: str
+    reserved_account_groups: tuple[str, ...] = ()  # named pools dedicated to approved workflows
     contexts: int = Field(default=4, ge=1, le=200)
     watchers: int = Field(default=1, ge=0, le=50)
     headless: bool = True
@@ -188,6 +189,49 @@ class GatewaySettings(BaseModel):
     keepalive_s: float = Field(default=15.0, gt=0)
     max_clients: int = Field(default=2000, ge=1)
     client_queue: int = Field(default=200, ge=1)  # per-client backlog before it is dropped
+    revocation_check_s: float = Field(default=1.0, gt=0)
+
+
+class WorkflowSettings(BaseModel):
+    lease_s: float = Field(default=90.0, gt=0)
+    approval_ttl_s: int = Field(default=300, ge=1)
+    grant_ttl_s: int = Field(default=3600, ge=1)
+    poll_s: float = Field(default=1.0, gt=0)
+    evidence_page_size: int = Field(default=100, ge=1, le=1000)
+    action_timeout_ms: int = Field(default=10000, ge=100)
+    reconcile_grace_s: float = Field(default=10.0, ge=0)
+    alert_unknown_after_s: float = Field(default=300.0, gt=0)
+    response_max_bytes: int = Field(default=65536, ge=1024)
+    lease_margin_s: float = Field(default=5.0, gt=0)
+
+    @model_validator(mode="after")
+    def execution_fits_lease(self) -> WorkflowSettings:
+        if self.lease_s <= self.action_timeout_ms / 1000 + self.lease_margin_s:
+            raise ValueError("lease must exceed the bounded action phase plus safety margin")
+        return self
+
+
+class McpSettings(BaseModel):
+    tenant_id: str
+    access_token: SecretStr
+
+
+class BackupSettings(BaseModel):
+    directory: Path
+    container: str
+    executable: str
+    username: str
+    databases: list[str] = Field(min_length=1)
+    timeout_s: float = Field(default=120.0, gt=0)
+    interval_s: float = Field(default=86400.0, gt=0)
+    retention_count: int = Field(default=7, ge=1)
+
+    @field_validator("databases")
+    @classmethod
+    def safe_identifiers(cls, values: list[str]) -> list[str]:
+        if any(not name.replace("_", "").isalnum() or not name[0].isalpha() for name in values):
+            raise ValueError("database names must be safe identifiers")
+        return values
 
 
 class _Base(BaseSettings):
@@ -217,6 +261,7 @@ class CoordinatorSettings(_Base):
     auth: AuthSettings = AuthSettings()
     demo: DemoSettings = DemoSettings()
     api: ApiSettings
+    workflows: WorkflowSettings = WorkflowSettings()
 
 
 class SeedSettings(BaseModel):
@@ -274,6 +319,25 @@ class WorkerAppSettings(_Base):
     storage: StorageSettings
 
 
+class WorkflowAppSettings(_Base):
+    app_db: DatabaseSettings
+    board_client: BoardClientSettings
+    vault: VaultSettings
+    mailpit: MailpitSettings
+    worker: WorkerSettings
+    workflows: WorkflowSettings = WorkflowSettings()
+
+
+class McpAppSettings(_Base):
+    app_db: DatabaseSettings
+    mcp: McpSettings
+    workflows: WorkflowSettings = WorkflowSettings()
+
+
+class BackupAppSettings(_Base):
+    backup: BackupSettings
+
+
 SERVICE_SETTINGS: tuple[type[_Base], ...] = (
     BoardAppSettings,
     CoordinatorSettings,
@@ -282,6 +346,9 @@ SERVICE_SETTINGS: tuple[type[_Base], ...] = (
     MigrationSettings,
     GatewayAppSettings,
     WorkerAppSettings,
+    WorkflowAppSettings,
+    McpAppSettings,
+    BackupAppSettings,
 )
 
 

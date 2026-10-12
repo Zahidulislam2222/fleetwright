@@ -19,4 +19,4 @@ Nothing beyond what was measured is claimed as achieved.
 ## Consequences
 
 - The scaling docs separate *measured* from *target* numbers.
-- The current single-server demo cannot meet either target and says so.
+- The current single-server public workspace cannot meet either target and says so.

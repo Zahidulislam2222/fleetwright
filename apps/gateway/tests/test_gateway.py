@@ -190,3 +190,21 @@ async def test_the_connection_cap_answers_503(db: Db) -> None:
             assert (await http.get(f"{url}/v1/stream")).status_code == 503
         health = (await http.get(f"{url}/healthz")).json()
         assert health["status"] == "ok"
+
+
+async def test_revocation_closes_an_idle_stream_before_any_more_data(db: Db) -> None:
+    cfg, tenant = await _settings(db, revocation_check_s=0.05)
+    redis = client.core(cfg.redis)
+    token, principal = await sessions.create(redis, Principal(tenant, "viewer", user_id=uuid4()), 60)
+    try:
+        async with serving(cfg) as (url, gw), httpx.AsyncClient(timeout=WAIT_S) as http:
+            http.cookies.set(cfg.auth.cookie_name, token)
+            async with http.stream("GET", f"{url}/v1/stream") as reply:
+                stream = events(reply.aiter_lines())
+                assert (await anext(stream))[0] == "hello"
+                await sessions.revoke(redis, principal)
+                with pytest.raises(StopAsyncIteration):
+                    await asyncio.wait_for(anext(stream), 1.0)
+            assert gw.hub.count == 0
+    finally:
+        await redis.aclose()

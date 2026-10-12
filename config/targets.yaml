@@ -3,7 +3,7 @@
 # Adding a load board = a new entry here (plus a new adapter only if its flow differs).
 targets:
   demo-board:
-    name: Demo Freight Exchange (mock)
+    name: Fleet Freight Exchange
     login:
       path: /login
       username: "#username"

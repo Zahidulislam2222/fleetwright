@@ -12,19 +12,33 @@ from sqlalchemy.ext.asyncio import AsyncConnection
 from fw_core.vault import Account
 
 
-async def acquire(conn: AsyncConnection, tenant_id: UUID, slot_id: str, hold_s: float) -> Account | None:
+async def acquire(
+    conn: AsyncConnection,
+    tenant_id: UUID,
+    slot_id: str,
+    hold_s: float,
+    permitted_targets: tuple[str, ...],
+    reserved_groups: tuple[str, ...],
+) -> Account | None:
     row = (
         await conn.execute(
             text(
                 """UPDATE accounts SET holder_worker = :w, holder_expires_at = clock_timestamp() + make_interval(secs => :s)
                    WHERE tenant_id = :t AND id = (
                      SELECT id FROM accounts
-                     WHERE tenant_id = :t AND enabled
+                     WHERE tenant_id = :t AND enabled AND target = ANY(:targets)
+                       AND NOT (account_group = ANY(:reserved))
                        AND (holder_expires_at IS NULL OR holder_expires_at < clock_timestamp() OR holder_worker = :w)
                      ORDER BY holder_worker = :w DESC, id LIMIT 1 FOR UPDATE SKIP LOCKED)
                    RETURNING id, target, username, email, account_group, otp_channel"""
             ),
-            {"t": tenant_id, "w": slot_id, "s": hold_s},
+            {
+                "t": tenant_id,
+                "w": slot_id,
+                "s": hold_s,
+                "targets": list(permitted_targets),
+                "reserved": list(reserved_groups),
+            },
         )
     ).one_or_none()
     if row is None:

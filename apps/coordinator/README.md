@@ -1,21 +1,19 @@
-# Coordinator (`apps/coordinator`)
+# Coordinator
 
-The control plane's server side.
+Fleetwright's authenticated control plane: FastAPI `/v1`, password/TOTP sessions, CSRF, roles,
+workflow approvals/grants, audit, freight dispatch/recovery and operational tooling.
 
-## Today
-
-| Module | Purpose |
+| Module | Responsibility |
 |---|---|
-| `migrate.py` + `migrations/` | Schema, database roles and row-level security. Run with `uv run python -m fw_coordinator.migrate` (uses the owner role) |
-| `control.py` | One **control process per cell**: dispatcher (filters, schedules, fast-path duplicate drop, claim + outbox in one transaction), outbox relay (with a cell-ownership check), reconciler (lease sweeps; resolves `UNKNOWN` claims by asking the target with the account's sealed session), and `move_tenant` for moving a tenant between cells |
+| `api.py`, `auth.py`, `views.py` | Console sessions, roles, bounded views and atomic mutation/audit records |
+| `workflow_api.py` | Owner approval and grant lifecycle; inspection, cancellation, evidence, health and metrics |
+| `control.py` | Per-cell freight dispatch, outbox relay, lease sweeps, reconciliation and tenant movement |
+| `migrate.py`, `migrations/` | Owner-role schema migrations and RLS; workflow migrations 0002–0004 are additive |
+| `seed.py` | Idempotent configured owner/workspace/destination initialization |
+| `backup.py` | Verified archives, scheduled loop and fresh non-destructive restore drill |
 
-```bash
-uv run python -m fw_coordinator.control     # cell from FW_CONTROL__CELL
-uv run pytest apps/coordinator
-```
-
-## In progress
-
-The `/v1` REST API for the console: sign-in with password and TOTP, roles, CSRF protection, an
-anonymous read-only demo view, filters and schedules management, manual one-time-code entry and
-capped demo controls. See the [roadmap](../../docs/roadmap.md).
+Run `uv run python -m fw_coordinator.api` and `uv run python -m fw_coordinator.control` as separate
+services. Migrate before startup. Settings come from `fw_core.settings`; keep secrets outside source.
+The API contract is [OpenAPI](../../contracts/openapi.yaml). See [integration reference](../../docs/integrations.md),
+[workflow operations](../../docs/operations/reliable-browser.md) and [deployment](../../docs/operations/deployment.md).
+Tests live alongside the service and run through `uv run python tools/dev/run_tests.py -q`.

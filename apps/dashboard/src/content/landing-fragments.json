@@ -1,5 +1,5 @@
 {
-  "label": "Illustrative · mock data",
+  "label": "Reference sequence",
   "claimer": {
     "title": "Claims · last 60 s",
     "rows": [
@@ -53,13 +53,13 @@
     "seriesLabel": "Items per crawl cycle: {values}"
   },
   "agent": {
-    "title": "Agent · task 3 of 5",
+    "title": "Agent · planned sequence",
     "log": [
       "Opened 3 tabs: brief, drafts, calendar",
       "Drafted post from the product brief",
       "Labelled as AI-generated"
     ],
-    "approval": "Publish to the Demo Studio page?",
+    "approval": "Publish to the Fleet Studio page?",
     "approve": "Approve",
     "reject": "Reject"
   }

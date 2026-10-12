@@ -39,17 +39,25 @@ class ClickSpec(_Spec):
     book_button: str  # "{ref}" is replaced by the job key
 
 
-class ApiSpec(_Spec):
+class AuthenticationApiSpec(_Spec):
     me: str
-    loads: str
-    book: str
-    bookings: str
     csrf_header: str
 
 
-class TargetSpec(_Spec):
+class ApiSpec(AuthenticationApiSpec):
+    loads: str
+    book: str
+    bookings: str
+
+
+class AuthenticationSpec(_Spec):
     name: str
     login: LoginSpec
+    captcha: CaptchaSpec | None
+    api: AuthenticationApiSpec
+
+
+class TargetSpec(AuthenticationSpec):
     captcha: CaptchaSpec
     feed_page: str
     click: ClickSpec
@@ -58,9 +66,18 @@ class TargetSpec(_Spec):
 
 
 class Targets(_Spec):
-    targets: dict[str, TargetSpec]
+    targets: dict[str, TargetSpec | AuthenticationSpec]
+
+    def freight_targets(self) -> tuple[str, ...]:
+        return tuple(name for name, spec in self.targets.items() if isinstance(spec, TargetSpec))
 
     def get(self, target: str) -> TargetSpec:
+        spec = self.authentication(target)
+        if not isinstance(spec, TargetSpec):
+            raise ValueError(f"target {target!r} does not support freight workflows")
+        return spec
+
+    def authentication(self, target: str) -> AuthenticationSpec:
         try:
             return self.targets[target]
         except KeyError:

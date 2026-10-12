@@ -173,7 +173,16 @@ def create_app(cfg: GatewayAppSettings | None = None) -> FastAPI:
             try:
                 yield ServerSentEvent(json.dumps({"type": "hello", "role": who.role}), event="hello")
                 while True:
-                    item = await listener.queue.get()
+                    try:
+                        item = await asyncio.wait_for(listener.queue.get(), timeout=cfg.gateway.revocation_check_s)
+                    except TimeoutError:
+                        item = None
+                    if who.session is not None:
+                        current = await sessions.load(gateway.redis, request.cookies.get(cfg.auth.cookie_name))
+                        if current is None or current != who:
+                            return
+                    if item is None:
+                        continue
                     if item is DROPPED:
                         return
                     yield ServerSentEvent(item, event="update")

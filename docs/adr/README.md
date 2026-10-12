@@ -14,3 +14,4 @@ a changed decision gets a new record that supersedes the old one.
 | 007 | [Envelope encryption for sessions and credentials](0007-envelope-encryption.md) | Accepted |
 | 008 | [One typed configuration boundary; product data in YAML](0008-config-boundary.md) | Accepted |
 | 009 | [What "1M users" and "99% uptime" mean here](0009-scale-targets.md) | Accepted |
+| 010 | [Approved workflows, reserved accounts and release verification](0010-approved-workflows-and-release-account-pools.md) | Accepted; clarifies 009 |

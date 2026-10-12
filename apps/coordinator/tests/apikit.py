@@ -5,10 +5,12 @@ forwarded address, so lockout counters never leak between tests or runs."""
 
 from __future__ import annotations
 
+import asyncio
 import base64
 import secrets
+import time
 from collections.abc import AsyncIterator
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit, urlunsplit
@@ -60,6 +62,7 @@ class Api:
     cfg: CoordinatorSettings
     tenant_id: UUID
     users: dict[str, User]
+    last_mfa_step: dict[str, int] = field(default_factory=dict)
 
     def client(self) -> httpx.AsyncClient:
         return httpx.AsyncClient(
@@ -70,11 +73,17 @@ class Api:
 
     async def signed_in(self, role: str) -> httpx.AsyncClient:
         user = self.users[role]
+        otp = pyotp.TOTP(user.totp)
+        step = int(time.time()) // otp.interval
+        if self.last_mfa_step.get(role) == step:
+            # Respect production replay protection when tests sign in twice within one step.
+            await asyncio.sleep((step + 1) * otp.interval - time.time() + 0.1)
         c = self.client()
         r = await c.post("/v1/auth/login", json={"email": user.email, "password": PASSWORD})
         assert r.status_code == 200, r.text
-        r = await c.post("/v1/auth/mfa", json={"code": pyotp.TOTP(user.totp).now()})
+        r = await c.post("/v1/auth/mfa", json={"code": otp.now()})
         assert r.status_code == 200, r.text
+        self.last_mfa_step[role] = int(time.time()) // otp.interval
         c.headers[self.cfg.auth.csrf_header] = r.json()["csrf"]
         return c
 

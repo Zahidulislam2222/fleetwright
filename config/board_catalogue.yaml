@@ -1,5 +1,5 @@
-# Product data for the fictitious mock load board (Phase 2). Not configuration of any real board.
-# Loads are generated from these lists; every value is invented for the demo.
+# Product data for the owned freight exchange. Not configuration of any real board.
+# Loads are generated from these lists; every value is maintained for controlled verification.
 lanes:
   cities:
     - Dallas, TX
@@ -20,9 +20,9 @@ lanes:
   rate_per_mile_usd: [1.6, 3.4]
   pickup_hours_ahead: [2, 72]
 branding:
-  name: Demo Freight Exchange
-  banner: "DEMO — fictitious load board built for testing Fleetwright. Not a real marketplace."
+  name: Fleet Freight Exchange
+  banner: "Owned freight exchange for authorized workflow verification. No commercial freight is offered."
 captcha:
-  operands: [2, 19]   # "What is A + B?" — our own trivially solvable mock captcha
+  operands: [2, 19]   # "What is A + B?" — our own trivially solvable owned captcha
 competitors:
   names: [rival-bot-1, rival-bot-2, rival-bot-3]

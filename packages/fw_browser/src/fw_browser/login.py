@@ -12,7 +12,7 @@ from playwright.async_api import Page
 
 from fw_browser import captcha
 from fw_browser.otp import OtpProvider
-from fw_core.targets import TargetSpec
+from fw_core.targets import AuthenticationSpec
 
 
 class SignInFailed(Exception):
@@ -29,7 +29,7 @@ class SignInTimeouts:
 async def sign_in(
     page: Page,
     base_url: str,
-    spec: TargetSpec,
+    spec: AuthenticationSpec,
     *,
     username: str,
     password: str,
@@ -50,7 +50,7 @@ async def sign_in(
     await page.locator(login.otp_field).fill(code, timeout=timeouts.page_ms)
     async with page.expect_navigation(timeout=timeouts.page_ms):
         await page.locator(login.otp_submit).click(timeout=timeouts.page_ms)
-    if _matches(page.url, spec.captcha.url):
+    if spec.captcha is not None and _matches(page.url, spec.captcha.url):
         await captcha.solve(page, spec.captcha, timeouts.page_ms)
     if not _matches(page.url, login.home_url):
         raise SignInFailed("one-time code step was not accepted")

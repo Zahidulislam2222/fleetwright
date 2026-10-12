@@ -1,7 +1,12 @@
 {
   "product": "Fleetwright",
-  "mockBanner": "Prototype · mock data · clock frozen at",
+  "mockBanner": "Offline reference data · clock frozen at",
   "nav": [
+    {
+      "href": "/console/workflows",
+      "label": "Browser workflows",
+      "icon": "Crosshair"
+    },
     {
       "href": "/console",
       "label": "Overview",
@@ -61,7 +66,7 @@
     },
     {
       "href": "/board",
-      "label": "Mock load board",
+      "label": "Owned freight exchange",
       "icon": "Truck"
     },
     {
@@ -77,7 +82,7 @@
   ],
   "shell": {
     "tenantLabel": "Tenant",
-    "stateLabel": "Prototype state",
+    "stateLabel": "local mode state",
     "stateHelp": "Preview how every screen behaves",
     "themeLabel": "Theme",
     "themes": {
@@ -105,18 +110,18 @@
     "showing": "Showing {shown} of {total}",
     "retry": "Retry",
     "requestAccess": "Request access",
-    "mock": "Mock data",
+    "mock": "Reference data",
     "viewTable": "Table",
     "viewChart": "Chart",
     "close": "Close",
     "search": "Search",
     "noMatches": "No rows match this filter.",
-    "prototypeAction": "Prototype: “{action}” on {target} recorded locally — nothing was sent.",
+    "prototypeAction": "Local mode: “{action}” on {target} recorded in this browser.",
     "searchPlaceholder": "Search by ID or name",
     "actions": "Actions",
     "viewLabel": "View",
     "loading": "Loading",
-    "prototypeOnly": "Prototype only",
+    "prototypeOnly": "Local mode only",
     "ago": "{t} ago",
     "started": "started {t}",
     "updated": "updated {t}",
@@ -335,7 +340,7 @@
       "title": "Latency",
       "description": "Each stage measured separately — publish→detect is never averaged into detect→action.",
       "chartTitle": "Stage latency by percentile",
-      "note": "Computed from the mock claims' own timestamps (nearest-rank). Real numbers publish after the Phase 5 load test.",
+      "note": "Computed from the displayed claim timestamps using nearest-rank percentiles. Offline reference values are not live measurements.",
       "stages": {
         "publish_to_seen": "Publish → seen",
         "seen_to_queued": "Seen → queued",
@@ -362,7 +367,7 @@
         "title": "Latency is restricted",
         "body": "Viewing metrics needs the operator role."
       },
-      "liveNote": "Measured from the claims' own timestamps over the last {window} (nearest-rank). Stages with no samples show 0."
+      "liveNote": "Computed from the displayed claim timestamps using nearest-rank percentiles. Offline reference values are not live measurements."
     },
     "crawl": {
       "title": "Crawl jobs",
@@ -452,12 +457,12 @@
         "owner": "Owner",
         "operator": "Operator",
         "viewer": "Viewer",
-        "demo": "Demo"
+        "demo": "Guest"
       },
       "mfaOn": "TOTP on",
       "mfaOff": "No MFA",
       "save": "Save changes",
-      "prototypeNote": "Prototype: changes are not saved.",
+      "prototypeNote": "local mode: changes are not saved.",
       "empty": {
         "title": "Nothing to configure",
         "body": "This tenant has no settings yet."
@@ -501,7 +506,7 @@
   },
   "live": {
     "banner": "Live",
-    "publicView": "Public demo · read-only",
+    "publicView": "Public workspace · read-only",
     "signedInAs": "{name} · {role}",
     "signIn": "Sign in",
     "signOut": "Sign out",
@@ -513,7 +518,7 @@
     "roles": {
       "public": "Visitor",
       "viewer": "Viewer",
-      "demo": "Demo",
+      "demo": "Guest",
       "operator": "Operator",
       "owner": "Owner"
     },
@@ -547,9 +552,9 @@
       "toggled": "“{name}” {state}; dispatchers reloaded"
     },
     "demo": {
-      "title": "Demo controls",
-      "intro": "This tenant runs against the mock freight board. Start a burst of loads or add trouble, and watch the claims and the timeline react.",
-      "signInToControl": "Sign in with the public demo login (on the sign-in page) to use these controls.",
+      "title": "Workspace controls",
+      "intro": "This workspace runs against the owned freight exchange. Start a capped load burst or inject faults, then inspect claims and their timeline.",
+      "signInToControl": "Sign in with the public workspace login (on the sign-in page) to use these controls.",
       "run": "Start a {minutes}-minute run",
       "running": "Run active · ends in {t}",
       "feed": "Board feed: {n} loads/min",

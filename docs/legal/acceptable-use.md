@@ -1,14 +1,14 @@
 # Acceptable use and client onboarding gate
 
 Fleetwright is a tool for automating web workflows **that the client is allowed to automate**.
-This page sets the rules for any deployment outside the bundled demo.
+This page sets the rules for any deployment outside the bundled public workspace.
 
 ## Allowed
 
 - Sites and systems the client owns or operates.
 - Third-party sites whose terms permit automated access, or that have given the client written
   permission (for example, an API agreement or a partner programme).
-- Testing and demonstration against the fictitious board in `apps/mockboard`.
+- Testing and verification against the owned freight board in `apps/mockboard`.
 
 ## Not allowed
 

@@ -10,3 +10,5 @@ Messaging on Redis.
 | `client.py` | Redis clients for the core and each cell |
 
 Tests: `uv run pytest packages/fw_queue`.
+
+Release operation and limits: [deployment](../../docs/operations/deployment.md) · [maintenance](../../docs/maintenance.md).

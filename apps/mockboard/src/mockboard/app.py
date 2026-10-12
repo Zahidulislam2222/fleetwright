@@ -31,6 +31,7 @@ from mockboard import security, store
 from mockboard.feed import Feed
 from mockboard.mail import send_otp
 from mockboard.models import Adversity, Catalogue
+from mockboard.portal import install as install_portal
 
 log = logging.getLogger("mockboard")
 
@@ -441,4 +442,5 @@ def create_app(settings: BoardAppSettings | None = None) -> FastAPI:
             "adversity": settings.model_dump(exclude={"feed_rate_per_min"}),
         }
 
+    install_portal(app, engine, templates, api_session, adversity)
     return app

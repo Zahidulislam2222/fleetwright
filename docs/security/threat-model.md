@@ -1,55 +1,28 @@
 # Threat model
 
-Method: STRIDE per component, reviewed at every phase. Status column: **in place** (built and
-tested), **partial**, or **planned** (on the [roadmap](../roadmap.md)).
+Assets: destination credentials/sessions, human authority, action integrity, tenant records,
+execution evidence, encryption keys and recoverable backups. Trust boundaries include the public
+edge, operator browser, MCP client process, coordinator/database, queue, worker, destination and
+host backup service. Destination content and model output are untrusted input.
 
-## What we protect
+| Threat | Current mitigation | Residual / next verification |
+|---|---|---|
+| Account takeover | Password/TOTP, lockout, bounded hashing, cookie/CSRF controls | Guest account is intentionally shared; owner credentials must remain private |
+| Model approves its own action | No MCP approval tool; owner console approval bound to exact fingerprint | Human must review exact inputs/account; compromised owner machine remains trusted |
+| Approval replay or changed payload | Database-clock expiry, canonical contract hash, one-time consumption | New contract versions require new approval |
+| Stale/dead worker repeats accepted action | Fenced leases, ACTING intent, UNKNOWN recovery and receipt reads | Destination may not provide conclusive receipts; operator review then required |
+| Tenant crossover / confused deputy | RLS, invocation/job lookup authorization, explicit tenant grant | Privileged system roles and migrations require careful review |
+| Revoked client keeps observing/acting | Tool/execution rechecks and idle-stream authorization polling | Data already delivered cannot be recalled; streams close within configured interval |
+| Page/prompt injection | Structured allowlisted contracts, owned origin, human approval separate from model | Standalone arbitrary browser agent is not released; broader injection assessment required |
+| Credentials in evidence | Safe JSON fields, bounded exports and log filtering | Raw screenshots/traces/archives remain sensitive; no blanket redaction claim |
+| Audit crash gap | Shared DB audit transaction; durable external intent and outcome | External operation can remain unresolved after acceptance |
+| Target/network denial of service | Timeouts, body/page limits, bounded attempts and queues | Large tenant skew, reconnect storms and slow clients need scale tests |
+| SSRF / destination escape | Current owned-origin adapters and internal production network | Arbitrary crawler blocked from release until DNS/redirect/egress guard exists |
+| Host or Docker compromise | Hardened app containers and private network | Single host is a shared failure domain; backup Docker authority is privileged |
+| Backup loss / tampering | Private permissions, archive/list validation and hashes | Hash alone is not authentication; independent encrypted copy and key recovery pending |
+| Dependency compromise | Locked registries, source scans, security CI | Dev-only advisory retained; signed provenance/SBOM/image scanning planned |
 
-| Asset | Why it matters |
-|---|---|
-| Target-site credentials and logged-in sessions | Anyone holding them can act as the client's account |
-| Claim integrity | A duplicate or phantom booking costs the client money and reputation |
-| Tenant data (filters, jobs, bookings, audit log) | Commercially sensitive; must never cross tenants |
-| One-time codes | Short-lived, but enough to take over a session |
-| Operator accounts | Control the whole fleet of a tenant |
-| Master encryption key | Unwraps every sealed record |
-
-## Trust boundaries
-
-1. Internet ↔ edge (CDN/WAF, TLS termination)
-2. Edge ↔ console and API
-3. API / control processes ↔ Postgres and Redis (private network only)
-4. Workers ↔ target sites (untrusted responses)
-5. Workers ↔ email / OTP providers
-6. Operators' browsers (untrusted input)
-
-## Threats and responses
-
-| # | Threat (STRIDE) | Component | Response | Status |
-|---|---|---|---|---|
-| T1 | **Spoofing**: operator account takeover by password guessing | API | argon2id hashing; mandatory TOTP for every account; lockout per email and per client network; constant-time answer for unknown users | Partial (built, not yet released) |
-| T2 | **Spoofing**: replay of a TOTP code | API | Each time step accepted once (atomic compare-and-set) | Partial (built, not yet released) |
-| T3 | **Tampering**: a stale or paused worker acts on a claim it no longer owns | Claims | Fencing tokens checked in every `UPDATE`; database clock only | In place |
-| T4 | **Tampering**: a sealed session copied into another account's row | Vault | Associated data binds ciphertext to tenant + account + purpose | In place |
-| T5 | **Repudiation**: "the system booked that, not me" | Audit | Append-only `audit_log` (no update or delete grant); full claim history in `claim_events` | In place (claims); partial (console actions) |
-| T6 | **Information disclosure**: tenant A reads tenant B | Database | Row-level security `ENABLE` + `FORCE`; tested, mutation-checked | In place |
-| T7 | **Information disclosure**: secrets in logs or failure evidence | Workers | Secrets, cookies and codes never logged; a test scans logs and events | In place |
-| T8 | **Information disclosure**: database dump exposes sessions | Vault | Envelope encryption, AES-256-GCM per record | In place |
-| T9 | **Information disclosure**: secrets in source control | Repository | gitleaks on every edit, commit and push; `.env` and credential files ignored | In place |
-| T10 | **Denial of service**: a hostile target page returns huge or never-ending bodies | Workers | Bounded body reads, timeouts on every action, body read only when needed | In place |
-| T11 | **Denial of service**: unbounded queries or streams | Platform | Pagination limits, statement timeouts, stream length caps, dead-letter after N deliveries | In place |
-| T12 | **Elevation of privilege**: viewer performs operator actions | API | Role check on every endpoint server-side; per-endpoint tests | Planned (with the API release) |
-| T13 | **Elevation of privilege**: worker credentials used to read the whole database | Database | Worker role has column-level grants only | In place |
-| T14 | **CSRF / XSS** against the console | Console | `SameSite=Strict` httpOnly session cookie + CSRF token; Content-Security-Policy, `nosniff`, referrer and permissions policies | Headers in place; cookie/CSRF planned with the API |
-| T15 | **SSRF** from crawl targets reaching internal services | Crawler | Egress guard after DNS resolution, blocking private, loopback, link-local and metadata ranges | Planned (crawler phase) |
-| T16 | **Prompt injection** into the local AI agent | Agent | Page content treated as data; human approval before publish, send, purchase or delete; domain allowlist | Planned (agent phase) |
-| T17 | **Insider misuse**: an operator automates a site the client is not allowed to automate | Process | Onboarding gate with written authorisation ([acceptable use](../legal/acceptable-use.md)) | In place (policy) |
-| T18 | **Supply chain**: malicious or typo-squatted dependency | Build | Exact version pins, lock files, registry check before adding; image digests pinned in Compose | In place; SBOM and image signing planned |
-
-## Residual risks (accepted for now)
-
-- The public demo runs on a single shared server: a host compromise exposes the demo's data. The
-  demo holds only fictitious data.
-- The local master key comes from the environment. Production moves the wrap to a KMS.
-- Third-party captcha solving is not implemented by design; real targets with captchas go to a
-  human operator.
+Fencing establishes database authority, not universal exactly-once external side effects. The
+adapter's evidence semantics and destination constraints must be reviewed for every workflow.
+Reassess this model when adding destinations, permissions, model providers, storage, cells or
+regions. See [controls](controls.md), [legal scope](../legal/acceptable-use.md) and [roadmap](../roadmap.md).

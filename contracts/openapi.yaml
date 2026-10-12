@@ -150,6 +150,17 @@ components:
       - count
       title: Alert
       type: object
+    ApprovalIn:
+      additionalProperties: false
+      properties:
+        action_hash:
+          pattern: ^[a-f0-9]{64}$
+          title: Action Hash
+          type: string
+      required:
+      - action_hash
+      title: ApprovalIn
+      type: object
     AuditEntry:
       additionalProperties: false
       properties:
@@ -768,6 +779,19 @@ components:
           - type: 'null'
           title: Origin
       title: FilterPatch
+      type: object
+    GrantIn:
+      additionalProperties: false
+      properties:
+        scopes:
+          items:
+            type: string
+          title: Scopes
+          type: array
+          uniqueItems: true
+      required:
+      - scopes
+      title: GrantIn
       type: object
     HTTPValidationError:
       properties:
@@ -1712,3 +1736,259 @@ paths:
                 $ref: '#/components/schemas/WorkerPage'
           description: Successful Response
       summary: Workers
+  /v1/workflow-grants:
+    post:
+      operationId: issue_v1_workflow_grants_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GrantIn'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Issue V1 Workflow Grants Post
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Issue
+  /v1/workflow-grants/{grant_id}:
+    delete:
+      operationId: revoke_v1_workflow_grants__grant_id__delete
+      parameters:
+      - in: path
+        name: grant_id
+        required: true
+        schema:
+          format: uuid
+          title: Grant Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: boolean
+                title: Response Revoke V1 Workflow Grants  Grant Id  Delete
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Revoke
+  /v1/workflows/health:
+    get:
+      operationId: health_v1_workflows_health_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Health V1 Workflows Health Get
+                type: object
+          description: Successful Response
+      summary: Health
+  /v1/workflows/jobs:
+    get:
+      operationId: listing_v1_workflows_jobs_get
+      parameters:
+      - in: query
+        name: cursor
+        required: false
+        schema:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Cursor
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Listing V1 Workflows Jobs Get
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Listing
+  /v1/workflows/jobs/{job_id}:
+    get:
+      operationId: proposal_v1_workflows_jobs__job_id__get
+      parameters:
+      - in: path
+        name: job_id
+        required: true
+        schema:
+          format: uuid
+          title: Job Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Proposal V1 Workflows Jobs  Job Id  Get
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Proposal
+  /v1/workflows/jobs/{job_id}/approval:
+    delete:
+      operationId: revoke_approval_v1_workflows_jobs__job_id__approval_delete
+      parameters:
+      - in: path
+        name: job_id
+        required: true
+        schema:
+          format: uuid
+          title: Job Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: boolean
+                title: Response Revoke Approval V1 Workflows Jobs  Job Id  Approval Delete
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Revoke Approval
+  /v1/workflows/jobs/{job_id}/approve:
+    post:
+      operationId: approve_v1_workflows_jobs__job_id__approve_post
+      parameters:
+      - in: path
+        name: job_id
+        required: true
+        schema:
+          format: uuid
+          title: Job Id
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprovalIn'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: boolean
+                title: Response Approve V1 Workflows Jobs  Job Id  Approve Post
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Approve
+  /v1/workflows/jobs/{job_id}/cancel:
+    post:
+      operationId: cancel_v1_workflows_jobs__job_id__cancel_post
+      parameters:
+      - in: path
+        name: job_id
+        required: true
+        schema:
+          format: uuid
+          title: Job Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Cancel V1 Workflows Jobs  Job Id  Cancel Post
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Cancel
+  /v1/workflows/jobs/{job_id}/evidence:
+    get:
+      operationId: evidence_v1_workflows_jobs__job_id__evidence_get
+      parameters:
+      - in: path
+        name: job_id
+        required: true
+        schema:
+          format: uuid
+          title: Job Id
+          type: string
+      - in: query
+        name: cursor
+        required: false
+        schema:
+          default: 0
+          title: Cursor
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Evidence V1 Workflows Jobs  Job Id  Evidence Get
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Evidence
+  /v1/workflows/metrics:
+    get:
+      operationId: metrics_v1_workflows_metrics_get
+      responses:
+        '200':
+          content:
+            text/plain:
+              schema:
+                type: string
+          description: Successful Response
+      summary: Metrics

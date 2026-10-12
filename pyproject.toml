@@ -3,7 +3,7 @@ name = "fleetwright"
 version = "0.2.0"
 description = "Fleetwright workspace root: coordination core, browser workers, mock board, control-plane API"
 requires-python = ">=3.12,<3.13"
-dependencies = ["fw-core", "fw-queue", "fw-browser", "fw-mockboard", "fw-coordinator", "fw-gateway", "fw-worker"]
+dependencies = ["fw-core", "fw-queue", "fw-browser", "fw-mockboard", "fw-coordinator", "fw-gateway", "fw-worker", "fw-mcp"]
 
 [tool.uv]
 package = false
@@ -19,6 +19,7 @@ fw-mockboard = { workspace = true }
 fw-coordinator = { workspace = true }
 fw-gateway = { workspace = true }
 fw-worker = { workspace = true }
+fw-mcp = { workspace = true }
 
 [dependency-groups]
 dev = [
@@ -54,7 +55,7 @@ python_version = "3.12"
 strict = true
 warn_unused_ignores = true
 plugins = ["pydantic.mypy"]
-files = ["packages/fw_core/src", "packages/fw_queue/src", "packages/fw_browser/src", "apps/coordinator/src", "apps/gateway/src", "apps/worker/src", "apps/mockboard/src"]
+files = ["packages/fw_core/src", "packages/fw_queue/src", "packages/fw_browser/src", "packages/fw_mcp/src", "apps/coordinator/src", "apps/gateway/src", "apps/worker/src", "apps/mockboard/src"]
 
 [[tool.mypy.overrides]]
 module = ["asyncpg.*", "argon2.*", "pyotp.*", "sse_starlette.*"]

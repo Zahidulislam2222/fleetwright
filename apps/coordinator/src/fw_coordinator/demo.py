@@ -65,12 +65,24 @@ class SeedCell(BaseModel):
     capacity: int = Field(gt=0)
 
 
+class SeedAccountPool(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    count: int = Field(ge=1, le=50)
+    group: str = Field(min_length=1)
+    prefix: str = Field(pattern="^[a-z0-9_-]+$")
+    label: str = Field(min_length=1)
+
+
 class DemoSeed(BaseModel):
     model_config = ConfigDict(extra="forbid")
     tenant_name: str
     cell: SeedCell
     demo_user_name: str
     board_accounts: int = Field(ge=1, le=50)
+    board_account_group: str
+    board_account_prefix: str
+    board_account_label: str
+    workflow_pool: SeedAccountPool
     filters: list[SeedFilter]
     schedules: list[SeedSchedule] = []
 

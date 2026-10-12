@@ -318,7 +318,14 @@ class Slot:
             self.account = None
         if self.account is None:
             async with tenant_tx(self.fleet.engine, self.tenant_id) as conn:
-                self.account = await accounts.acquire(conn, self.tenant_id, self.id, self.cfg.account_hold_s)
+                self.account = await accounts.acquire(
+                    conn,
+                    self.tenant_id,
+                    self.id,
+                    self.cfg.account_hold_s,
+                    self.fleet.targets.freight_targets(),
+                    self.cfg.reserved_account_groups,
+                )
             if self.account is None:
                 await self._set_state("paused", "no free account")
                 return False

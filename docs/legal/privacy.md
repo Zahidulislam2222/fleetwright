@@ -1,56 +1,63 @@
 # Privacy and data protection
 
-How Fleetwright handles personal data, written for clients, data protection officers and
-reviewers. Not legal advice.
+This describes current processing and the deployment obligations an operator must complete.
+Owned destination records are maintained for workflow verification; operator identities, network
+metadata and security logs can still be personal data. Do not treat an owned workspace as exempt
+from privacy obligations.
 
-## Roles
+## Responsibility
 
-- For a client deployment, the **client is the controller** and Fleetwright (the operator of the
-  service) is the **processor**, bound by a data processing agreement.
-- For the public demo site, the site owner is the controller. The demo uses only fictitious data.
+The public site's operator determines its processing purposes. In a customer deployment,
+controller/processor roles depend on actual decisions and contracts; they are not automatically
+assigned by the software. Document roles, lawful basis, notices and a DPA where required before
+processing customer data. Use [the legal register](README.md) for applicability and source links.
 
-## What data is processed
+## Data inventory
 
-| Category | Examples | Why | Where it lives | Protection |
-|---|---|---|---|---|
-| Console users | Name, work email, role, last sign-in time | Access control and audit | Postgres (`users`) | Row-level security; password hashed (argon2id); TOTP secret encrypted |
-| Target-site accounts | Login email, password, session cookies | To act for the client | Postgres (`accounts`, `account_sessions`) | Envelope encryption (AES-256-GCM); never logged |
-| One-time codes | Codes from email or typed by an operator | To finish a login | In memory and short-lived Redis keys only | Never logged or stored in Postgres |
-| Job data from the target | Load details: lanes, rates, times | The business purpose | Postgres (`target_jobs`, `claims`) | Row-level security; minimised to needed fields |
-| Audit records | Who did what, when, from which network | Accountability and security | Postgres (`audit_log`, append-only) | Client addresses stored as a network prefix (/24 IPv4, /48 IPv6), not a full IP |
-| Failure evidence | Browser trace and screenshot of a failed step | Troubleshooting | Local object storage | Retention limit (7 days by default); access restricted |
+| Data | Purpose / storage | Current protection |
+|---|---|---|
+| Console email, role and password hash | Identity and authorization in PostgreSQL | Argon2id; role checks; encrypted TOTP secret |
+| Target credentials/session state | Authorized destination login in account vault | Envelope encryption, row-bound associated data and tenant RLS |
+| One-time codes | Login completion in memory/short-lived messaging | Limited lifetime, no intended log persistence |
+| Freight/job/request inputs and receipts | Execution and reconciliation in PostgreSQL | Tenant isolation, exact-action fingerprint and bounded evidence |
+| Approval/grant/session records | Human authority and client access | Expiry/revocation checks; stored token digests |
+| Audit identity and network prefix | Investigation/accountability | Append-only application grants; IPv4 /24 or IPv6 /48 prefix in application audit |
+| Browser screenshots/traces | Private failure investigation | Private storage and configured pruning; artifacts may contain page data |
+| Database archives | Recovery | Restricted host permissions, verified manifests; archives remain sensitive |
 
-## Principles applied
+Edge, hosting and infrastructure access logs may have different network metadata than application
+audit. Review their retention and vendor terms separately. Evidence redaction in JSON exports does
+not establish that raw screenshots/traces or database archives are anonymous.
 
-- **Minimisation:** only the fields a task needs are stored. The planned crawler adds a per-job
-  "may contain personal data" flag with a field allowlist.
-- **Retention:** evidence files are deleted after the configured retention period; job data
-  retention is set per client at onboarding.
-- **Security:** see [security controls](../security/controls.md).
-- **Masking:** anonymous visitors and the shared demo login see masked emails and no client
-  addresses.
-- **Cookies:** the console uses strictly necessary cookies only (session and CSRF). No analytics,
-  advertising or tracking cookies.
+## Retention and requests
 
-## Data-subject requests
+Browser evidence has a configured retention period, seven days by default, and pruning in the
+freight worker. Backup loop retention defaults to seven completed archives. Database job/audit
+retention is not a complete automated deletion policy today. Before customer onboarding, assign
+periods by category, legal holds, backup expiry, deletion ownership and verification. Restrict free
+text and prohibit unnecessary sensitive personal data in workflow inputs.
 
-Requests (access, correction, deletion, objection) are handled by the controller with the
-processor's help:
+Handle access, correction, deletion and objection requests through the deployment operator:
+verify identity/authority, identify the tenant and records, assess legal retention duties, export
+or correct/delete through an approved procedure, and record completion. Append-only audit records
+need a legally reviewed minimization/pseudonymization policy; do not promise automatic deletion
+that is not implemented. Apply the applicable jurisdiction's deadline and extensions.
 
-1. Identify the tenant and the records (by email or account).
-2. Export or delete within the legal deadline (one month under GDPR, extendable in complex cases;
-   45 days under the CCPA).
-3. Audit-log entries are kept for accountability, with the person's identifiers removed where the
-   law allows.
-4. Record the request and the outcome.
+## Cookies, providers and transfers
 
-## International transfers
+The application uses necessary session/CSRF mechanisms and local browser preferences; no application
+advertising or analytics integration is configured. Hosting/CDN providers may apply their own
+security mechanisms. Document subprocessors and hosting regions in a deployment-specific notice.
+International transfer safeguards require an assessed legal mechanism and contract; choosing a
+region or provider does not by itself complete that assessment.
 
-Hosting region is chosen per client. Transfers of EU personal data outside the EEA rely on the EU–US
-Data Privacy Framework or Standard Contractual Clauses, recorded in the DPA.
+MCP exports exclude credentials, cookies, arbitrary payloads and raw page HTML. Client prompts
+and model-provider retention are outside that export boundary: send only necessary redacted
+material and review the selected provider's terms. There is no automatic paid model API fallback.
 
-## Breach notification
+## Security incidents
 
-Personal-data breaches are handled under the [incident runbook](../operations/runbooks.md#incident-response):
-the processor informs the controller without undue delay; the controller notifies the supervisory
-authority within 72 hours where GDPR requires it.
+Contain unauthorized access, preserve private evidence, identify affected data and notify the
+responsible controller/operator promptly. GDPR controller notification to a supervisory authority
+is generally within 72 hours where required; processor notification is without undue delay.
+Other jurisdictions can differ. Follow [incident response](../operations/runbooks.md#incident-response).

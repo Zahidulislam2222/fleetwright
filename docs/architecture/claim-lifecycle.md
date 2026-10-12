@@ -1,8 +1,9 @@
 # Claim lifecycle
 
 The claim state machine (`packages/fw_core/src/fw_core/claims.py`) is the part of Fleetwright that
-guarantees **no job is acted on twice**. Every rule below is enforced by a database statement, not
-by worker code.
+enforces claim uniqueness, current fenced authority and explicit uncertain outcomes. Database
+transitions combine with worker/adapter checks; external destinations do not validate database fences.
+This does not guarantee exactly-once side effects on arbitrary websites.
 
 ```
 DETECTED ──▶ QUEUED ──▶ LEASED ──▶ ACTING ──▶ CONFIRMED
@@ -55,5 +56,5 @@ DETECTED ──▶ QUEUED ──▶ LEASED ──▶ ACTING ──▶ CONFIRMED
 | Crash while `LEASED` | The claim is re-queued and booked once |
 | Crash while `ACTING` | The claim becomes `UNKNOWN` and is reconciled against the board |
 | Hypothesis interleavings (40 generated schedules) | A terminal state never changes |
-| 200 competitors × 10,000 jobs | 9,897 confirmed claims = 9,897 bookings on the board, 0 duplicates |
+| 200 competitors × 10,000 jobs | 2026-10-13: 9,895 confirmed/reconciled claims and matching destination bookings; zero duplicate attempts |
 | Engine chaos run (5xx errors, slow responses, lost acknowledgements, rival bots) | Every claim ends confirmed, failed or reconciled, and matches the board's ground truth |

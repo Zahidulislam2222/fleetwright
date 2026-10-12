@@ -2,6 +2,14 @@
 
 Bugs found after a change was declared done. Each row records which quality gate should have caught it and whether that gate now exists.
 
+Pre-release MCP review findings (caught before declaring this extension complete): queue head
+starvation, reconciliation head starvation, lease time spent during setup, disabled-account use,
+and service-worker/WebSocket routing escapes. All received source fixes and focused regression
+coverage; independent re-review approved the final source. Additional dependency audit upgraded
+MCP1.26.0 to patched1.28.1; an unpatched development-only Next ESLint/braces advisory remains
+explicitly documented, with production dependency audits clean. The full verification record lives in
+the private dossier and workflow runbook. No production incident is implied by this review record.
+
 | Date | What escaped | Gate that should have caught it | Gate added? |
 |---|---|---|---|
 | 2026-10-05 | Overflow check reported "0 px at 375" while it could not fail: Playwright `isMobile` widens the layout viewport to fit content, so `scrollWidth - innerWidth` was always 0 | Behavioural test (A11) — the check itself was the defect | Yes: measure `scrollWidth - clientWidth` at true CSS widths 375/768/1024 without `isMobile`; injected-overflow mutation check proved it now fails (141 px detected) |
@@ -29,3 +37,6 @@ Bugs found after a change was declared done. Each row records which quality gate
 | 2026-10-06 | Audit cursor still 500 on a non-ASCII digit or a key past bigint after the first fix | First fix tested only letters | Yes: parametrized test covering letters, "²" and a 26-digit key, mutation-checked |
 | 2026-10-06 | Server-side image build wrote into the release folder, breaking release immutability | Drift check compared hashes but not file count | Yes: drift check counts files; builds moved to a separate folder |
 | 2026-10-06 | Production smoke test left an enabled filter in the live demo engine on every run | Smoke test had no cleanup step | Yes: smoke test reuses one disabled filter and checks none are left enabled |
+| 2026-10-13 | Workflow contract fingerprint changed across worker processes because set-valued choices became unordered JSON arrays; approval correctly rejected, so a real worker never acted | Cross-process approval/worker behavior; one random-seed crash test could pass by coincidence | Yes: eight explicit PYTHONHASHSEED subprocesses must produce identical fingerprints; canonical set serialization |
+| 2026-10-13 | Initially selected MCP SDK had published advisories despite source security scans passing; affected transports/features unused by this stdio server | Dependency vulnerability audit should precede version selection | Yes: patched1.28.1 pinned and re-audited; dependency audit evidence retained separately from source scans |
+| 2026-10-13 | Fresh restore fixture could treat PostgreSQL temporary initialization server as ready and race its shutdown | Controlled startup-window behavioral test | Yes: delayed initializer exposes socket-only window; TCP readiness required before one-time bootstrap, full restoration invariants retained |

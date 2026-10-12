@@ -85,3 +85,11 @@ CREATE OR REPLACE VIEW load_rows AS
   SELECT l.id, l.ref, l.origin, l.destination, l.equipment, l.weight_lb, l.miles, l.rate_usd, l.pickup_at,
          l.published_at, l.booked_at, l.booked_by, l.booked_by_competitor, ba.username AS booked_by_username
   FROM loads l LEFT JOIN board_accounts ba ON ba.id = l.booked_by;
+CREATE TABLE IF NOT EXISTS portal_requests (
+  account_id bigint NOT NULL REFERENCES board_accounts(id),
+  reference text NOT NULL,
+  title text NOT NULL,
+  priority text NOT NULL CHECK (priority IN ('normal','urgent')),
+  accepted_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+  PRIMARY KEY (account_id,reference)
+);

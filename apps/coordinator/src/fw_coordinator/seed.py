@@ -50,6 +50,10 @@ async def _tenant(engine: AsyncEngine, cfg: SeedAppSettings, data: DemoConfig) -
                 text("INSERT INTO tenant_cells (tenant_id, cell_id) VALUES (:t, :c)"),
                 {"t": tenant_id, "c": cfg.seed.cell},
             )
+        else:
+            await conn.execute(
+                text("UPDATE tenants SET name=:n WHERE id=:t"), {"n": data.seed.tenant_name, "t": tenant_id}
+            )
     return UUID(str(tenant_id))
 
 
@@ -121,14 +125,22 @@ async def _user(
 
 
 async def _board_accounts(
-    engine: AsyncEngine, envelope: Envelope, http: httpx.AsyncClient, cfg: SeedAppSettings, tenant_id: UUID, count: int
+    engine: AsyncEngine,
+    envelope: Envelope,
+    http: httpx.AsyncClient,
+    cfg: SeedAppSettings,
+    tenant_id: UUID,
+    count: int,
+    group: str,
+    prefix: str,
+    label: str,
 ) -> int:
-    """Demo carrier accounts: created on the board with a random password kept only in the vault."""
+    """Named account pools: destination passwords are generated privately and sealed in the vault."""
     base = cfg.board_client.internal_url.rstrip("/")
     headers = {"Authorization": f"Bearer {cfg.board_client.admin_token.get_secret_value()}"}
     created = 0
     for i in range(1, count + 1):
-        username = f"{cfg.demo.tenant_slug}-carrier-{i}"
+        username = f"{cfg.demo.tenant_slug}-{prefix}-{i}"
         async with tenant_tx(engine, tenant_id) as conn:
             exists = (
                 await conn.execute(
@@ -137,6 +149,13 @@ async def _board_accounts(
                 )
             ).scalar_one_or_none()
         if exists:
+            async with tenant_tx(engine, tenant_id) as conn:
+                await conn.execute(
+                    text(
+                        "UPDATE accounts SET label=:l, account_group=:g WHERE tenant_id=:t AND target=:target AND username=:u"
+                    ),
+                    {"l": f"{label} {i}", "g": group, "t": tenant_id, "target": BOARD_TARGET, "u": username},
+                )
             continue
         password = secrets.token_urlsafe(18)
         reply = await http.post(
@@ -149,13 +168,14 @@ async def _board_accounts(
             await conn.execute(
                 text(
                     """INSERT INTO accounts (tenant_id, id, label, target, username, email,
-                                           cred_key_id, cred_wrapped, cred_nonce, cred_sealed)
-                       VALUES (:t, :i, :l, :g, :u, :e, :k, :w, :n, :s)"""
+                                           account_group, cred_key_id, cred_wrapped, cred_nonce, cred_sealed)
+                       VALUES (:t, :i, :l, :g, :u, :e, :group, :k, :w, :n, :s)"""
                 ),
                 {
                     "t": tenant_id,
                     "i": account_id,
-                    "l": f"Demo carrier {i}",
+                    "l": f"{label} {i}",
+                    "group": group,
                     "g": BOARD_TARGET,
                     "u": username,
                     "e": reply.json()["email"],
@@ -230,7 +250,21 @@ async def seed(cfg: SeedAppSettings, data: DemoConfig) -> dict[str, object]:
                     cfg.demo.account_password.get_secret_value(),
                     None,
                 )
-            created = await _board_accounts(engine, envelope, http, cfg, tenant_id, data.seed.board_accounts)
+            created = await _board_accounts(
+                engine,
+                envelope,
+                http,
+                cfg,
+                tenant_id,
+                data.seed.board_accounts,
+                data.seed.board_account_group,
+                data.seed.board_account_prefix,
+                data.seed.board_account_label,
+            )
+            pool = data.seed.workflow_pool
+            created += await _board_accounts(
+                engine, envelope, http, cfg, tenant_id, pool.count, pool.group, pool.prefix, pool.label
+            )
             async with tenant_tx(engine, tenant_id) as conn:
                 await _rules(conn, tenant_id, data)
             headers = {"Authorization": f"Bearer {cfg.board_client.admin_token.get_secret_value()}"}

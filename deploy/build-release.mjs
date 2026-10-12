@@ -25,15 +25,16 @@ if (existsSync(out)) {
   process.exit(2);
 }
 
-// 0. The backend ships as committed source, so the release is exactly a commit.
+// 0. Every release input must be committed: static files and templates belong to the same commit.
 const BACKEND_PATHS = ["pyproject.toml", "uv.lock", ".dockerignore", "config", "packages", "apps/coordinator", "apps/gateway", "apps/mockboard", "apps/worker", "deploy/docker"];
+const RELEASE_PATHS = [...BACKEND_PATHS, "apps/dashboard", "deploy/templates", "deploy/deploy.config.json", "deploy/security-headers.json", "deploy/build-release.mjs", "infra/compose/local.yaml", "infra/postgres"];
 const git = (args) => spawnSync("git", args, { cwd: root, encoding: "utf8" });
-const dirty = git(["status", "--porcelain", "--", ...BACKEND_PATHS]);
+const dirty = git(["status", "--porcelain", "--", ...RELEASE_PATHS]);
 if (dirty.status !== 0 || dirty.stdout.trim()) {
-  console.error(`Commit backend changes first; uncommitted:\n${dirty.stdout || dirty.stderr}`);
+  console.error(`Commit release inputs first; uncommitted:\n${dirty.stdout || dirty.stderr}`);
   process.exit(2);
 }
-const commit = git(["rev-parse", "--short", "HEAD"]).stdout.trim();
+const commit = git(["rev-parse", "HEAD"]).stdout.trim();
 
 // Data-service images are pinned once, in the local stack, and reused here.
 const localStack = readFileSync(join(root, "infra", "compose", "local.yaml"), "utf8");
@@ -103,6 +104,8 @@ const values = {
   ...config.limits,
   ...config.cache,
   ...config.backend,
+  ...config.backup,
+  backupDatabases: JSON.stringify(config.backup.backupDatabases),
   releaseId,
   securityHeaders: headerLines,
   postgresImage: pinned("postgres"),
@@ -119,6 +122,8 @@ const render = (name) =>
   });
 writeFileSync(join(out, "nginx.conf"), render("nginx.conf"));
 writeFileSync(join(out, "compose.yaml"), render("compose.yaml"));
+writeFileSync(join(out, "backup.service"), render("backup.service"));
+writeFileSync(join(out, "backup.env"), render("backup.env"));
 writeFileSync(join(out, `${config.slug}.caddy`), render("site.caddy"));
 mkdirSync(join(out, "infra"));
 cpSync(join(root, "infra", "postgres", "10-roles.sh"), join(out, "infra", "10-roles.sh"));

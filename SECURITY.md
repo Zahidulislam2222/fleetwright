@@ -4,7 +4,7 @@
 
 Please report security problems **privately**. Do not open a public issue.
 
-- Use GitHub's private vulnerability reporting: **Security → Report a vulnerability** on this
+- Use GitHub's private vulnerability reporting when enabled: **Security → Report a vulnerability** on this
   repository.
 - Include what you found, how to reproduce it, and the impact you expect.
 
@@ -19,7 +19,7 @@ What happens next:
 
 Actively exploited vulnerabilities in a released product are handled under the EU Cyber
 Resilience Act timelines where they apply (early warning within 24 hours, notification within 72
-hours, final report within 14 days). See [runbooks](docs/operations/runbooks.md#vulnerability-handling).
+hours, incident-specific final reporting). See [runbooks](docs/operations/runbooks.md#vulnerability-handling).
 
 ## Scope
 
@@ -39,7 +39,7 @@ Fleetwright is pre-1.0. Only the latest commit on `main` receives fixes.
 
 ## How the project handles security
 
-- Every file change by an automated or human author is scanned for secrets (gitleaks) and Python
+- The configured local edit hooks scan file changes for secrets (gitleaks) and Python
   security issues (bandit); commits also run semgrep. Findings are fixed, never suppressed.
 - The same scanners run in GitHub Actions on every push to `main` and every pull request.
 - Real secrets never enter the repository. `.env.example` documents variable names with

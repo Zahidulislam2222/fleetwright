@@ -26,11 +26,12 @@ from pydantic import BaseModel, ConfigDict, Field
 from redis.asyncio import Redis
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import AsyncEngine
+from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine
 
 from fw_coordinator import schemas, views
 from fw_coordinator.auth import Auth, BadCredentials, LockedOut, ip_prefix
 from fw_coordinator.demo import Demo, DemoConfig, RunActive, load_demo
+from fw_coordinator.workflow_api import install as install_workflows
 from fw_core.crypto import Envelope
 from fw_core.db import make_engine, system_tx, tenant_tx
 from fw_core.logs import setup_logging
@@ -164,23 +165,34 @@ async def can_control_demo(svc: Services, who: Principal) -> None:
         raise HTTPException(403, "not allowed for this role")
 
 
-async def audit(svc: Services, who: Principal, request: Request, action: str, target: str, detail: str) -> None:
-    async with tenant_tx(svc.engine, who.tenant_id) as conn:
-        await conn.execute(
-            text(
-                """INSERT INTO audit_log (tenant_id, actor, role, action, target, detail, ip_prefix)
+async def audit(
+    svc: Services,
+    who: Principal,
+    request: Request,
+    action: str,
+    target: str,
+    detail: str,
+    conn: AsyncConnection | None = None,
+) -> None:
+    if conn is None:
+        async with tenant_tx(svc.engine, who.tenant_id) as owned:
+            await audit(svc, who, request, action, target, detail, owned)
+        return
+    await conn.execute(
+        text(
+            """INSERT INTO audit_log (tenant_id, actor, role, action, target, detail, ip_prefix)
                    VALUES (:t, :a, :r, :action, :target, :d, :ip)"""
-            ),
-            {
-                "t": who.tenant_id,
-                "a": who.email or "anonymous",
-                "r": who.role,
-                "action": action,
-                "target": target,
-                "d": detail,
-                "ip": ip_prefix(client_ip(request, svc.cfg.api.trusted_proxy_hops)),
-            },
-        )
+        ),
+        {
+            "t": who.tenant_id,
+            "a": who.email or "anonymous",
+            "r": who.role,
+            "action": action,
+            "target": target,
+            "d": detail,
+            "ip": ip_prefix(client_ip(request, svc.cfg.api.trusted_proxy_hops)),
+        },
+    )
 
 
 def _limit(svc: Services, limit: int | None) -> int:
@@ -299,6 +311,7 @@ def create_app(cfg: CoordinatorSettings | None = None, demo_data: DemoConfig | N
 
     @app.post("/v1/auth/logout", response_model=schemas.SignedOut)
     async def logout(request: Request, response: Response, svc: Svc, who: Mutator) -> dict[str, bool]:
+        await audit(svc, who, request, "auth.sign_out.intent", "console", "revocation requested; result may be unknown")
         await sessions.revoke(svc.redis, who)
         await audit(svc, who, request, "auth.sign_out", "console", "signed out")
         response.delete_cookie(svc.cfg.auth.cookie_name, path="/")
@@ -431,9 +444,10 @@ def create_app(cfg: CoordinatorSettings | None = None, demo_data: DemoConfig | N
                         "weight": body.max_weight_lb,
                     },
                 )
+                await audit(svc, who, request, "filter.create", body.name, json.dumps(body.model_dump()), conn)
         except IntegrityError as exc:
             raise HTTPException(409, "a filter with this name exists") from exc
-        await _filters_changed(svc, who, request, "filter.create", body.name, json.dumps(body.model_dump()))
+        await _filters_changed(svc, who)
         return await _one_filter(svc, who, filter_id)
 
     @app.patch("/v1/filters/{filter_id}", response_model=schemas.Filter)
@@ -473,17 +487,16 @@ def create_app(cfg: CoordinatorSettings | None = None, demo_data: DemoConfig | N
                         },
                     )
                 ).one_or_none()
+                if row is not None:
+                    await audit(svc, who, request, "filter.update", row.name, json.dumps(changes), conn)
         except IntegrityError as exc:
             raise HTTPException(409, "a filter with this name exists") from exc
         if row is None:
             raise HTTPException(404, "no such filter")
-        await _filters_changed(svc, who, request, "filter.update", row.name, json.dumps(changes))
+        await _filters_changed(svc, who)
         return await _one_filter(svc, who, filter_id)
 
-    async def _filters_changed(
-        svc: Services, who: Principal, request: Request, action: str, target: str, detail: str
-    ) -> None:
-        await audit(svc, who, request, action, target, detail)
+    async def _filters_changed(svc: Services, who: Principal) -> None:
         try:
             await svc.redis.publish(keys.filters_channel(who.tenant_id), "changed")
         except OSError:
@@ -509,6 +522,9 @@ def create_app(cfg: CoordinatorSettings | None = None, demo_data: DemoConfig | N
             ).scalar_one_or_none()
         if label is None:
             raise HTTPException(404, "no such account")
+        await audit(
+            svc, who, request, "account.otp_entered.intent", label, "handoff requested; value never stored in audit"
+        )
         key = keys.manual_otp(who.tenant_id, account_id)
         async with svc.redis.pipeline(transaction=True) as pipe:
             pipe.rpush(key, body.code)
@@ -528,6 +544,7 @@ def create_app(cfg: CoordinatorSettings | None = None, demo_data: DemoConfig | N
     @app.post("/v1/demo/run", response_model=schemas.DemoStatus)
     async def demo_run(request: Request, svc: Svc, who: Mutator) -> dict[str, Any]:
         await can_control_demo(svc, who)
+        await audit(svc, who, request, "demo.run.intent", "board", "run requested; external outcome pending")
         try:
             status = await svc.demo.start_run()
         except RunActive:
@@ -538,6 +555,7 @@ def create_app(cfg: CoordinatorSettings | None = None, demo_data: DemoConfig | N
     @app.patch("/v1/demo/adversity", response_model=schemas.DemoStatus)
     async def demo_adversity(body: AdversityIn, request: Request, svc: Svc, who: Mutator) -> dict[str, Any]:
         await can_control_demo(svc, who)
+        await audit(svc, who, request, "demo.adversity.intent", "board", "change requested; external outcome pending")
         try:
             status = await svc.demo.change_adversity(dict(body.changes))
         except ValueError as exc:
@@ -549,6 +567,7 @@ def create_app(cfg: CoordinatorSettings | None = None, demo_data: DemoConfig | N
         await audit(svc, who, request, "demo.adversity", "board", json.dumps(body.changes))
         return status
 
+    install_workflows(app, services, principal, csrf_checked)
     return app
 
 

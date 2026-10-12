@@ -22,10 +22,14 @@ adversity:                  # switches a demo visitor may change, with the large
   competitor_share: {max: 0.6}
   layout_variant: {choices: [a, b]}
 seed:
-  tenant_name: Fleetwright Demo
-  cell: {name: Demo cell, region: local, capacity: 50}   # the id comes from FW_SEED__CELL
-  demo_user_name: Demo visitor
+  tenant_name: Fleetwright Workspace
+  cell: {name: Freight cell, region: local, capacity: 50}   # the id comes from FW_SEED__CELL
+  demo_user_name: Workspace guest
   board_accounts: 4         # demo tenant accounts created on the mock board
+  board_account_group: default
+  board_account_prefix: carrier
+  board_account_label: Fleet carrier
+  workflow_pool: {count: 1, group: workflow, prefix: workflow, label: Approved workflow account}
   filters:
     - {name: Everything over $900, min_rate_usd: 900}
     - {name: Texas outbound, origin: "Dallas, TX", min_rate_usd: 0}

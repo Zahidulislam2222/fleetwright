@@ -1,12 +1,27 @@
 # Changelog
 
+## Release candidate (2026-10-13) — reliable browser operations
+
+- Dedicated local MCP package for versioned freight-booking and maintenance-request workflows,
+  with scoped revocable access, idempotent submissions and bounded paginated evidence.
+- Exact-action human owner approval in the API and console; fenced durable execution, safe
+  cancellation and receipt-based reconciliation after interrupted responses or process death.
+- Fair persisted recovery rotation, authenticated operational gauges/alerts, verified database
+  archives and fresh-cluster restoration tooling.
+- Transactional console audit, durable intent for external actions, bounded idle-stream revocation,
+  and isolated serialized test databases.
+- Actual Codex MCP and real-browser verification; Claude verification deferred by the owner.
+- Dedicated reserved workflow account pool, supervised workflow worker and protected host backup service templates.
+- Complete public product/API/security/privacy/legal/operations/scaling/SLO/maintenance documentation and refreshed READMEs.
+- Publication/configuration regressions and quality CI; full release suite138/138passed475.34s.
+
 All notable changes, newest first. Version numbers follow the workspace version in
 `pyproject.toml`.
 
 ## 0.2.0 (2026-10-05): the engine
 
 ### Added
-- **Mock load board** (`apps/mockboard`): login with emailed one-time code, captcha, live feed with
+- **owned freight board** (`apps/mockboard`): login with emailed one-time code, captcha, live feed with
   ground-truth publish times, first-booker-wins booking, booking-attempt audit, adversity switches
   (rate limits, errors, slow responses, lost acknowledgements, layout change, rival bots, forced
   session expiry, single session), admin API.
@@ -15,7 +30,7 @@ All notable changes, newest first. Version numbers follow the workspace version 
   reclaim and dead-letter; transactional outbox and relay.
 - **Worker runtime** (`apps/worker`, `packages/fw_browser`): one Chromium per process with many
   contexts; account holder leases; session vault with envelope encryption; emailed and manual
-  one-time codes; proxy and captcha adapters (mock providers); failure evidence with retention;
+  one-time codes; proxy and captcha adapters (controlled providers); failure evidence with retention;
   graceful drain.
 - **Live engine**: watchers on the feed's JSON responses; per-cell control process with dispatcher
   (filters, schedules, hot reload), outbox relay and reconciler; actors in HTTP or click mode;
@@ -29,6 +44,6 @@ All notable changes, newest first. Version numbers follow the workspace version 
 ## 0.1.0 (2026-10-05): design and live site
 
 ### Added
-- Landing page and console design prototype (every screen with ready, loading, empty, error and
+- Landing page and console design interaction reference (every screen with ready, loading, empty, error and
   denied states; light and dark themes).
 - Live static deployment with security headers.

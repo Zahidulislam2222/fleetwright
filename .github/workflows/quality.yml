@@ -1,0 +1,37 @@
+name: quality
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  source-and-publication:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.12.10"
+          enable-cache: false
+      - run: uv sync --frozen --python 3.12
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy
+      - name: Configuration and publication regressions
+        run: >-
+          uv run pytest -q packages/fw_core/tests/test_config_boundary.py
+          packages/fw_core/tests/test_publication_contract.py
+          packages/fw_core/tests/test_workflow_contract_fingerprint.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: npm ci
+        working-directory: apps/dashboard
+      - run: npm run lint && npm run typecheck && npm run build && npm run check:contrast
+        working-directory: apps/dashboard
+      - run: npm audit --omit=dev
+        working-directory: apps/dashboard

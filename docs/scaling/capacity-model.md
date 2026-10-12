@@ -1,63 +1,60 @@
 # Capacity model
 
-How many machines each scale tier needs, worked out from measured inputs. Every number is labelled
-**measured**, **estimate** or **target**. Estimates must be replaced by measurements before any
-capacity is promised to a client.
+This model separates measured inputs from assumptions. Replace every estimate with a benchmark
+before offering a capacity commitment.
 
-## Measured inputs (developer PC, 2026-10-05)
+## Measured execution inputs
 
-| Input | Value | Source |
+Historical developer-machine runs used 8, 16 and 32 Chromium contexts: roughly 70–103 MB unique
+memory per context and 1.8 CPU cores at 32 contexts. Owned-board freight detection-to-confirmation
+was approximately p50 365 ms / p95 540 ms. These figures depend on the workload and machine;
+they are not measurements of heavier sites or of the new workflow runner at scale.
+
+For planning, use 100 MB/context, reserve at least 30% of node RAM for the OS, browser overhead,
+peaks and service processes, and validate CPU separately. An 8 GB worker-only node would then
+budget about 56 contexts by memory; **50 contexts remains an unmeasured next test**, not a proven
+density. Do not share that budget with a database without recalculating it.
+
+## One-million-session assumptions
+
+The following are deliberately adjustable scenario inputs, not configured production limits:
+
+| Input | Planning assumption | Derived load |
 |---|---|---|
-| Memory per browser context | 70–103 MB unique set size; **100 MB** used for planning | Fleet capacity run at 8 / 16 / 32 contexts, Chromium child processes included |
-| CPU at 32 contexts | ≈ 1.8 cores (≈ 0.06 cores per context) | Same run, idle feed polling |
-| Detection → confirmed booking | p50 ≈ 365 ms, p95 ≈ 540 ms | Per-stage timestamps in Postgres |
-| Claims under contention | 10,000 jobs, 200 concurrent competitors, 0 duplicates | Slow test in `test_claims.py` |
+| Connected sessions | 1,000,000 | Sustained concurrent sockets |
+| Read rate | One request/session/30 s | About 33,333 reads/s before caching/coalescing |
+| Mutation rate | 1% of sessions, one/minute | About 167 writes/s, with bursts tested separately |
+| Delivered updates | One/session/10 s, 1 KiB payload | About 100,000 deliveries/s and 102.4 MB/s payload bandwidth |
+| Gateway socket allocation | 64 KiB/session, estimate | About 61 GiB fleet memory before process/queue overhead |
+| Reconnect event | 10% reconnect within 10 s | 10,000 handshakes/s plus resynchronization demand |
+| Gateway density | 20,000 sockets/instance, unmeasured | 50 active instances before failover/headroom |
 
-The CPU figure is for watching a feed and acting on bookings. Pages with heavy scripts or video
-use more; measure per target before sizing.
+Protocol/TLS overhead, replication and client-triggered refetch add load. If every update triggers
+five reads, the update scenario can create 500,000 reads/s: coalescing and bounded snapshots are
+acceptance requirements. CDN serving removes much static asset load, not API traffic or user sockets.
 
-## Worker plane
+For three equally loaded zones surviving one-zone loss at no more than 70% instance capacity,
+normal aggregate utilization must be at most about 46.7%. The 50-instance idealized density would
+therefore suggest at least 108 provisioned equivalents, rounded up with deployment/maintenance
+headroom. This is arithmetic, not an infrastructure quote or a claim that 108 instances suffice.
 
-Planning rule (estimate): **≈ 75 contexts per 8 GB node**, leaving about 0.5 GB for the operating
-system and the worker process itself; CPU is not the limit at that density (≈ 4.5 cores).
+## Database and queue budgets
 
-| Tier | Contexts | Nodes of 8 GB (estimate) | Cells (estimate, ≈ 500 contexts per cell) | Status |
-|---|---|---|---|---|
-| Pilot | 50 | 1 | 1 | Within measured range per node |
-| Small | 500 | ≈ 7 | 1 | Extrapolated |
-| Large | 5,000 | ≈ 67 | ≈ 10 | Extrapolated |
-| Very large | 10,000 | ≈ 134 | ≈ 20 | Extrapolated |
+Budget connections as sum(replicas × pool size) plus migration/monitoring/operational reserve,
+below the database limit. Connection pooling and backpressure must limit that sum during rollout
+and autoscaling. Measure transaction latency, lock waits, WAL growth, replication lag and RLS query
+plans at realistic tenant skew. Partition append-heavy events/audit by retention and time, preserving
+tenant predicates and integrity rules. Read replicas cannot satisfy fresh approval authority.
 
-Cell size of ≈ 500 contexts is an estimate: one Redis instance handles far more stream traffic than
-500 contexts generate, so the real limit is expected to be the blast radius you accept for one cell
-failure, not Redis throughput. It will be set by a load test.
+For each queue, estimate arrivals × outage duration × record size, then include replay and retention
+headroom. Bound queue growth and admission explicitly. Alerts need oldest-item age, not only count.
+Current stream caps can trim history; recovery semantics must be verified rather than assuming
+every detection can always be reconstructed.
 
-## Control plane
+## Validation ladder
 
-| Tier (concurrent console sessions) | Gateway instances (estimate, ≈ 20,000 SSE connections each) | API instances (estimate) | Postgres | Status |
-|---|---|---|---|---|
-| 1,000 | 1 (2 for redundancy) | 2 | Primary + standby | Target |
-| 10,000 | 2 | 2–4 | Primary + standby | Target |
-| 100,000 | ≈ 5–10 | 4–8 | + read replicas, connection pooler | Target |
-| 1,000,000 | ≈ 50–100 | 10–20 | + replicas per region, partitioned `claims` / `claim_events` / `audit_log` | Target |
-
-Why this is plausible (estimates, to be load-tested):
-- Live updates use server-sent events. Each gateway subscribes once per tenant channel in Redis
-  and fans out to its own clients, so Redis load grows with tenants, not with viewers.
-- The console is a static export: served from a CDN, it adds no server load per viewer.
-- Reads dominate. Lists are cursor-paginated and bounded; heavy views (latency, overview) can be
-  served from replicas or short caches.
-
-## What has not been measured yet
-
-| Unknown | How it will be measured | Roadmap |
-|---|---|---|
-| Claims per second one Postgres primary sustains | Load test of the claim path with many cells | Hardening phase |
-| SSE connections per gateway instance | k6 against the gateway, p95 fan-out latency | Console phase |
-| A 50- and 70-context fleet for one hour | Fleet run on a dedicated machine | Hardening phase |
-| Memory on real target sites | Per-target capacity run | Per client |
-
-## Cost
-
-No cost figures are published here. Prices change, and any paid infrastructure is approved by the
-owner with an exact quote before it is created.
+Measure 1k, 10k, 100k and 1M sessions with the same disclosed workload. At every step test skewed
+tenants, authorization revocation, slow consumers, cache cold start, replica loss, reconnect storm
+and one-zone failure. Record p50/p95/p99, errors, resource peaks and cost per active tenant/session.
+Measure browser density separately at 50/70 contexts for an hour and then across cells.
+No paid environment is provisioned by this document.

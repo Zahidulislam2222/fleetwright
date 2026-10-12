@@ -43,7 +43,7 @@
         const a = data.adversity;
         fact("New loads per minute", String(data.feed_rate_per_min));
         fact("Rival bots", pct(a.competitor_share) + " of loads");
-        fact("Simulated errors", pct(a.error_rate));
+        fact("Injected errors", pct(a.error_rate));
         fact("Lost booking answers", pct(a.ack_loss_rate));
         fact("Page layout", a.layout_variant === "b" ? "changed (variant B)" : "normal");
         status.textContent = "Live · " + time(data.server_time);

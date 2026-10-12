@@ -1,0 +1,24 @@
+# Generated from the committed release. Docker access requires host administrator authority.
+[Unit]
+Description=Fleetwright verified database backups
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=exec
+User=root
+WorkingDirectory={{releaseRoot}}/../build/{{releaseId}}
+EnvironmentFile={{backupEnvFile}}
+ExecStart={{releaseRoot}}/../build/{{releaseId}}/.venv/bin/python -m fw_coordinator.backup loop
+UMask=0077
+Restart=on-failure
+RestartSec={{backupRestartS}}
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths={{backupDirectory}}
+MemoryMax={{backupMemoryMax}}
+
+[Install]
+WantedBy=multi-user.target

@@ -1,6 +1,6 @@
 # GENERATED from deploy/templates/compose.yaml by deploy/build-release.mjs — edit the template.
 # Networks: `edge` carries only Caddy -> web; `backend` is internal (no route to the internet), so
-# the engine, the mock board and the data services can reach each other and nothing else.
+# the engine, owned destinations and data services can reach each other and nothing else.
 name: {{slug}}
 
 x-hardened: &hardened
@@ -199,6 +199,19 @@ services:
       - evidence:/data/evidence
     depends_on:
       control: { condition: service_started }
+      board: { condition: service_healthy }
+
+  workflow-worker:
+    <<: *app
+    command: ["python", "-m", "fw_worker.workflows"]
+    mem_limit: {{workflowWorkerMemory}}
+    cpus: {{workflowWorkerCpus}}
+    pids_limit: 512
+    shm_size: 256m
+    tmpfs:
+      - /tmp:rw,nosuid,size=256m,mode=1777
+    depends_on:
+      api: { condition: service_healthy }
       board: { condition: service_healthy }
 
 networks:

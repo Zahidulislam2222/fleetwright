@@ -1,47 +1,27 @@
-# Dashboard (`apps/dashboard`)
+# Dashboard
 
-The public website and the operator console, built with Next.js 16 and React 19 as a **static
-export** (served by a plain web server or a CDN).
+Next.js/React public website and operator console. The production release is a static export
+behind the same-origin API/update proxy. The console uses live authenticated data when available;
+offline mode is labelled reference data and retains local interactions only.
 
-Live: <https://fleetwright.zahidul-islam.com>
-
-## Routes
-
-| Route | What it is |
+| Route | Behavior |
 |---|---|
-| `/` | Landing page |
-| `/console/*` | Operator console: overview, workers, accounts, claims, filters, schedules, latency, crawl jobs, audit log, settings |
-| `/login` | Sign-in with password and one-time code (design) |
-| `/board` | Preview of the mock load board |
-| `/agent` | Preview of the local AI agent window |
+| `/` | Product, architecture and verification overview |
+| `/login` | Password/TOTP; restricted shared workspace login |
+| `/console/*` | Overview, workers/accounts/claims, filters/schedules, latency, audit and settings |
+| `/console/workflows` | Exact-action owner review, job investigation, cancellation and evidence download |
+| `/board` | Local freight interaction view; the browser worker uses the separately running destination |
+| `/agent` | Planned standalone interface with local interaction data; real execution uses MCP |
 
-## Status
+Run `npm ci` and `npm run dev` from this directory. Verify with `npm run lint`, `npm run typecheck`,
+`npm run build` and `npm run check:contrast`. Contrast checks cover configured color pairs and do
+not establish full accessibility conformance. Read the installed Next.js guides before framework
+changes, as required by [AGENTS.md](AGENTS.md).
 
-The console is a **design prototype on mock data** (`src/mocks/`). Every screen has ready,
-loading, empty, error and permission-denied states, and light and dark themes. The data shapes in
-`src/mocks/types.ts` are the contract the real API implements; wiring the console to the live
-engine is in progress ([roadmap](../../docs/roadmap.md)). The mocks will stay as a contract-test
-fixture.
+Maintained display text lives in `src/content/*.json`. Existing internal file/role names are
+compatibility identifiers. Security headers come from `deploy/security-headers.json`; limits and
+host settings come from deployment configuration. Build an immutable committed release from the
+repository root using `node deploy/build-release.mjs <YYYYMMDD-name>`.
 
-## Develop
-
-```bash
-npm ci
-npm run dev          # http://localhost:3000
-npm run lint
-npm run typecheck
-npm run build        # production build
-npm run check:contrast   # WCAG contrast of every colour pair
-```
-
-Release bundles for the server are built from the repository root with
-`node deploy/build-release.mjs <YYYYMMDD-name>` (static export, web server config and a SHA-256
-manifest for parity checks).
-
-## Notes for contributors
-
-- This Next.js version has breaking changes compared with older versions; read the guides in
-  `node_modules/next/dist/docs/` before changing framework-level code (see `AGENTS.md`).
-- Copy lives in `src/content/*.json`, not in components.
-- Security headers (Content-Security-Policy and others) are defined in
-  `deploy/security-headers.json` and applied by the web server.
+See [product](../../docs/product.md), [deployment](../../docs/operations/deployment.md),
+[maintenance/accessibility](../../docs/maintenance.md) and [security controls](../../docs/security/controls.md).

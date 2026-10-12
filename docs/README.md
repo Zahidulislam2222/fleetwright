@@ -1,15 +1,16 @@
 # Fleetwright documentation
 
-| Section | Documents |
-|---|---|
-| **Architecture** | [Overview](architecture/overview.md) · [Claim lifecycle](architecture/claim-lifecycle.md) |
-| **Decisions** | [Architecture decision records](adr/README.md) |
-| **Scaling** | [Path to 1M sessions](scaling/README.md) · [Capacity model](scaling/capacity-model.md) · [SLOs, error budgets, uptime](scaling/slo.md) |
-| **Security** | [Security policy](../SECURITY.md) · [Threat model](security/threat-model.md) · [Controls](security/controls.md) |
-| **Law and privacy** | [US and EU compliance register](legal/README.md) · [Acceptable use and onboarding gate](legal/acceptable-use.md) · [Privacy](legal/privacy.md) |
-| **Operations** | [Local development](operations/local-development.md) · [Configuration](operations/configuration.md) · [Runbooks](operations/runbooks.md) |
-| **Evidence** | [Testing and measurements](testing.md) |
-| **Plans** | [Roadmap](roadmap.md) · [Changelog](../CHANGELOG.md) |
+Start with the product guide, then follow the operational or engineering path you need.
 
-Every number in these documents is labelled as **measured**, an **estimate** or a **target**.
-Nothing that has not been measured is presented as achieved.
+| Area | Documents |
+|---|---|
+| Product and integration | [Product and boundaries](product.md) · [API and MCP reference](integrations.md) · [Reliable browser workflows](operations/reliable-browser.md) |
+| Architecture | [Overview](architecture/overview.md) · [Claim lifecycle](architecture/claim-lifecycle.md) · [Decision records](adr/README.md) |
+| Setup and operations | [Local development](operations/local-development.md) · [Configuration](operations/configuration.md) · [Deployment](operations/deployment.md) · [Runbooks](operations/runbooks.md) |
+| Security | [Reporting policy](../SECURITY.md) · [Threat model](security/threat-model.md) · [Control status](security/controls.md) |
+| Law and privacy | [Legal register](legal/README.md) · [Acceptable use](legal/acceptable-use.md) · [Privacy and retention](legal/privacy.md) |
+| Future scale and availability | [1M+ simultaneous users](scaling/README.md) · [Capacity arithmetic](scaling/capacity-model.md) · [99% / 99.9% SLOs and recovery](scaling/slo.md) |
+| Assurance and maintenance | [Testing and measurements](testing.md) · [Maintenance and accessibility](maintenance.md) · [Roadmap](roadmap.md) · [Changelog](../CHANGELOG.md) |
+
+Measured results include their workload and date. Estimates explain assumptions. Targets have
+acceptance gates before becoming capacity commitments or contractual service levels.
