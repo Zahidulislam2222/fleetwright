@@ -115,7 +115,7 @@ class AuditEntry(Wire):
     id: str
     at: str
     actor: str
-    role: Literal["owner", "operator", "viewer", "demo", "system"]
+    role: Literal["owner", "operator", "viewer", "demo", "system", "workflow"]
     action: str
     target: str
     detail: str

@@ -123,7 +123,7 @@ export type AuditEntry = {
   id: string;
   at: string;
   actor: string;
-  role: Role | "system";
+  role: Role | "system" | "workflow";
   action: string;
   target: string;
   detail: string;

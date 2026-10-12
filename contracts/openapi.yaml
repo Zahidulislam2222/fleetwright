@@ -189,6 +189,7 @@ components:
           - viewer
           - demo
           - system
+          - workflow
           title: Role
           type: string
         target:
