@@ -46,6 +46,8 @@ uv run mypy
 
 The harness creates isolated test databases, serializes suite runs and propagates test settings to
 child workers. It refuses non-local databases. Browser console tests require a built dashboard.
-Frontend gates: `npm run lint`, `npm run typecheck`, `npm run build` and `npm run check:contrast`.
+Generate route types with `npx next typegen` before standalone TypeScript checks on a clean
+checkout. Frontend gates: `npm run lint`, `npm run typecheck`, `npm run build` and
+`npm run check:contrast`. See the [Next.js CLI reference](https://nextjs.org/docs/app/api-reference/cli/next#next-typegen-options).
 See [testing](../testing.md). Stop the local Compose project with `down` while retaining volumes;
 volume deletion is a separate destructive operation, never a routine cleanup or deployment step.

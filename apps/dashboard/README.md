@@ -13,7 +13,8 @@ offline mode is labelled reference data and retains local interactions only.
 | `/board` | Local freight interaction view; the browser worker uses the separately running destination |
 | `/agent` | Planned standalone interface with local interaction data; real execution uses MCP |
 
-Run `npm ci` and `npm run dev` from this directory. Verify with `npm run lint`, `npm run typecheck`,
+Run `npm ci` and `npm run dev` from this directory. Generate route types with `npx next typegen`
+before a standalone type check. Verify with `npm run lint`, `npm run typecheck`,
 `npm run build` and `npm run check:contrast`. Contrast checks cover configured color pairs and do
 not establish full accessibility conformance. Read the installed Next.js guides before framework
 changes, as required by [AGENTS.md](AGENTS.md).
