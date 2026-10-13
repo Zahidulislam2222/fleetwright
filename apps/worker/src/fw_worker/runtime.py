@@ -156,18 +156,39 @@ class Fleet:
     async def drain(self) -> None:
         """Stop taking work, let in-flight operations finish (bounded), release every account."""
         self.stopping.set()
-        await self._heartbeat(state_override="draining")
+        failures: list[Exception] = []
+        try:
+            await self._heartbeat(state_override="draining")
+        except Exception as error:
+            failures.append(error)
         slot_tasks = [t for t in self._tasks if t.get_name() != "heartbeat" and not t.done()]
-        _, pending = await asyncio.wait(slot_tasks, timeout=self.cfg.drain_timeout_s) if slot_tasks else (set(), set())
-        for task in pending:
-            task.cancel()
-        for task in self._tasks:
-            if task.get_name() == "heartbeat":
-                task.cancel()
-        await asyncio.gather(*self._tasks, return_exceptions=True)
-        for slot in [*self._retired_slots, *self.slots]:
-            await slot.close(release=True)
-        await self._heartbeat(state_override="stopped")
+        pending = set(slot_tasks)
+        try:
+            _, pending = (
+                await asyncio.wait(slot_tasks, timeout=self.cfg.drain_timeout_s) if slot_tasks else (set(), set())
+            )
+        except Exception as error:
+            failures.append(error)
+        finally:
+            # Telemetry faults must not strand tasks, contexts or account-release attempts.
+            for task in self._tasks:
+                if not task.done():
+                    task.cancel()
+            await asyncio.gather(*self._tasks, return_exceptions=True)
+            for slot in [*self._retired_slots, *self.slots]:
+                try:
+                    await slot.close(release=True)
+                except Exception as error:
+                    failures.append(error)
+            try:
+                await self._heartbeat(state_override="stopped")
+            except Exception as error:
+                failures.append(error)
+        if failures:
+            log.error("fleet drain failed after cleanup attempts", extra={"failures": len(failures)})
+            if len(failures) > 1:
+                raise failures[0] from ExceptionGroup("additional fleet drain failures", failures[1:])
+            raise failures[0]
         log.info("fleet drained", extra={"slots": len(self.slots), "forced": len(pending)})
         self._retired_slots.clear()
 
@@ -200,16 +221,23 @@ class Fleet:
                 ):
                     log.warning("account hold lost; slot stops using it", extra={"slot": slot.id})
                     slot.hold_lost = True
-                await conn.execute(
-                    text(
-                        """INSERT INTO workers (tenant_id, id, process_id, cell_id, mode, account_id, state, version,
+                # Retired telemetry is historical: never resurrect rows cascade-deleted with
+                # their tenant. UPDATE is safe even if deletion races this transaction.
+                statement = (
+                    """UPDATE workers SET process_id=:p, account_id=:a, state=:s, version=:v,
+                         memory_mb=:mem, cpu_pct=:cpu, clock_offset_ms=:off, heartbeat_at=clock_timestamp()
+                       WHERE tenant_id=:t AND id=:i"""
+                    if slot.retired
+                    else """INSERT INTO workers (tenant_id, id, process_id, cell_id, mode, account_id, state, version,
                                                 memory_mb, cpu_pct, clock_offset_ms, heartbeat_at)
                            VALUES (:t, :i, :p, :c, :m, :a, :s, :v, :mem, :cpu, :off, clock_timestamp())
                            ON CONFLICT (tenant_id, id) DO UPDATE SET process_id = EXCLUDED.process_id,
                              account_id = EXCLUDED.account_id, state = EXCLUDED.state, version = EXCLUDED.version,
                              memory_mb = EXCLUDED.memory_mb, cpu_pct = EXCLUDED.cpu_pct,
                              clock_offset_ms = EXCLUDED.clock_offset_ms, heartbeat_at = EXCLUDED.heartbeat_at"""
-                    ),
+                )
+                updated = await conn.execute(
+                    text(statement),
                     {
                         "t": slot.tenant_id,
                         "i": slot.id,
@@ -224,6 +252,8 @@ class Fleet:
                         "off": self.clock_offset_ms,
                     },
                 )
+                if slot.retired and updated.rowcount == 0:
+                    log.warning("retired worker heartbeat row absent; not recreated", extra={"slot": slot.id})
 
     async def emit(self, tenant_id: UUID, event: dict[str, Any]) -> None:
         """Live event for the dashboard (no secrets: ids, states and timings only)."""

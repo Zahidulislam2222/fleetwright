@@ -15,6 +15,7 @@ import json
 import logging
 import os
 import secrets
+import signal
 import sys
 from typing import Any
 from urllib.parse import urljoin
@@ -463,10 +464,46 @@ async def main() -> None:
     cfg = load(CrawlAppSettings)
     definitions(cfg.config_dir)  # fail startup on invalid maintained contracts
     engine = make_engine(cfg.app_db.dsn, cfg.app_db, "crawler")
+    loop = asyncio.get_running_loop()
+    owner = asyncio.current_task()
+    runner = asyncio.create_task(Crawler(cfg, engine).run())
+    stopping = False
+    handlers: list[tuple[signal.Signals, Any, bool]] = []
+
+    def request_stop() -> None:
+        nonlocal stopping
+        if not stopping:
+            stopping = True
+            runner.cancel()
+
     try:
-        await Crawler(cfg, engine).run()
+        for name in (signal.SIGTERM, signal.SIGINT):
+            previous = signal.getsignal(name)
+            try:
+                loop.add_signal_handler(name, request_stop)
+            except NotImplementedError:
+                signal.signal(name, lambda *_args: loop.call_soon_threadsafe(request_stop))
+                handlers.append((name, previous, False))
+            else:
+                handlers.append((name, previous, True))
+        try:
+            await runner
+        except asyncio.CancelledError:
+            # The owned runner's deliberate stop is clean; caller cancellation remains visible.
+            if not stopping or (owner is not None and owner.cancelling()):
+                raise
     finally:
-        await engine.dispose()
+        try:
+            if not runner.done():
+                runner.cancel()
+                await asyncio.gather(runner, return_exceptions=True)
+            await engine.dispose()
+        finally:
+            # Keep the one-shot handlers through all cleanup so repeated signals cannot recancel it.
+            for name, previous, unix_handler in handlers:
+                if unix_handler:
+                    loop.remove_signal_handler(name)
+                signal.signal(name, previous)
 
 
 if __name__ == "__main__":
