@@ -85,9 +85,11 @@ a standard `ubuntu-latest` runner, a frozen collector environment and the mainta
 summary lines in job logs and fails the job on the first unhealthy response. There is no artifact
 upload, cache, paid integration, issue creation or outbound message action. Standard hosted runs
 in public repositories are [free under GitHub's current billing rules](https://docs.github.com/en/billing/concepts/product-billing/github-actions).
-Publication and an actual successful dispatch must be checked before claiming the schedule is
-active. Workflow runs are independent of both the owner PC and the production server, but the
-scheduled job has no shared persistent SQLite history between runners.
+The default-branch workflow was published and enabled, and its actual manual
+[verification run](https://github.com/Zahidulislam2222/fleetwright/actions/runs/38437549799)
+passed both public probes on 13 October 2026. This verifies independent execution, not every
+future scheduled invocation. Runs are independent of both the owner PC and the production server,
+but scheduled jobs have no shared persistent SQLite history between runners.
 
 The operator PC must stay awake and online to collect continuously. The observation establishes
 only its recorded window; it does not establish monthly availability, a 24/7 alert service or an
@@ -113,7 +115,7 @@ configuration hashes, recent committed samples, credential renewal and predecess
 Preserve history; a healthy report without new samples is not current collection evidence. Test a
 bounded failed probe followed by recovery and confirm both notices survive process restart.
 
-Independent scheduled probes require public-repository publication and an observed successful run
-before activation is claimed. They do not share persistent history with the host collector.
+Independent scheduled probes are published and enabled, with the successful run linked above.
+They do not share persistent history with the host collector.
 Availability objectives remain [future SLOs](../scaling/slo.md), and operational status belongs in
 the [release record](../releases/2026-10-13.md).

@@ -23,13 +23,13 @@ jobs:
       - run: uv run mypy
       - name: Configuration and publication regressions
         run: >-
-          uv run pytest -q packages/fw_core/tests/test_config_boundary.py
+          uv run python -m pytest -q packages/fw_core/tests/test_config_boundary.py
           packages/fw_core/tests/test_settings.py
           packages/fw_core/tests/test_publication_contract.py
           packages/fw_core/tests/test_workflow_contract_fingerprint.py
       - name: Operational recovery and exact release signature regressions
         run: >-
-          uv run pytest -q apps/coordinator/tests/test_monitor_recovery.py
+          uv run python -m pytest -q apps/coordinator/tests/test_monitor_recovery.py
           tools/security/tests/test_release_artifacts.py
       - name: Release signature tool types
         run: uv run mypy --explicit-package-bases tools/security/release_artifacts.py
