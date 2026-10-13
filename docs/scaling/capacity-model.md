@@ -10,10 +10,17 @@ memory per context and 1.8 CPU cores at 32 contexts. Owned-board freight detecti
 was approximately p50 365 ms / p95 540 ms. These figures depend on the workload and machine;
 they are not measurements of heavier sites or of the new workflow runner at scale.
 
-For planning, use 100 MB/context, reserve at least 30% of node RAM for the OS, browser overhead,
-peaks and service processes, and validate CPU separately. An 8 GB worker-only node would then
-budget about 56 contexts by memory; **50 contexts remains an unmeasured next test**, not a proven
-density. Do not share that budget with a database without recalculating it.
+Separate isolated server tests subsequently sustained 50 contexts for 3,601.986 seconds and
+70 for 3,602.632 seconds with zero fixture-action errors. They used 6/8 GiB memory caps and
+2 CPU quotas on an 8-core host with 25,199,177,728 bytes of RAM. Maximum sampled cgroup charges
+were 1,535,565,824 and 2,082,316,288 bytes, respectively. These are aggregate simple-fixture
+process charges, not interchangeable with historical per-context unique-memory estimates.
+See [the complete measurements](verification-2026-10-13.md), including retained failed attempts.
+
+For an illustrative worker-node scenario, assume 100 MB/context and reserve 30% of RAM for the
+OS, browser overhead, peaks and service processes. An 8 GB worker-only node then budgets about
+56 contexts by memory. This arithmetic still needs representative page, login, trace, CPU and
+network measurements before selecting a real node density. A shared database reduces that budget.
 
 ## One-million-session assumptions
 
@@ -23,7 +30,7 @@ The following are deliberately adjustable scenario inputs, not configured produc
 |---|---|---|
 | Connected sessions | 1,000,000 | Sustained concurrent sockets |
 | Read rate | One request/session/30 s | About 33,333 reads/s before caching/coalescing |
-| Mutation rate | 1% of sessions, one/minute | About 167 writes/s, with bursts tested separately |
+| Mutation rate | 1% of sessions, one/minute | About 167 writes/s; approvals and audit amplify transactions |
 | Delivered updates | One/session/10 s, 1 KiB payload | About 100,000 deliveries/s and 102.4 MB/s payload bandwidth |
 | Gateway socket allocation | 64 KiB/session, estimate | About 61 GiB fleet memory before process/queue overhead |
 | Reconnect event | 10% reconnect within 10 s | 10,000 handshakes/s plus resynchronization demand |
@@ -66,7 +73,7 @@ replacement/failure headroom separately; these rows describe active nodes only.
 | 5,000 | 100 | `100W` |
 | 10,000 | 200 | `200W` |
 
-The existing demonstration adds no newly provisioned node cost. Its resource caps and measured
+The existing verification used authorized infrastructure without provisioning another node. Its resource caps and measured
 simple-page test windows do not establish the quoted cloud-node assumptions above.
 
 ## Database and queue budgets
@@ -79,13 +86,24 @@ tenant predicates and integrity rules. Read replicas cannot satisfy fresh approv
 
 For each queue, estimate arrivals × outage duration × record size, then include replay and retention
 headroom. Bound queue growth and admission explicitly. Alerts need oldest-item age, not only count.
-Current stream caps can trim history; recovery semantics must be verified rather than assuming
-every detection can always be reconstructed.
+Current stream caps can trim transport history. Raw freight detections are persisted before
+delivery and retried until consumed, and unconsumed rows are excluded from retention pruning.
+Legacy Redis-only backlog needs the documented upgrade drain. Gateway invalidations remain
+ephemeral hints: lost hints require authoritative API refresh, not assumed event-history recovery.
+
+## Measured control-plane baseline
+
+The current network test used 16 API clients and 32 SSE clients, including two slow readers,
+for 30.297 seconds: 1,199 API requests, 192 SSE connections, 160 reconnects, 12,420 data frames
+and zero HTTP/network errors. API p95 was 762.90 ms and event-delivery p95 161.47 ms. Cold client
+and database setup were measured separately; direct Hub overflow separately tested queue eviction.
+This mixed local test overlapped other work and has no million-session extrapolation factor.
 
 ## Validation ladder
 
 Measure 1k, 10k, 100k and 1M sessions with the same disclosed workload. At every step test skewed
 tenants, authorization revocation, slow consumers, cache cold start, replica loss, reconnect storm
 and one-zone failure. Record p50/p95/p99, errors, resource peaks and cost per active tenant/session.
-Measure browser density separately at 50/70 contexts for an hour and then across cells.
+The 50/70 simple-fixture hour windows passed. Next measure representative authorized browser
+workflows and then multiple execution cells, without carrying fixture density into a service quote.
 No paid environment is provisioned by this document.

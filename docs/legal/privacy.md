@@ -43,6 +43,17 @@ or correct/delete through an approved procedure, and record completion. Append-o
 need a legally reviewed minimization/pseudonymization policy; do not promise automatic deletion
 that is not implemented. Apply the applicable jurisdiction's deadline and extensions.
 
+Maintain an operator request register with receipt date, verified requester/authority, applicable
+jurisdiction, affected categories, legal holds, deadline, decision and completion evidence.
+Processing-record duties are separate from permission to retain all raw personal data. Apply the
+current [Bangladesh Act and jurisdiction-specific requirements](README.md) where relevant;
+older ordinance summaries are not the current legal baseline.
+
+Deletion must account for rows, caches, browser profiles, screenshots/traces, exports and archive
+expiry. Where a protected archive is retained for recovery, restrict access, record expiry and
+reapply approved minimization/deletion decisions after restoration. Preserve necessary legal or
+incident evidence under an assessed hold; indefinite retention is not a security control.
+
 ## Cookies, providers and transfers
 
 The application uses necessary session/CSRF mechanisms and local browser preferences; no application
@@ -54,6 +65,16 @@ region or provider does not by itself complete that assessment.
 MCP exports exclude credentials, cookies, arbitrary payloads and raw page HTML. Client prompts
 and model-provider retention are outside that export boundary: send only necessary redacted
 material and review the selected provider's terms. There is no automatic paid model API fallback.
+
+The standalone agent keeps private local state/history and uses a dedicated profile or isolated
+CDP context. Its configured
+local Ollama flow avoids a hosted model API for that path, but destination submissions still leave
+the device. CDP connection, exports, remote destinations and any newly selected provider each need
+assessment; local inference is not a promise that all processing remains local.
+
+Before deployment, publish the actual operator identity/contact, purposes and legal bases,
+retention schedule, rights channels, recipients/subprocessors and transfer safeguards. This
+engineering inventory is not a completed deployment-specific privacy notice or DPA.
 
 ## Security incidents
 

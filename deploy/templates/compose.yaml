@@ -209,6 +209,7 @@ services:
   workflow-worker:
     <<: *app
     command: ["python", "-m", "fw_worker.workflows"]
+    stop_grace_period: {{workerStopGraceS}}s
     mem_limit: {{workflowWorkerMemory}}
     cpus: {{workflowWorkerCpus}}
     pids_limit: 512

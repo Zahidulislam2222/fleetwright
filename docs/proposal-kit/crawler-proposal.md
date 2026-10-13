@@ -1,7 +1,7 @@
 # Proposal draft: reliable authorized catalogue crawling
 
 I build crawlers that make failures visible and preserve progress across worker interruptions.
-Fleetwright demonstrates this against an owned, paginated catalogue using maintained JSON/CSS
+Fleetwright implements this against an owned, paginated catalogue using maintained JSON/CSS
 extraction contracts, a durable frontier, robots rules, shared origin pacing and bounded retries.
 Operators can inspect progress and export only the approved fields as private JSONL.
 
@@ -27,3 +27,7 @@ Evidence: [crawler operations](../operations/crawler.md),
 [adversarial network and recovery tests](../../apps/coordinator/tests/test_crawler_adversity.py).
 
 Portfolio: https://zahidul-islam.com/ · GitHub: https://github.com/Zahidulislam2222
+
+The exact release console has also completed a real cycle and downloaded four validated owned
+catalogue records, with public start/export denied. Treat that as integration evidence for the
+maintained contract, not evidence of an unrelated destination's behavior.

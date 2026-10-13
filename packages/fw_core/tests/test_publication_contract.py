@@ -4,10 +4,11 @@ import json
 import re
 from pathlib import Path, PurePosixPath
 
+import yaml
 from dotenv import dotenv_values
 
 from fw_coordinator.demo import load_demo
-from fw_core.settings import BackupAppSettings, WorkerSettings
+from fw_core.settings import BackupAppSettings, WorkerSettings, WorkflowSettings
 
 ROOT = Path(__file__).resolve().parents[3]
 BANNED = re.compile(r"\b(demo|demonstration|prototype|fictional|fictitious|simulated|illustrative|mock)\b", re.I)
@@ -41,9 +42,25 @@ def test_release_contains_workflow_runner_and_backup_service():
     compose = (ROOT / "deploy/templates/compose.yaml").read_text()
     assert "  workflow-worker:" in compose
     assert '"fw_worker.workflows"' in compose
-    assert "stop_grace_period: {{workerStopGraceS}}s" in compose
     config = json.loads((ROOT / "deploy/deploy.config.json").read_text())
-    assert config["backend"]["workerStopGraceS"] > WorkerSettings(cell="test").drain_timeout_s
+    values = {
+        **config,
+        **config["limits"],
+        **config["backend"],
+        "releaseId": "20261013-validation",
+        "postgresImage": "postgres:test",
+        "redisImage": "redis:test",
+        "mailpitImage": "mailpit:test",
+    }
+    rendered = re.sub(r"\{\{(\w+)\}\}", lambda match: str(values[match[1]]), compose)
+    services = yaml.safe_load(rendered)["services"]
+    longest_drain = max(WorkerSettings(cell="test").drain_timeout_s, WorkflowSettings().drain_timeout_s)
+    for service in ("worker", "workflow-worker", "crawler"):
+        grace = services[service].get("stop_grace_period")
+        assert grace is not None, f"{service} has no explicit shutdown allowance"
+        seconds = float(grace.removesuffix("s"))
+        assert seconds == config["backend"]["workerStopGraceS"]
+        assert seconds > longest_drain, f"{service} shutdown interrupts a configured browser drain"
     unit = (ROOT / "deploy/templates/backup.service").read_text()
     assert "fw_coordinator.backup loop" in unit
     assert "UMask=0077" in unit

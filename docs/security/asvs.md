@@ -3,27 +3,28 @@
 This is an engineering evidence map, **not ASVS Level 2 compliance, certification, or an independent
 penetration test**. L2 requires every applicable L1 and L2 requirement; selected passing controls
 cannot establish that claim. Unlisted requirements remain unassessed. The application, owned
-mock destination and local browser agent have different trust boundaries; destination login
+verification destination and local browser agent have different trust boundaries; destination login
 controls are not evidence for console identity controls.
 
 Reference: [OWASP ASVS 5.0.0 release](https://github.com/OWASP/ASVS/tree/v5.0.0/5.0/en).
 Requirement identifiers below were checked against that release; descriptions are brief project
-interpretations. Evidence paths are relative to this repository. Source coverage and deployed
-behavior must both be reviewed again for the final release.
+interpretations. Evidence paths are relative to this repository. Results include verified
+`20261013-free-local-rc2` images and rehearsal. Each subsequent release must verify its own
+artifacts and deployment behavior; this page does not declare a newer release deployed.
 
 | ASVS requirement / area | Project evidence | Status / assessment boundary |
 |---|---|---|
 | 8.1.1 function/data authorization rules | `docs/security/controls.md`, `docs/security/threat-model.md`, API role checks and scoped grants | Documented baseline; owner must review rules for every new endpoint |
 | 8.1.2 field permissions | Strict workflow input contracts, bounded public views, owner-only grant/approval mutation | Partial: field-level matrix for every route not independently assessed |
-| 8.2.1 explicit function authority | API/MCP role checks; `apps/coordinator/tests/test_workflow_review.py`, `test_workflows.py` | Existing tests; final full-suite/deployment evidence required |
+| 8.2.1 explicit function authority | API/MCP role checks; `apps/coordinator/tests/test_workflow_review.py`, `test_workflows.py` | Integrated source suite passed; each release still requires artifact/deployment verification |
 | 8.2.2 object authority | Tenant predicates, PostgreSQL forced RLS, job/grant lookup checks | Existing tenant/workflow tests; privileged system-role queries remain trusted boundary |
-| 8.2.3 field authority | Allowlisted contract fields, evidence export projection, capped demo controls | Partial; no complete property-by-property independent assessment |
+| 8.2.3 field authority | Allowlisted contract fields, evidence export projection, capped public workspace controls | Partial; no complete property-by-property independent assessment |
 | 8.3.1 trusted enforcement | Approval and grant checks execute in API/core/database; model cannot issue approval | Existing browser workflow suite passed in the local 31-case runtime acceptance |
 | 8.4.1 tenant separation | RLS and tenant-bound workflow grants; API/gateway tests | Existing positive/negative cases; large skew/multi-zone expansion not proven |
 | 6.1.1 authentication attack controls | `fw_coordinator/auth.py`, central AuthSettings, threat model | Rate/hash concurrency/lockout implemented; configuration operational review remains |
 | 6.3.1 anti-automation | Bounded password hashing and account/network attempt budgets | Existing authentication tests; distributed attack simulation not performed |
-| 6.3.2 default identities | Public capped demo identity deliberately exists; private owner access separate | Documented exception: public demo is not a private production tenant |
-| 6.3.3 MFA | Console password+TOTP; token hashes and challenge expiry | Public demo code is intentionally visible; owner route requires private factors |
+| 6.3.2 default identities | Public capped workspace identity deliberately exists; private owner access separate | Documented exception: shared public credentials grant restricted authority |
+| 6.3.3 MFA | Console password+TOTP; token hashes and challenge expiry | Public workspace code is intentionally visible; owner route requires private factors |
 | 6.5.1 single-use authentication code | `auth.py` records successful TOTP steps; replay checks | Existing implementation; do not equate destination email OTP with console MFA |
 | 6.2.2–6.2.4 password lifecycle | No public self-service password change/reset interface | Gap: operator-mediated recovery does not satisfy self-service password requirements |
 | 5.1.1, 5.2.1–5.2.3 file input | Application has bounded generated JSON evidence, not general public file upload | Upload controls not applicable to absent upload feature; reassess if added |
@@ -31,23 +32,23 @@ behavior must both be reviewed again for the final release.
 | 5.4.1–5.4.2 download names | Fixed/generated JSON export names; owner-authorized evidence endpoints | Existing contract/browser export checks; broader header fuzzing unassessed |
 | V1 encoding/query construction | Parameterized SQL and React rendering | Source patterns reviewed; independent injection assessment not complete |
 | V2 validation/business integrity | Fingerprinted exact-action approval, expiry/replay/changed-input tests, DB fencing | 31-case runtime acceptance includes real owned Chromium workflows and crash recovery |
-| V3 frontend | CSRF, cookie flags, CSP/security headers and origin checks | Static release builder replaces inline-script relaxation with exact hashes; inline styles remain an exception; final browser/deployment proof required |
+| V3 frontend | CSRF, cookie flags, CSP/security headers and origin checks | Exact inline-script hashes; rc2 real 15-route observation passed; inline styles remain an exception |
 | V4 API | Typed request/response contracts, bounded pagination, HTTP authorization | Network mixed-load test below; authorization fuzzing remains bounded test coverage |
 | V7 sessions | Opaque session digests, expiry/revocation, idle SSE authority checks | Existing gateway/session tests; stolen-device posture assessment absent |
 | V9 self-contained tokens | Console/MCP authority is opaque server-side state, not JWT | JWT-specific controls not applicable to present token design |
 | V10 OAuth/OIDC | No public OAuth/OIDC authorization-server/client flow in application | Not applicable to present application; external documentation integrations are separate |
 | V11 cryptography | AES-GCM envelopes with AAD; Ed25519 offline release signature tooling | Key custody/rotation depend on operator; hardware KMS not deployed |
 | V12 transport | Public TLS and private backend network; pinned crawl HTTP destination | Internal database/Redis TLS is not established on current single-host network |
-| V13 configuration | Typed environment boundary, lockfiles, no public credentials | Final full-tree secret/config scan remains a release gate |
+| V13 configuration | Typed environment boundary, lockfiles, private credential recovery inventory | Full-tree source/config checks passed; repeat after relevant changes and for release staging |
 | V14 data protection | Redacted evidence, bounded artifacts, retention, private archives | Full data-subject request automation and independent retention assessment absent |
-| V15 supply chain/design | Native Trivy CycloneDX inventory, source hashes, signed-release helper, source scans | Hardened candidate removed11HIGHfindings (0HIGH/CRITICAL); frozen candidate pip-audit2.10.1 found0vulnerabilities in52externalPythonpackages; native verification-image scan0HIGH/CRITICAL and1094-componentSBOM; final exact-release image needs separate scan/signature; no SLSA claim |
+| V15 supply chain/design | Native image SBOMs, source hashes, offline Ed25519 release signatures and source scans | Verified rc2 app/web each 0 HIGH/CRITICAL; 1094/72-component native SBOMs; Python 52 external distributions, 0 findings; dev-only npm HIGH retained; no SLSA claim |
 | V16 audit/errors | Transactional DB audit, redaction, intent/outcome records | External uncertainty retained as UNKNOWN; no automatic replay |
 | V17 WebRTC | No WebRTC feature | Not applicable to present application |
 
 ## Authorized dynamic verification
 
 Run adversarial requests only against isolated local databases and owned local destinations; the
-shared public demo is checked functionally and is not a stress/penetration-test target.
+shared public workspace is checked functionally and is not a stress/penetration-test target.
 
 | Scenario | Reproducible test / observed boundary |
 |---|---|
@@ -62,21 +63,52 @@ shared public demo is checked functionally and is not a stress/penetration-test 
 | Browser process death after destination acceptance | Existing real workflow crash child + receipt reconciliation; blind retry forbidden |
 
 Exceptions are tracked here openly; do not turn missing controls into passing findings. This map
-must be updated with final release test/scan outcomes before a public security assurance claim.
+must retain release identities and be updated after relevant test/scan outcomes.
 
 ## Dependency audit boundary
 
 The full npm dependency scan includes development packages and retains one HIGH finding:
-`braces` 3.0.3, CVE-2026-93687. The scanner returned no fixed version. That scan exits 1 and must
-not be reported as green. The package is used in the trusted repository build toolchain;
-production static assets do not require Node tooling. Acceptance of this exception requires
-review and confirmation that the final static image contains neither Node nor this dependency.
+`braces` 3.0.3, [CVE-2026-93687](https://avd.aquasec.com/nvd/cve-2026-93687). The scanner returned
+no fixed version. That scan exits 1 and must not be reported as green. The package is used in the
+trusted repository build toolchain;
+production static assets do not require Node tooling. The reviewed rc2 boundary was checked:
+the dependency path is development-only through Next ESLint; the actual static runtime has no
+Node/npm executable or `node_modules` tree; its native 72-component SBOM contains neither Node/npm
+nor `braces`; all 129 served static files match the release manifest. The backend Playwright driver
+has a separate runtime boundary; this is not a platform-wide claim of no Node. These checks support
+a trusted-repository-build exception, not safe use of untrusted build patterns. Reassess the
+advisory and each new artifact; source archives deliberately retain build lockfiles.
 No scanner rule or vulnerability identifier has been suppressed.
 
 The frozen Python candidate inventory was extracted from its actual virtual environment.
 `pip-audit` 2.10.1 reported zero vulnerabilities across 52 external distributions. Local workspace
 packages were excluded from public PyPI lookups and remain covered by source review/scans.
 Native image scanning covers operating-system and inherited global packages separately.
+
+## Exact-image and dynamic release evidence
+
+The verified `rc2` server images were built from SHA-verified source. Local rehearsal image IDs
+differ; source parity is not binary parity. Native Trivy 0.75.0 checked report and CycloneDX
+identities against actual server image IDs, with scanner and downloaded-report checksums.
+
+| Boundary | Observed result |
+|---|---|
+| Backend image | 0 HIGH/CRITICAL; 1,094 SBOM components; real two-context Chromium isolation and ten module imports passed |
+| Static web image | 0 HIGH/CRITICAL; 72 SBOM components; installed `libexpat=2.8.5-r0`, `pcre2=10.49-r0`, `tiff=4.7.2-r0` verified |
+| Web hardening | Three signed official Alpine patches on a pinned base; no blanket upgrade or CVE suppression; nonroot/read-only original health check passed |
+| Passive ZAP rehearsal | 61.265 seconds; 0 HIGH, 1 MEDIUM, 1 LOW, 6 informational alerts; raw exit 2, 2 warnings, 0 failures, 64 passes, no ignored rules |
+| Browser policy | Fifteen routes observed for full ten-second windows with no recorded CSP/page errors; exact script hashes retained |
+| Artifact trust | Offline Ed25519 signatures bind primary files, provenance and native web identity/SBOM; local signer verification is not third-party attestation |
+
+Passive ZAP exceptions are **MEDIUM `style-src unsafe-inline`** and **LOW missing/invalid
+Cross-Origin-Embedder-Policy**. Runtime inline styles remain permitted. The latter is a browser
+isolation hardening gap; neither is hidden by scanner configuration. A passive baseline does not
+exercise every authenticated role or replace an authorized penetration test.
+
+The earlier static image failed with ten HIGH findings and a newer Alpine image still had three;
+the Debian alternative also failed. Results were retained, and three precise patches produced
+the clean image. A subsequent source/configuration fix repeats exact-image and rehearsal gates;
+passing rc2 evidence does not authorize a subsequent release.
 
 ## Final source and bounded capacity evidence
 
@@ -87,8 +119,9 @@ confirmed receipts. These supplemental checks retain their distinct platform/wor
 
 Independent source scanning covered all 154 staged files with zero findings and zero parser
 errors after fixes; four later source/test deltas also passed. The configured Gitleaks, Bandit
-and Semgrep hooks passed. Final artifact identity, native image scan and deployment rehearsal
-remain separate release gates; selected source results do not establish ASVS certification.
+and Semgrep hooks passed. The six-file web-hardening integration scan also passed with zero
+findings/parser errors. Artifact identity, native scans and rehearsal remain per-release gates;
+selected source results do not establish ASVS certification.
 
 The isolated no-network browser fixture sustained both 50 and 70 contexts for uninterrupted
 hours: 3,601.986 and 3,602.632 seconds, respectively, with zero action errors and exit code 0.

@@ -16,7 +16,7 @@ the session's configured CSRF header. Session cookies are HttpOnly and Secure in
 | `/v1/workflows/jobs/{job_id}` | Inspect, cancel and review a specific job | Tenant and role checks |
 | `/v1/workflows/health` | Operational workflow health | Authenticated operator/owner |
 | `/v1/workflows/metrics` | Prometheus-compatible workflow measurements | Observation grant and tenant header |
-| `/v1/crawls/contracts`, `/v1/crawls/jobs` | Maintained catalogue contracts and durable cycles | Tenant reads; operator/user and CSRF for start/cancel |
+| `/v1/crawls/contracts`, `/v1/crawls/jobs` | Maintained catalogue contracts and durable cycles | Tenant reads; authenticated operator/owner and CSRF for start/cancel |
 | `/v1/crawls/jobs/{job_id}/export` | Private retained JSONL download | Authenticated operator/owner in the same tenant |
 | `/v1/stream` | Live invalidation hints | Current session; bounded revocation recheck |
 
@@ -60,3 +60,35 @@ stale worker fences and interrupted destination acknowledgements. The
 References: [MCP tools](https://modelcontextprotocol.io/specification/2025-11-25/server/tools),
 [Codex MCP](https://developers.openai.com/codex/mcp),
 [Claude MCP](https://code.claude.com/docs/en/mcp).
+
+## HTTP client lifecycle
+
+1. Establish a same-origin session using the documented login/MFA flow; read current role and CSRF
+   requirements from the session contract. Keep cookies and factors out of logs.
+2. Use maintained contracts and tenant-bound account identifiers. Owner approval is a separate action
+   from client submission. Crawler submission accepts a definition ID, not arbitrary selectors/URLs.
+3. Handle pagination with returned cursors. Treat SSE as invalidation hints and refetch authoritative
+   views through the API.
+4. On an uncertain mutation response, inspect persisted identity/state before resubmission. A conflict
+   requires reconciliation of intent, not changing an identity to evade duplicate detection.
+5. Respect rate limits and current authorization. Do not replay consumed approvals or retry UNKNOWN
+   destination actions.
+
+Generated [OpenAPI](../contracts/openapi.yaml) defines exact methods, schemas and status codes.
+Typical failures include authentication/role denial, stale/conflicting actions, invalid contracts,
+rate limits and dependency outages. Bound client retries and avoid logging raw response bodies.
+
+## Local-agent interface
+
+The standalone application exposes its own loopback UI/API; it is not an endpoint of the hosted
+control plane. A local session and same-origin CSRF are required for mutations. Task preparation,
+draft editing, exact approval, cancellation, global stop and receipt reconciliation are documented
+in [local-agent operations](operations/local-agent.md). Models receive no selector or approval tools.
+
+## Contract-change review
+
+Destination input/action/receipt changes must invalidate older approvals and include migration or
+forward-compatibility assessment. Review credentials, personal data, origins, request budgets,
+idempotency and inconclusive outcomes. Keep the API schema, settings schema, maintained data and
+client documentation synchronized. See [configuration](operations/configuration.md),
+[maintenance](maintenance.md) and [architecture decisions](adr/README.md).

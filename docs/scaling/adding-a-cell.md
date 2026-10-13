@@ -13,7 +13,9 @@ separate verified estimate and approval before provisioning.
    record to that identity and transport; do not expose Redis publicly.
 3. Start a control process and freight/workflow workers with their corresponding
    `FW_CONTROL__CELL` / `FW_WORKER__CELL` assignment. Configure dedicated pools, resource caps,
-   heartbeat and stop grace. Start a crawler assigned through `FW_CRAWL__CELL` if needed.
+   heartbeat and stop grace. The orchestrator's grace must exceed the configured application
+   drain timeout plus an explicit margin; verify the rendered Compose values, not only source
+   defaults. Start a crawler assigned through `FW_CRAWL__CELL` if needed.
 4. Move a test tenant with the reviewed administrative
    `fw_coordinator.control.move_tenant(engine, tenant_id, to_cell, actor)` transaction. It holds
    assignment authority while moving queued claims and resetting unconsumed detection delivery.
@@ -23,7 +25,8 @@ separate verified estimate and approval before provisioning.
    actions may finish; investigate `UNKNOWN` outcomes before creating replacement work.
 6. Verify exact artifact/config parity, current image identities, queue recovery, bounded fair
    tenant turns and representative latency/memory/CPU. Record the measured workload and rollback
-   boundary before moving additional tenants.
+   boundary before moving additional tenants. Test a heavily loaded tenant beside small tenants
+   and compare oldest eligible queue age; equal turn counts alone do not establish fair latency.
 
 Removing a cell requires moving or accounting for its tenants and durable work, stopping its
 producers, draining old deliveries and preserving uncertainty/evidence. Do not delete its Redis

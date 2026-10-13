@@ -14,8 +14,9 @@ configured owned origin; this is not arbitrary-site browser execution.
 
 1. Install the locked workspace (`uv sync --frozen`) and Playwright Chromium. Start the local
    data stack, owned freight board and coordinator using the existing development instructions.
-2. Run `python -m fw_coordinator.migrate`. Migrations 0002–0004 are additive and preserve freight claims.
-3. Sign in as a real owner with password and TOTP. The shared shared workspace account cannot approve
+2. Run `python -m fw_coordinator.migrate`. Apply every current migration; workflow, crawler, pacing and durable-detection changes have
+   separate compatibility requirements described in [deployment](deployment.md).
+3. Sign in as a real owner with password and TOTP. The shared workspace account cannot approve
    or issue access grants. `POST /v1/workflow-grants` accepts `{"scopes":["observe","execute"]}`
    with the authenticated cookie and session CSRF header. Use observation alone for investigation.
 4. Save the returned tenant ID and short-lived token as `FW_MCP__TENANT_ID` and
@@ -149,7 +150,7 @@ establish off-site backup retention or full-host recovery.
 
 ## Verification
 
-Final local verification on 2026-10-13 met 14/14 acceptance criteria for the owner-adjusted scope:
+The historical reliable-browser extension met 14/14 acceptance criteria for the owner-adjusted scope:
 Claude's actual client run is explicitly deferred; Codex's actual run passed for both workflows.
 
 | Gate | Verified result |
@@ -167,7 +168,7 @@ Claude's actual client run is explicitly deferred; Codex's actual run passed for
 An earlier full run timed out in the legacy load benchmark before its final assertions. The
 unchanged isolated rerun passed; the original 900-second deadline and coverage were preserved.
 The timeout's root cause was not conclusively established. Deployment is verified separately in
-the [release evidence](../releases/2026-10-13.md); larger fleet capacity remains unproven.
+the [release evidence](../releases/2026-10-13.md); representative authenticated fleet capacity remains unproven.
 
 Full npm audit is **not clean**: the development-only Next ESLint dependency chain includes
 `braces` 3.0.3, affected by [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm).
@@ -209,3 +210,21 @@ The seed provisions a dedicated `workflow` account group alongside the four frei
 Choose the approved-workflow account when submitting jobs; accounts occupied by freight slots remain
 unavailable until released. This prevents the two supervised workers from monopolizing each other's
 capacity. Keep reserved groups aligned with the seed configuration.
+
+## Current completion verification and lifecycle
+
+The newer full backend regression passed 260 tests with six expected skips. Exact release rehearsal
+includes both real MCP workflows, owner review/evidence, crawler and responsive console flows.
+Separate installed-model local-agent proof and 50/70-context owned-fixture hours broaden the evidence;
+they do not establish arbitrary destination correctness or authenticated fleet capacity.
+
+Before dependency/service replacement, gracefully stop the freight worker, workflow worker and
+crawler when present. Verify all stop graces exceed application drain bounds and record successful
+non-OOM exits and released holds. Keep old control available through legacy stream drain, then
+stop control and take a fresh archive before migration. See [deployment](deployment.md) and
+[operational runbooks](runbooks.md).
+
+Operational collection and independent encrypted recovery now have dedicated implementations and
+proof boundaries; use [monitoring](monitoring.md) and [recovery](recovery.md) instead of treating a
+local scheduled archive as complete host-loss protection. Final installation and live evidence
+belong in the [release record](../releases/2026-10-13.md).

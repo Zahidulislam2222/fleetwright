@@ -12,9 +12,9 @@ competitors are coordination actors, not 200 Chromium workers. These are fixture
 your destination's authentication, throttling and confirmation behavior must be measured separately.
 
 For a client deployment, I would start with its authorization and action/receipt contract, then
-deliver a bounded prototype with a correctness test and measured latency. A larger worker pool
+deliver a bounded first integration with a correctness test and measured latency. A larger worker pool
 would follow a representative sustained run with agreed resource, failure and recovery limits.
-The existing demo is one host; multi-zone availability and large customer capacity are not implied.
+The current installation is one host; multi-zone availability and large customer capacity are not implied.
 
 ## Eight reusable technical answers
 
@@ -69,7 +69,7 @@ are running; it is not a continuously staffed external monitoring service.
 
 ### 7. How is it deployed, including AWS?
 
-The implemented deployment uses Docker Compose and a small public demonstration fleet. Releases
+The implemented deployment uses Docker Compose and a bounded public workspace fleet. Releases
 are rehearsed, checked for drift and compared by file hashes after deployment, with retained
 rollback inputs. A configurable AWS reference has Terraform validation and three mocked-plan
 checks; no AWS provisioning or zone-loss exercise is claimed. Cloud costs and production topology
@@ -78,7 +78,7 @@ must be reviewed before a paid deployment.
 ### 8. What would a delivery milestone contain?
 
 Written criteria, maintained destination/configuration data, source and tests, reproducible run
-instructions, a real browser demonstration and a short evidence report. Acceptance covers both
+instructions, a real browser acceptance recording and a short evidence report. Acceptance covers both
 the expected action and the dangerous paths: competing actors, stale ownership, response loss,
 worker interruption, account limits and recovery. A release additionally needs its own exact
 artifact, security gates, rehearsal, deployment verification and operational handoff.
@@ -89,3 +89,6 @@ Evidence: [test workloads and historical measurements](../testing.md),
 [AWS reference](../../infra/terraform/README.md), [capacity boundaries](../scaling/README.md).
 
 Portfolio: https://zahidul-islam.com/ · GitHub: https://github.com/Zahidulislam2222
+
+Recorded fixture endurance now includes separate zero-error 50/70-context hours. Destination-specific
+throughput and availability remain separate acceptance work; see the linked measurement record.

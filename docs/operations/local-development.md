@@ -1,7 +1,12 @@
-# Local development
+# Local installation and development
 
-Requirements: Python 3.12, uv, Docker Compose, Node.js 24 and Playwright Chromium. Ports and
-secrets are configured through the root environment template. Do not reuse production credentials.
+The full fleet requires Python 3.12, uv, Docker Compose, Node.js 24 and Playwright Chromium.
+The standalone local agent has a separate SQLite-only runtime described below. Use the committed
+lockfiles and separate local credentials; production accounts and keys do not belong in development.
+
+## Prepare data services
+
+Run from the repository root:
 
 ```bash
 uv sync --frozen
@@ -9,16 +14,37 @@ uv run playwright install chromium
 uv run python tools/dev/make_env.py
 docker compose -f infra/compose/local.yaml --env-file .env up -d --wait
 uv run python -m fw_coordinator.migrate
-uv run python -m fw_coordinator.seed
 ```
 
-The environment generator refuses an existing file and does not print secrets. The seed uses
-configured private owner identity/TOTP and destination settings. Keep those values private.
+The generator refuses to overwrite an existing environment and does not print generated secrets.
+For an existing checkout, review new variables and use `make_env.py --sync` to add missing settings
+while preserving current values. Review [.env.example](../../.env.example) and
+[configuration ownership](configuration.md) before startup.
 
-Start these processes from the repository root in separate terminals:
+## Start the owned destination, then seed
+
+In a separate terminal, start the destination before running the seed: seeding calls its protected
+administration API to provision destination accounts and presets.
 
 ```bash
 uv run uvicorn --factory mockboard.app:create_app --host 127.0.0.1 --port 8100
+```
+
+This is the safe local bind example. If its configured client port changes, adapt the bind command
+to match. With the destination available, run:
+
+```bash
+uv run python -m fw_coordinator.seed
+```
+
+The seed creates configured private owner/TOTP access, a restricted shared workspace user, account
+groups, filters and schedules. Actual credentials stay in the ignored environment/recovery inventory.
+
+## Start independent service processes
+
+Use separate terminals from the repository root:
+
+```bash
 uv run python -m fw_coordinator.api
 uv run python -m fw_gateway
 uv run python -m fw_coordinator.control
@@ -27,18 +53,27 @@ uv run python -m fw_worker.workflows
 uv run python -m fw_coordinator.crawls
 ```
 
-The board bind port above must match `FWDEV_BOARD_PORT` / the client URL if changed. API and gateway
-bind values come from typed settings. Local Mailpit handles destination email codes; it is not a
-production outbound mail service. The approved-workflow runner is distinct from the freight fleet.
+The API/gateway bind addresses come from typed settings. The control process handles freight
+dispatch/reconciliation; the freight worker, approved-workflow runner and catalogue crawler have
+separate process lifecycles. Keep workflow-reserved account groups excluded from long-lived freight
+slots. API/crawler processes share the configured private export directory.
 
-From `apps/dashboard`, run `npm ci` then `npm run dev`. The development proxy forwards `/v1` to the
-configured local API/gateway. The console detects live sessions; an absent API selects explicit
-offline reference mode. The `/agent` page launches the separate local application; start it with
-`uv run --package fw-agent python -m fw_agent` after following the
-[local-model setup guide](local-agent.md). It requires no database/Redis/Docker services.
-Configure real MCP clients using [the workflow runbook](reliable-browser.md).
+From `apps/dashboard`, run `npm ci` and `npm run dev`. Its development proxy forwards same-origin
+`/v1` traffic to the configured API/gateway. API absence selects explicitly labelled offline
+reference data. Local Mailpit supports owned destination email-code testing; it is not an outbound
+customer mail service.
 
-## Verification
+## Local agent and MCP
+
+Start the local model service with an already installed model, configure `FW_AGENT__*`, then run
+`uv run python -m fw_agent`. PostgreSQL, Redis and Docker are not required for this standalone
+runtime. See [local-agent installation and boundaries](local-agent.md).
+
+For MCP, an owner first issues a scoped grant. Run `uv run python -m fw_mcp.server` in the workspace;
+keep the separately supervised workflow worker available. Follow [client setup](reliable-browser.md)
+and never put access tokens into prompts or committed client configuration.
+
+## Verify and stop
 
 ```bash
 uv run python tools/dev/run_tests.py -q
@@ -47,10 +82,12 @@ uv run ruff format --check .
 uv run mypy
 ```
 
-The harness creates isolated test databases, serializes suite runs and propagates test settings to
-child workers. It refuses non-local databases. Browser console tests require a built dashboard.
-Generate route types with `npx next typegen` before standalone TypeScript checks on a clean
-checkout. Frontend gates: `npm run lint`, `npm run typecheck`, `npm run build` and
-`npm run check:contrast`. See the [Next.js CLI reference](https://nextjs.org/docs/app/api-reference/cli/next#next-typegen-options).
-See [testing](../testing.md). Stop the local Compose project with `down` while retaining volumes;
-volume deletion is a separate destructive operation, never a routine cleanup or deployment step.
+The test harness serializes database/browser suites and refuses non-local test databases. It applies
+migrations and propagates isolated settings to child workers. Build the dashboard before console
+browser tests. In `apps/dashboard`, run `npx next typegen` before a clean standalone type check,
+then `npm run lint`, `npm run typecheck`, `npm run build` and `npm run check:contrast`.
+See [testing](../testing.md) and the [Next.js CLI reference](https://nextjs.org/docs/app/api-reference/cli/next#next-typegen-options).
+
+For planned shutdown, gracefully stop every browser worker before data services. Preserve volumes;
+`docker compose down` without volume deletion stops the local data stack. Removing volumes is a
+separate destructive operation. Interrupted actions retain UNKNOWN state and require receipt review.

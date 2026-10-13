@@ -27,10 +27,12 @@ uv run python -m fw_worker          # FW_WORKER__CELL, FW_WORKER__CONTEXTS, FW_W
 uv run pytest apps/worker           # real Chromium against a real board
 ```
 
-The process is stateless. Kill it at any time: leases expire on the database clock and are swept;
-sessions are restored from the vault on restart without a new one-time code.
+Durable state remains in PostgreSQL and the encrypted session vault. A process death before action
+can release work for another actor; a death during action leaves an uncertain outcome requiring
+receipt reconciliation. Cached sessions are restored when valid and renewed when expired/revoked.
+Use graceful drain for planned replacement and verify every slot/account hold is released.
 
-Capacity measured: about 70-103 MB per context, about 1.8 cores at 32 contexts
+Historical measurements: about 70–103 MB per context and 1.8 cores at 32 contexts
 ([capacity model](../../docs/scaling/capacity-model.md)).
 
 Run approved general workflows with `uv run python -m fw_worker.workflows`. These jobs use the
@@ -40,3 +42,16 @@ Both owned workflows and an OS-killed worker after destination acceptance have l
 proof. See the [workflow runbook](../../docs/operations/reliable-browser.md).
 
 Release operation and limits: [deployment](../../docs/operations/deployment.md) · [maintenance](../../docs/maintenance.md).
+
+## Admission, handover and capacity
+
+Account-group eligibility and database-clock cooldown are checked at admission and the action
+boundary; completion advances pacing so slow preparation cannot bypass the account policy.
+Watchers persist raw detections before cell delivery. Tenant moves replay pending detections under
+current directory authority; the control process commits their filter/claim decision atomically.
+
+Separate 50- and 70-context one-hour owned-fixture runs passed with zero errors. These establish
+browser endurance under the recorded resource limits, not 50/70 authenticated customer workers.
+For destination capacity, measure login renewal, pacing, tenant skew, sustained receipts and drain
+on representative accounts. Keep the [capacity evidence](../../docs/scaling/verification-2026-10-13.md)
+with every proposed worker count.

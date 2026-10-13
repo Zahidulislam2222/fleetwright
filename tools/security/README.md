@@ -13,7 +13,7 @@ trivy image --image-src docker --scanners vuln --severity HIGH,CRITICAL --exit-c
 
 The source provenance manifest hashes allowed source roots and excludes private/generated trees,
 environment files and private keys. Hash inventory alone is unsigned. To attest exact bytes with
-an operator-controlled offline Ed25519 key, record the actual private key in ignored CREDENTIALS.md,
+an operator-controlled offline Ed25519 key, record it in the private ignored recovery inventory,
 store the private key in an ignored path, and distribute its public verification key separately:
 
 ```sh
@@ -29,3 +29,15 @@ manifest/build inputs are fixed; modifying signed bytes invalidates the signatur
 
 Official tool guidance: [Trivy filesystem](https://trivy.dev/docs/latest/target/filesystem/),
 [Trivy image](https://trivy.dev/docs/latest/target/container_image/).
+
+## Exact artifact and runtime gates
+
+For final release directory signing and complete-file-list verification, use the dedicated
+[artifact workflow](release-artifacts.md), not the generic source-hash signature alone. Bind native
+application and web image identities/SBOMs to the final signed inventory. Local and server builds
+may have different IDs; attest the actual deployment images and verify them again after startup.
+
+Retain findings and failed attempts. A zero HIGH/CRITICAL vulnerability scan is a point-in-time
+scanner result, not proof of complete security or ASVS certification. Separate production images,
+source dependencies and development-tool advisories. See [security controls](../../docs/security/controls.md),
+[maintenance](../../docs/maintenance.md) and [release procedure](../../docs/operations/deployment.md).

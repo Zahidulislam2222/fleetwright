@@ -42,7 +42,7 @@ hardcoded in business code (a test enforces this). See [ADR-008](../adr/0008-con
 | `FW_WORKFLOWS__*`, `FW_MCP__*` | Approved workflows/MCP | Lease/action/approval/grant limits, reconciliation, page bounds, tenant and access token |
 | `FW_BACKUP__*` | Host backup CLI | Directory, Docker executable/container, database list, timeout, interval and retention |
 | `FW_CRAWL__*` | Crawler/API | Cell, allowed origins, explicit owned-origin private access, output directory, request/socket/lease budgets, pacing, retry and extraction limits, retention and quality thresholds |
-| `FW_AGENT__*` | Standalone local app | Loopback bind/provider/model, private SQLite/profile/evidence paths, optional CDP, destination allowlist, approval/time/token/tab/action/request budgets |
+| `FW_AGENT__*` | Standalone local app | Loopback bind/provider/model, private SQLite/profile/evidence paths, optional CDP, destination allowlist, approval/time/token/tab/action/request budgets and history-list limit |
 | `FW_MONITOR__*`, `FW_MONITOR_GRANT__*` | Host/external collector | Probes, SQLite and notification files, bounded collection, retention, optional archive-age check and observe-only grant renewal |
 | `FW_RECOVERY__*` | Independent recovery tooling | Protected archive directory, independent encryption key, archive bounds and retention |
 | `FW_RELEASE_SIGNING__*` | Offline release finalization | Ignored private key path, separately trusted public key path and signer identity |
@@ -76,3 +76,20 @@ hardcoded backend model or automatic paid fallback.
 `FW_CLAIMS__DETECTION_RETRY_S` controls redelivery of durable raw detections until their dispatch
 decision commits. A tenant move resets pending delivery under the same directory transaction;
 Redis delivery and retained stream history do not replace the PostgreSQL mailbox authority.
+
+## Resolve configuration deliberately
+
+Application environment values override the local dotenv file through typed settings. Docker
+Compose has a separate interpolation/container-environment precedence; a shell variable is not
+automatically injected into every container. Review the rendered Compose configuration privately
+and check the specific service's required variables before startup. Follow
+[Docker's documented precedence](https://docs.docker.com/compose/how-tos/environment-variables/envvars-precedence/).
+
+Keep independent keys for session-vault encryption, off-host recovery and offline release signing.
+Record their actual recovery values privately, preserve keys needed by retained archives, and
+revoke/rotate through a reviewed procedure. Never use the public signing key as its own trust anchor.
+
+Configuration changes require settings-schema/template regressions and affected behavior tests.
+Destination contract changes also require new approvals. Paths, model/provider endpoints, deadlines,
+history limits and retention can change through settings/data; stable wire fields, state names and
+canonical hash syntax are protocol constraints. See [maintenance](../maintenance.md).

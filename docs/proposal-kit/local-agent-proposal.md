@@ -32,3 +32,7 @@ Evidence: [setup and operating boundary](../operations/local-agent.md),
 [WebSocket server-observation regression](../../packages/fw_agent/tests/test_websocket_egress.py).
 
 Portfolio: https://zahidul-islam.com/ · GitHub: https://github.com/Zahidulislam2222
+
+The native UI regression checks that reviewed title/body edits survive blur and polling, become a
+fresh proposal and reach the exact destination receipt. Actual installed-model recordings cover all
+three templates; recording tooling clicks the operator controls and the model cannot approve itself.

@@ -1,61 +1,61 @@
-# Roadmap
+# Roadmap and promotion criteria
 
-Milestones advance on evidence rather than promised dates. Each requires written criteria,
-automated gates, real-flow verification and independent review.
+Milestones advance on evidence, not promised dates. Substantive changes require written criteria,
+automated gates, real-flow verification, independent review and an exact compatible release.
 
-## Implemented and locally verified
+## Implemented capabilities
 
-The freight engine includes fenced claims, warm sessions, filters/schedules, cells, transactional
-outbox, reconciliation and latency traces. The console includes password/TOTP, roles, CSRF,
-masked public access, capped shared controls, audit and live updates.
+Fleetwright includes fenced freight claims, warm sessions, filters/schedules, tenant-to-cell routing,
+database-clock account pacing, durable raw detections and receipt reconciliation. The console
+supports password/TOTP, roles, CSRF, private owner approvals, masked public access, audit and live
+updates. General workflows have versioned contracts, scoped/revocable MCP and bounded evidence.
 
-Reliable Browser Operations adds versioned general workflow contracts, durable fenced jobs,
-exact-action approval, scoped/revocable MCP, bounded investigation/export, two owned browser
-workflows, authenticated health/metrics and verified backup/restore tools. The combined suite
-passed all 148 cases across the final regression and isolated benchmark runs on 2026-10-13; actual Codex ran both workflows. Claude's actual client run is
-deferred while its subscription is inactive. Publication/deployment status belongs in the
-[changelog](../CHANGELOG.md); local test results alone are not release evidence.
+Catalogue crawling has durable progress, bounded pinned HTTP/TLS fetches, quality guards, retention
+and private JSONL export. The standalone agent uses SQLite and an installed local model with three
+maintained record-saving templates, exact approvals, private state and uncertainty recovery.
+Monitoring, renewable observe-only credentials, encrypted off-host recovery and signed exact
+artifact tooling are implemented. The AWS reference has offline provider-substituted validation;
+no AWS infrastructure has been provisioned by that evidence.
 
-## Prioritized milestones
+## Current verification boundary
 
-The completion implementation adds a durable catalogue crawler, the standalone SQLite/Ollama
-browser app, renewable authenticated monitoring, independent encrypted off-host recovery,
-action-boundary account pacing, bounded cell-scoped workflow turns, signed-artifact tooling and
-a configurable AWS reference tested without cloud provisioning. See the [crawler](operations/crawler.md),
-[local agent](operations/local-agent.md), [monitoring](operations/monitoring.md),
-[recovery](operations/recovery.md) and [assurance evidence](scaling/verification-2026-10-13.md).
-These source additions require their own exact release evidence; the previously deployed rc5
-release remains the deployment reference until the completion release is verified.
+The full backend suite passed 260 tests with six expected skips; the later local-agent UI correction
+passed its own 25-case suite and actual three-template installed-model recording. Separate 50/70
+browser-context fixture runs exceeded one hour with zero errors. Exact completion rc2 rehearsal
+passed real owner/MCP/browser/crawler/CSP flows and final native image scans reported zero
+HIGH/CRITICAL findings. Final integration and deployment status belong in the
+[release record](releases/2026-10-13.md); implementation evidence alone is not publication.
 
-The [13 October release](releases/2026-10-13.md) verifies the first milestone below; preserve
-these release gates for every replacement. The next expansion priority is operational baseline.
+## Expansion milestones
 
-| Priority | Deliverable | Acceptance / exit evidence |
+| Priority | Deliverable | Required promotion evidence |
 |---|---|---|
-| 1 | Reliable release operations | Exact committed artifact, migration/rehearsal, healthy workflow worker, scheduled verified archives, live HTTP/browser check, local/live hash parity |
-| 2 | Install and verify operational baseline | Collector/renewal/supervisor and independent scheduled-probe checks on the exact completion release; local encrypted off-host restore already exercised |
-| 3 | Workflow expansion | New authorized destination contracts with account/precondition/receipt rules, ambiguous-outcome policy and adversarial browser tests; no arbitrary selector tool |
-| 4 | Client assurance | Repeat actual Codex acceptance on releases; actual Claude run when subscription is available; no paid fallback without explicit approval |
-| 5 | Security assurance | OWASP ASVS assessment with evidence, dynamic tests, CSP hardening, artifact access/retention tests, release SBOM, container/dependency scans and signed provenance |
-| 6 | Fleet scale | Isolated 50/70-context fixture hours passed; representative authenticated freight workloads, tenant skew and deployed drain/move measurements remain |
-| 7 | Multi-zone control plane | Redundant API/gateways, database standby/PITR, pooled connections, static spare capacity, zone-failure exercise and measured 99.9% objective |
-| 8 | 100k then 1M+ simultaneous users | Disclosed sustained mixed workload, bounded fan-out/refetch, reconnect/slow-client tests, resource/cost curves and failure exercises |
-| 9 | Additional crawler destinations | Maintained authorized origin/extraction contracts, network egress review, per-domain budgets and adversarial evidence before onboarding |
-| 10 | Additional local-agent destinations | Strict form/receipt contracts beyond the three verified owned templates; preserve exact human approval and transport restrictions |
+| 1 | Repeatable operational baseline | Exact all-worker drain, immutable image/signature parity, live authorization/receipts, supervised backup/monitor, independent fresh encrypted restore |
+| 2 | Authorized destination expansion | Maintained account/precondition/action/receipt contract, lawful data scope, rate policy and adversarial real-browser tests |
+| 3 | Client assurance | Actual Codex acceptance on releases; Claude run when the owner's account is available, with no automatic paid fallback |
+| 4 | Representative fleet scale | Authenticated sustained workload, session renewal, tenant skew, account pacing, destination receipts and drain/move measurements |
+| 5 | Security and recovery assurance | Broader ASVS evidence, lower-severity finding review, retention/access tests and timed full-host/key/application recovery |
+| 6 | Multi-zone control plane | Redundant API/gateways, database standby/PITR, pooled connections, static spare capacity and zone-failure exercise |
+| 7 | 100k then 1M+ simultaneous control-plane users | Sustained mixed workloads, bounded fan-out/refetch, reconnect/slow-client tests, failure exercises and resource/cost curves |
+| 8 | Additional crawler delivery formats | Reviewed field/data contracts, destination authorization, durable delivery/retry policy and operational-cost agreement |
+| 9 | Additional local-agent integrations | Strict form/receipt contracts and exact human approval beyond the three owned workflows |
 
-## Current limitations and tracked work
+## Future scale and reliability
 
-- The deployment is one host; no measured monthly uptime or contracted 1M-user capacity.
-- Workflow runners now use bounded cell-scoped round-robin turns; large-tenant skew still needs representative deployment measurements.
-- Freight and workflow actions enforce account-group eligibility and database-clock cooldown at admission/action/completion; destination-side remote timing remains a receipt/reconciliation boundary.
-- The durable mailbox preserves new unread and in-flight detections across tenant moves; legacy Redis-only backlog requires the documented upgrade drain.
-- Replanning retires and replaces freight slots; targeted forced-drain tests cover retired generations and account release. Verify drain again on the exact deployed release.
-- Bounded local API/SSE reconnect and slow-client tests exist; production-scale refetch/skew still requires measurements. Console updates coalesce through maintained configuration.
-- Source health/metrics collector, renewal and independent public-probe workflow need final installation/publication evidence.
-- Independent encrypted archives were restored into fresh local databases with table row parity; a full-host/key/application recovery drill remains separate.
-- New static release generation binds inline scripts to build hashes. Runtime inline styles remain an explicit exception; real release navigation must pass before publishing the stronger policy.
-- Full npm audit retains an unpatched development-only `braces` advisory; production dependencies audit clean.
-- A destination with inconclusive receipts remains `UNKNOWN` and needs operator review.
+1M+ simultaneous users describes control-plane sessions across tenants; it does not mean a million
+browser actors. The 99% initial operating objective and 99.9% multi-zone objective need explicit
+SLIs, windows, error budgets, paging ownership, recovery and representative failure/load evidence.
+They are future targets, not measured monthly availability or contractual commitments. See
+[scale architecture](scaling/README.md), [capacity](scaling/capacity-model.md) and [SLOs](scaling/slo.md).
 
-See [scaling](scaling/README.md), [SLOs](scaling/slo.md), [security](security/controls.md),
-[maintenance](maintenance.md) and [workflow operations](operations/reliable-browser.md).
+## Retained limits
+
+The current hosting topology has one failure domain. Fixture endurance is not authenticated freight
+capacity. Missing destination receipts remain inconclusive; UNKNOWN actions cannot be blindly retried.
+The local browser agent is not an OS sandbox for hostile pages. Static inline-script hashes are
+implemented, while inline styles and incomplete cross-origin isolation remain disclosed limitations.
+The development-only dependency advisory remains separate from production audits/native image scans.
+Off-host data restoration does not establish a second running site or measured recovery objective.
+
+Use [testing](testing.md), [security controls](security/controls.md), [legal scope](legal/README.md),
+[maintenance](maintenance.md) and [operations](operations/runbooks.md) when planning a promotion.

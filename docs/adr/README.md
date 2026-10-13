@@ -1,7 +1,7 @@
 # Architecture decision records
 
-Each record states the context, the decision and its consequences. Records are never rewritten;
-a changed decision gets a new record that supersedes the old one.
+Each record states the context, the decision and its consequences. A changed architectural decision gets a new record that supersedes the old one; preserve the
+original context and consequences. Editorial terminology changes do not create a new decision.
 
 | # | Decision | Status |
 |---|---|---|
@@ -17,3 +17,17 @@ a changed decision gets a new record that supersedes the old one.
 | 010 | [Approved workflows, reserved accounts and release verification](0010-approved-workflows-and-release-account-pools.md) | Accepted; clarifies 009 |
 | 011 | [One durable crawl frontier and pinned HTTP egress](0011-durable-crawl-frontier.md) | Accepted |
 | 012 | [Persist raw detections before cell delivery](0012-durable-raw-detections.md) | Accepted; extends 003 |
+| 013 | [Local drafting and exact approval have separate authority](0013-local-drafting-and-approval-authority.md) | Accepted |
+| 014 | [Bind release identity and stop all actors before replacement](0014-release-identity-and-worker-shutdown.md) | Accepted |
+
+## Reading the decisions
+
+Start with authority (001–004), then process/cell isolation (005–007), configuration (008) and
+future scale objectives (009–010). Crawler egress/frontier (011) and durable raw detections (012)
+explain the newer persistence boundaries and backend compatibility requirements.
+Local assistant authority (013) and native image/all-worker lifecycle identity (014) complete the
+operational boundaries used by the current implementation.
+
+An accepted decision describes the chosen design, not a certification or measured capacity.
+Use [current architecture](../architecture/overview.md), [test evidence](../testing.md) and
+[release operations](../operations/deployment.md) for implementation status and promotion gates.

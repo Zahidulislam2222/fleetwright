@@ -33,3 +33,29 @@ retention policy; deleting an export does not erase data from previously retaine
 The owned catalogue provides a stable, paginated target. Its alternate layout exercises the quality
 alarm. It is separate from the live freight feed. External webhooks, paid proxy/captcha services and
 Parquet/S3 delivery are not enabled in this release; use the private JSONL export interface.
+
+## Inspect, export and investigate
+
+The API exposes maintained definitions, paginated jobs, operator submission/cancellation and
+tenant-bound exports; see [integration routes](../integrations.md) and generated OpenAPI. The native
+console path is select catalogue → Start crawl → inspect progress → Download JSONL. Exports are
+no-store responses and expire under configured retention.
+
+Before accepting a cycle, check its terminal state, extracted item count, errors, added/changed/
+removed counts and alerts. A failed export is partial evidence, not a complete catalogue snapshot.
+Investigate zero-result/drop alerts before consuming downstream removals. Keep field types and
+identity constraints synchronized with the destination.
+
+The real owned catalogue flow reaches COMPLETE and exports four exact records across two pages.
+Tests also exercise TLS hostname verification, numeric DNS pinning, malformed/truncated JSON,
+physical termination of slow fetches, stale fences, cancellation and cross-tenant/export denial.
+The subprocess boundary confirms over-budget network work exits before retrying; cancelling only
+an await is insufficient. See [test evidence](../testing.md).
+
+## Network and privacy policy
+
+Only explicitly configured owned origins may receive private-address access. Additional origins
+retain public-address restrictions. DNS validation/pinning, TLS hostname checks, refusal of redirects
+and independent byte/time/page budgets constrain the supported HTTP path; do not claim a general
+purpose network sandbox. Review lawful collection, personal-data minimization and retention before
+adding a destination. See [privacy](../legal/privacy.md) and [acceptable use](../legal/acceptable-use.md).

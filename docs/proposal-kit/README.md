@@ -1,7 +1,7 @@
 # Fleetwright proposal kit
 
-These drafts describe implemented work and its measured boundaries. They are portfolio materials,
-not client testimonials or claims that an external customer's systems have been automated.
+These drafts describe implemented work and its measured boundaries. They are reusable capability and integration materials. Results are measured on owned destinations;
+no external customer's business outcome is implied.
 
 | Need | Draft |
 |---|---|
@@ -19,6 +19,15 @@ The [release record](../releases/2026-10-13.md), [changelog](../../CHANGELOG.md)
 engineering evidence. No document here promises monthly availability, cloud deployment, arbitrary-site
 exactly-once execution or an unmeasured fleet size. Pricing and delivery dates are intentionally absent.
 
-Video production is a separate artifact: these text drafts do not claim that three new capability
-videos have been recorded or published. Use verified demonstrations and source evidence, and identify
-the actual release/workload shown when attaching media.
+Three capability recordings have been produced from exact release rehearsal and actual local-model
+workflows, with transcripts, hashes, full-file decode and browser playback checks. They remain local
+artifacts and are not an external publication. Identify their release, owned workload and approval
+boundary when attaching them; do not imply customer deployment or production-scale capacity.
+
+## Use and review
+
+Choose the smallest capability that meets the request, confirm destination authorization and
+receipt behavior, and define acceptance before estimating. Keep future scale/availability objectives
+separate from recorded fixture results. Exact job-post question matching is optional; the eight
+technical topics are reusable explanations. Pricing, contractual support and delivery dates require
+an independently agreed scope. No proposal here has been sent externally.

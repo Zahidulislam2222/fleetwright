@@ -37,7 +37,8 @@ DETECTED ──▶ QUEUED ──▶ LEASED ──▶ ACTING ──▶ CONFIRMED
    becomes `UNKNOWN`.
 5. **`UNKNOWN` is never retried.** Retrying could book the job twice. The reconciler opens the
    account's sealed session, asks the target what the account has booked, and resolves the claim
-   as booked or not booked.
+   according to the destination receipt contract. An inconclusive absence remains uncertain for
+   human investigation; a timeout alone is never evidence of rejection.
 6. **A late actor still wins with the truth.** If the reconciler marked a claim `UNKNOWN` and the
    original actor then returns a definite answer with a still-current fence, that answer is
    recorded.
@@ -46,6 +47,18 @@ DETECTED ──▶ QUEUED ──▶ LEASED ──▶ ACTING ──▶ CONFIRMED
 8. **History and outbox in the same statement.** Each sweep rule is a single statement that moves
    the rows, writes `claim_events` and writes the outbox messages, so row locks are held for one
    round trip.
+
+## Admission and detection durability
+
+Account eligibility and database-clock pacing apply before admission and immediately before action.
+Completion updates the cooldown; slow browser preparation cannot make the next action eligible early.
+Watchers persist raw detections in a PostgreSQL mailbox before Redis delivery. Delivery alone does
+not consume a detection: its filter/claim decision must commit. Tenant handover resets pending
+routing under current directory authority and replays unread/in-flight old-cell work.
+
+The unpublished-outbox metric does not include every published-but-unconsumed detection. Inspect
+both durable backlog and stream pending/dead-letter state during a move or upgrade. See
+[ADR-012](../adr/0012-durable-raw-detections.md) and [upgrade safety](../operations/deployment.md#rollback-and-data-safety).
 
 ## Evidence
 

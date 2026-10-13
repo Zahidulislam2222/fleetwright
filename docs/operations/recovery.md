@@ -50,7 +50,7 @@ Prefer restoring directly from `open_bundle` bytes to avoid plaintext archive fi
 
 On 13 October 2026, read-only pinned SSH retrieval produced an authenticated encrypted off-host
 bundle of 2,533,091 bytes. Restoring from its exact ciphertext created two fresh local databases:
-20 Fleetwright and 8 mockboard public tables. All restored row counts matched the source archive's
+20 Fleetwright and 8 owned-destination public tables. All restored row counts matched the source archive's
 COPY records. The archived workflow dataset recovered 4 jobs, 4 approvals, 20 events and 2 grants.
 Plaintext archive files and SQL were kept in process memory. Existing production databases were
 not modified or dropped. Tests additionally verified wrong-key/tamper refusal and preservation of
@@ -63,3 +63,19 @@ separate original application keys remain necessary. Rehearse the procedure peri
 after schema/release changes, while preserving the last verified copy.
 
 Official reference: [PostgreSQL pg_restore](https://www.postgresql.org/docs/current/app-pgrestore.html).
+
+## Recovery inventory and release acceptance
+
+A usable recovery set includes validated encrypted database archives, the independent recovery key,
+application vault/authentication keys, reviewed configuration, source/release identity and role/
+migration bootstrap instructions. Protect key copies separately from archive media. Record who can
+recover the service without publishing their access details.
+
+Repeat the drill from a fresh completed archive after schema or release changes. Validate every
+restored table, not only table count, and keep job/approval/event/grant relationships visible in the
+private report. Before returning to service, verify current image identity, tenant isolation,
+authorization, account holds, queue/mailbox consistency and destination receipts for uncertain work.
+
+Data parity is evidence of the tested restore. A production failover, whole-host recovery or measured
+RPO/RTO requires its own timed end-to-end exercise. See [runbooks](runbooks.md),
+[release safety](deployment.md) and [recovery objectives](../scaling/slo.md).

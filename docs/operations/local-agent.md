@@ -33,7 +33,7 @@ Docker runtime. No cloud model, API key or paid service is required or enabled.
 | Dispatch handover note | Owned dispatch status | Handover draft form | Saves an owned local record |
 | Inspection summary | Owned inspection observations | Inspection draft form | Saves an owned local record |
 
-The lab is enabled explicitly by configuration. These are functional owned demonstration workflows;
+The lab is enabled explicitly by configuration. These are functional owned workflows;
 they do not send emails, post publicly, buy anything or integrate with a third-party production app.
 Other explicitly authorized origins can be configured only when they implement the same strict form
 and receipt contract. This is not an arbitrary-site autonomous agent. CAPTCHA/login bypass is absent.
@@ -92,10 +92,27 @@ independent OS/container egress policy, which this lightweight standalone runtim
 
 `pytest -q packages/fw_agent/tests -m 'not slow'` runs authority, API and real Chromium tests without
 a local model. `pytest -q packages/fw_agent/tests --agent-model-proof` additionally exercises all three
-templates with the installed local model and saves evidence under ignored `var/agent-proof/`.
+templates with the installed local model and prints its private local evidence directory.
 CI does not claim to have an installed model: that one proof skips unless explicitly requested.
 
-On power loss, read the project checkpoint in ignored `memory/agent-completion.md`, then restart the
-application against the same SQLite database and profile. Review UNKNOWN tasks and reconcile
+After power loss, restart the application against the same SQLite database and profile. Review
+UNKNOWN tasks and reconcile
 receipts; never delete task rows to force a retry. JSON evidence records the exact approval hash and
 matching receipt; screenshots show the destination acknowledgement.
+
+## Model and review maintenance
+
+The installed model is selected by typed settings, not by task text. The adapter checks local
+inventory and remote-backed metadata, requests a strict title/body JSON schema, bounds model
+response size/tokens/time, and supplies no action tools. See the
+[official structured chat format](https://docs.ollama.com/api/chat).
+
+Treat page content and model prose as untrusted. Review both title and body, including any
+unsupported inference. Unsaved fields survive blur, manual refresh and polling; approval refuses
+them until Save edits produces a new proposal. Confirm that the final receipt matches the reviewed
+content rather than checking only the CONFIRMED label.
+
+For upgrades, stop active tasks, preserve the SQLite/profile/evidence directories, back up private
+state and inspect UNKNOWN tasks after restart. Re-run approval, cancellation, injection and
+two-origin HTTP/WebSocket tests when changing templates or browser policy. Actual installed-model
+proof is separate from default CI; POSIX permission checks do not establish Windows ACL privacy.

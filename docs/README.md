@@ -1,8 +1,13 @@
 # Fleetwright documentation
 
-Start with the product guide, then follow the operational or engineering path you need.
+Start with [product scope](product.md). New operators should complete local installation,
+configuration and destination authorization before enabling actions. Integrators should read the
+API/MCP reference and exact-approval contract; service owners should use deployment, monitoring,
+recovery and incident runbooks.
 
-Latest deployed release: [13 October 2026 — Reliable Browser Operations](releases/2026-10-13.md).
+Most recent exact local rehearsal: `20261013-free-local-rc2`, source `847bcd40`.
+Final completion integration includes updated documentation and all-worker shutdown-grace checks.
+Use the [release record](releases/2026-10-13.md) for deployment status and live verification.
 
 | Area | Documents |
 |---|---|
@@ -19,3 +24,18 @@ Latest deployed release: [13 October 2026 — Reliable Browser Operations](relea
 
 Measured results include their workload and date. Estimates explain assumptions. Targets have
 acceptance gates before becoming capacity commitments or contractual service levels.
+
+## Choose a starting path
+
+- **Operator:** [local setup](operations/local-development.md) → [configuration](operations/configuration.md)
+  → [approved workflows](operations/reliable-browser.md) or [crawler](operations/crawler.md).
+- **Local assistant user:** [standalone app](operations/local-agent.md), including model installation,
+  private state, approval, cancellation and uncertain-outcome recovery.
+- **Integrator:** [API/MCP](integrations.md) → [architecture](architecture/overview.md) → target onboarding
+  in [acceptable use](legal/acceptable-use.md).
+- **Service owner:** [release procedure](operations/deployment.md) → [monitoring](operations/monitoring.md)
+  → [encrypted recovery](operations/recovery.md) → [incident runbooks](operations/runbooks.md).
+
+Documentation describes implemented contracts and explicit limits. A passed fixture test, an image
+scan, a signed artifact and a successful deployment establish different things; none substitutes for
+representative customer load or measured monthly availability.

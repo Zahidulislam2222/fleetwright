@@ -20,3 +20,14 @@ proof is in the coordinator workflow suite. See the
 [workflow runbook](../../docs/operations/reliable-browser.md).
 
 Release operation and limits: [deployment](../../docs/operations/deployment.md) · [maintenance](../../docs/maintenance.md).
+
+## Adding a destination
+
+Obtain explicit authorization and define authentication, account identity, permitted origin,
+preconditions, action fields and matching receipt semantics in maintained contracts. Test expired
+sessions, changed layouts, rate limits, ambiguous acknowledgements and interruption after acceptance.
+Missing receipt data must remain inconclusive unless the destination contract proves otherwise.
+
+The built-in challenge solver is confined to the owned arithmetic fixture. Additional proxy or
+challenge services are not enabled merely by changing a URL; review destination policy, credentials,
+privacy and cost before integration. See [target onboarding](../../docs/legal/acceptable-use.md).

@@ -27,3 +27,15 @@ repository root using `node deploy/build-release.mjs <YYYYMMDD-name>`.
 
 See [product](../../docs/product.md), [deployment](../../docs/operations/deployment.md),
 [maintenance/accessibility](../../docs/maintenance.md) and [security controls](../../docs/security/controls.md).
+
+## Authorization and release validation
+
+Owner workflow approval and grant issuance require private authenticated authority. Crawler
+start/cancel/export require operator-or-owner access; public views expose aggregate state without
+those controls. Native UI verification checks real login/TOTP, API responses, exact evidence
+exports, SPA navigation, desktop/mobile overflow and browser CSP violations.
+
+The hosted `/agent` route is a launch/setup guide. Its local app connection is explicit; deploying
+the dashboard does not install a model or obtain access to the user's browser. Maintain copy in the
+content files, preserve established wire identifiers and distinguish runtime data from offline
+reference views. Final edge-image scans and exact static-file hashes are separate release gates.

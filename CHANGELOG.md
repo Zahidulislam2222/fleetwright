@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — free/local completion
+## Unreleased — crawler, local agent and operational recovery
 
 - Durable tenant-scoped catalogue crawling, pinned HTTP/TLS destination checks, bounded physical
   request deadlines, JSON/CSS field contracts, quality alarms, retention and private console export.
@@ -11,8 +11,14 @@
 - Account-group and actual action cooldown enforcement, bounded cell-scoped workflow turns,
   graceful draining, static inline-script hashes and configurable offline-tested AWS reference.
 - Container hardening, CycloneDX inventory and independently verifiable offline release provenance.
+- Durable raw-detection replay across tenant handover, exact native app/web image identity checks,
+  static-only compatible rollback and all-worker shutdown-grace verification.
+- Professional component READMEs and product/integration/architecture/operations documentation,
+  with current fixture evidence and explicit future scale/availability promotion criteria.
 
-Local verification and independent review are recorded separately from deployed release evidence.
+Full backend regression: 260 passed / 6 expected skips; subsequent agent UI correction separately
+passed 25 tests. Both 50/70-context fixture hours and actual local-model templates passed. Latest
+exact rehearsal is completion rc2 / source `847bcd40`; final release evidence is recorded separately.
 
 ## 2026-10-13 — reliable browser operations
 

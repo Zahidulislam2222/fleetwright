@@ -1,7 +1,8 @@
 # Fleetwright: making browser automation inspectable and recoverable
 
-Fleetwright is a portfolio engineering project built against owned freight and request-portal
-fixtures. It is not a client testimonial, and its test outcomes are not third-party business metrics.
+Fleetwright is an authorized browser-operations platform validated against owned freight and
+request-portal destinations. The measured outcomes describe engineering workloads, not a
+customer testimonial or third-party business metrics.
 
 ## The problem
 
@@ -31,7 +32,7 @@ Changed, expired and replayed approvals are rejected before the browser performs
 | Uncoordinated action attempts | Fenced claims and destination-ground-truth duplicate checks | Controlled 200-competitor / 10,000-job test; not 200 browsers |
 | Slow setup on every action | Warm sessions and measured stages | Owned-board engine p50 approximately 365 ms / p95 540 ms; historical fixture workload |
 | Catalogue page scripts without durable progress | Resumable frontier, quality alarms and approved-field exports | Owned paginated catalogue and adversarial HTTP/TLS tests |
-| A local-agent prototype | Three real local-model browser form saves with exact human approval | Owned maintenance, handover and inspection templates; no social posting integration |
+| Unstructured local draft automation | Three real local-model browser form saves with exact human approval | Owned maintenance, handover and inspection templates; no social posting integration |
 | A timeout treated as failure | UNKNOWN state and matching-receipt reconciliation | Lost acknowledgements and killed-worker tests |
 
 ## Problems found during verification
@@ -42,8 +43,9 @@ substantial successful work and exercised action-phase recovery, as well as the 
 
 Fresh review later found that HTTP request interception did not constrain WebSocket connections.
 Real dedicated-browser and CDP tests observed an off-origin handshake and marker before approval.
-A context-lifetime WebSocket denial policy changed both tests to zero destination handshakes and
-messages. The checks observe the destination rather than trusting a page-side error.
+A context-lifetime WebSocket denial policy changed both tests to zero destination connection
+attempts. Independent unguarded Chromium controls prove the observing sink is reachable before
+guarded zero-contact assertions. The checks observe the destination rather than trusting a page-side error.
 
 Crawler review also exposed a timeout that cancelled an await while its blocking network operation
 continued. Fetches now run in an owned disposable process, with termination and process-exit
@@ -66,3 +68,20 @@ own rehearsal and deployment evidence; local implementation alone is not proof o
 Source and evidence: [architecture](../architecture/overview.md), [testing](../testing.md),
 [crawler](../operations/crawler.md), [local agent](../operations/local-agent.md),
 [scaling measurements](../scaling/verification-2026-10-13.md), [release record](../releases/2026-10-13.md).
+
+## Current verification and operating lessons
+
+The full completion suite passed 260 cases with six expected skips. Separate 50/70-context fixture
+hours passed without errors, and actual local-model workflows produced three matching receipts.
+Exact local release rehearsal checked owner/MCP actions, crawler export, public authorization,
+responsive navigation and script CSP; final native application/web image scans reported zero
+HIGH/CRITICAL findings at their recorded identities.
+
+Recording exposed another gap: a UI refresh could discard unsaved reviewed text. The earlier test
+checked confirmation but omitted content preservation. The corrected regression now verifies both
+edited fields after blur/polling and the exact final receipt. The lesson is to assert the user's
+intended outcome, not only the terminal state.
+
+Production rollout is a separate acceptance boundary. Keep all-worker drain, queue compatibility,
+trusted image identity, fresh backup, monitoring and encrypted recovery evidence with each release.
+No fixture count, scan result or successful data restore proves a production SLA.

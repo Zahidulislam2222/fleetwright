@@ -17,6 +17,14 @@ flowchart LR
   Redis --> Gateway[Authorized update gateway]
   Gateway --> Operator
   PG --> Backup[Private verified archives]
+  PG --> Crawler[Durable catalogue crawler]
+  Crawler --> Catalogue[Authorized catalogue]
+  Crawler --> Export[Private JSONL]
+  LocalUser[Local operator] --> Agent[Standalone local agent]
+  Agent --> SQLite[(Local SQLite)]
+  Agent -->|draft request| Model[Installed local model]
+  Model -->|title and body only| Agent
+  Agent -->|exact reviewed browser save| Form[Authorized form and receipt]
 ```
 
 ## Responsibilities
@@ -55,7 +63,7 @@ Fencing protects Fleetwright database authority; an arbitrary website does not c
 Correctness therefore also depends on the adapter's permitted action and receipt contract. Never
 generalize controlled destination results into exactly-once delivery on all websites.
 
-## Existing freight pipeline
+## Freight delivery and durable detections
 
 Watchers capture bounded feed responses and persist raw detections before delivery. Filters/schedules select jobs;
 claims and outbox rows commit together. The relay publishes to a cell stream. Warm actors lease,
@@ -88,3 +96,27 @@ domain. Multi-zone placement, gateway fleets, sharding and regional recovery rem
 
 The stack is Python 3.12, FastAPI, SQLAlchemy/Alembic, PostgreSQL, Redis Streams, Playwright,
 official FastMCP and Next.js/React. Lockfiles and deployment image digests define release versions.
+
+## Three separate execution authorities
+
+The fleet and general workflow runner share PostgreSQL authority, but use distinct process/account
+lifecycles. Catalogue collection uses a fenced durable frontier and an allowlisted HTTP fetch
+process; it does not give operators arbitrary browser scripting. The local agent uses SQLite on
+the user's computer and an installed model for typed drafting; it does not depend on fleet services.
+
+These boundaries prevent a model response, page instruction, Redis delivery or UI refresh from
+becoming authority. Local edits survive polling but cannot authorize the old proposal; saving them
+creates a new hash. Each uncertain action is reconciled against its destination contract.
+
+## Operational failure domains
+
+The host collector has administrative Docker authority solely for observe-only grant renewal;
+the independent probe has neither execution nor approval access. Off-host recovery uses a separate
+encryption key and proves data restoration without overwriting source databases. Those are distinct
+from full-host/application recovery and measured availability.
+
+Release identity includes committed source, immutable artifact inventory, final native app/web
+image IDs and independently trusted signatures. Scan results are bound to those exact images.
+Static rollback preserves compatible backends and mailbox state; backend recovery requires its
+own tested compatibility procedure. See [deployment](../operations/deployment.md),
+[monitoring](../operations/monitoring.md) and [recovery](../operations/recovery.md).

@@ -4,8 +4,9 @@ The current deployment uses an existing single server, immutable release directo
 Compose. It is a release target; local committed source remains authoritative. Only the edge web
 service binds a loopback port behind the TLS proxy. Databases, Redis, owned destinations and
 workers share a private backend network without general internet egress.
-The freight worker's configured container stop grace must exceed its typed application drain
-timeout. Verify old slots become stopped across a replacement; retain historical records and
+Every browser worker's configured container stop grace must exceed its typed application drain
+timeout; check freight and approved-workflow workers individually, and the crawler when present.
+Verify old slots become stopped across a replacement; retain historical records and
 investigate stale active rows rather than removing them from health checks.
 
 ## Release inputs and gates
@@ -29,10 +30,14 @@ full commit metadata and a SHA-256 manifest. Release IDs are immutable.
    `WEB_BASE_IMAGE` to `deploy/docker/web.Dockerfile`; it has no implicit base fallback. Scan both
    native server images and record their inspected identities and native SBOMs. Include web image
    metadata/SBOM as additional signed primary release artifacts before finalizing the signature.
-   Back up data, then run additive migrations and
-   idempotent seed before API startup. Start freight and approved-workflow workers separately.
-7. Verify origin/public HTTP and TLS, authenticated behavior, destination receipts and service state.
-8. Verify every deployed artifact hash against local, record release/commit and retain rollback.
+7. Gracefully stop freight, approved-workflow and present crawler workers before recreating any
+   dependencies. Verify successful non-OOM exits and released holds. Keep old control available
+   until every configured legacy stream has zero unread/pending work and no unexplained dead letters.
+8. Stop old control, validate a fresh pre-migration archive, then apply reviewed migrations and
+   idempotent seed. Verify trusted image identities immediately before startup; start the separate
+   control, freight, workflow and crawler services using the reviewed release configuration.
+9. Verify origin/public HTTP and TLS, authenticated behavior, destination receipts and service state.
+10. Verify every deployed artifact hash and running image identity, record release/commit and retain rollback.
 
 ## Scheduled backup service
 
@@ -66,9 +71,12 @@ the upgraded database and queues. Keep the compatible backend and roll back only
 assets, or deploy a reviewed forward fix. A full backend rollback requires a separately tested
 mailbox-preserving migration/export/import procedure; it is not the normal rollback path.
 
-Before this upgrade, stop and drain the old freight watcher/actor process while the old control
-loop remains available. Verify every configured cell's legacy detection streams have zero unread
-and pending messages, then stop the old control loop and take the pre-migration archive. Abort the
+Before this upgrade, gracefully stop ALL browser/execution workers: freight watchers/actors,
+the approved-workflow worker, and the crawler when present. Keep the old control loop available.
+Verify each stopped container exited successfully, was not OOM-killed, released its account holds
+and left post-action uncertainty inspectable. Do not recreate dependencies while any old actor is
+still running. Verify every configured cell's legacy detection streams have zero unread
+and pending messages, with no dead-letter backlog, then stop the old control loop and take a fresh pre-migration archive. Abort the
 upgrade if the backlog cannot be accounted for. Migration cannot make a previously unpersisted
 Redis-only detection durable retroactively. Keep the old stream data and private evidence.
 
@@ -87,3 +95,29 @@ Reconcile any accepted/unknown actions after recovery; redeployment does not und
 Hash parity proves deployed bytes match the release, not service correctness. Both hash checks and
 behavioral verification are required. See [runbooks](runbooks.md), [workflow operations](reliable-browser.md)
 and [recovery objectives](../scaling/slo.md).
+
+## Exact image identity before and after startup
+
+Verify the entire finalized artifact with the configured separately trusted signing key before
+starting services. The application and web images have different identities: map each backend role
+to the signed application image and the web role to its separately attested web image. A tag is a
+locator, not identity proof. Compare the actual immutable IDs immediately before Compose startup
+and the running containers' IDs afterward. Reject a missing, substituted or mismatched image.
+
+Retain native SBOMs and scanner findings for both deployment images. Local and server builds may
+differ; scanning a locally built image cannot establish the server image's condition. Verify static
+served-file hashes as well as artifact-directory parity. A signed inventory does not itself prove
+service correctness, secret hygiene or vulnerability absence. See
+[exact release verification](../../tools/security/release-artifacts.md).
+
+## Acceptance and operational handoff
+
+The latest verified rehearsal is completion rc2 from source `847bcd40`; final release integration
+also requires the documented all-worker shutdown grace. The selected completion release must pass
+its own exact signature/image, browser/MCP, HTTP/TLS, migration, backup, monitoring and recovery
+checks. Use the [release record](../releases/2026-10-13.md) for final installation status.
+
+Before closing a rollout, verify protected backup/monitor service working directories and config
+hashes, a fresh archive, observe-only grant renewal and an independent encrypted restore. Record
+remaining risks, support/incident ownership, retention and the next restore exercise. Keep private
+host paths, credentials, raw reports and browser artifacts out of public documentation.

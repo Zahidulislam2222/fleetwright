@@ -1,4 +1,4 @@
-# Fleetwright product and delivery scope
+# Fleetwright product guide
 
 Fleetwright coordinates authorized browser operations through a durable control plane. Operators
 review exact proposals; scoped MCP clients submit and investigate work; browser workers execute
@@ -59,3 +59,31 @@ Hosted service pricing, support agreements and contractual service levels are se
 - [Capacity plan](scaling/capacity-model.md), [1M+ user architecture](scaling/README.md),
   [availability objectives](scaling/slo.md) and [roadmap](roadmap.md).
 - [Deployment](operations/runbooks.md), [testing](testing.md) and [maintenance](maintenance.md).
+
+## Onboard an authorized workload
+
+1. Establish the customer/tenant owner, destination permission, account scope and data purpose.
+2. Select fleet workflow, catalogue crawler or local agent according to the actual action boundary.
+3. Define allowed origins, fields/selectors, identity, rate budgets, retention and success/uncertainty receipts.
+4. Provision private accounts and least-privilege grants; validate tenant isolation and owner approvals.
+5. Exercise session expiry, rate limits, changed pages, interrupted acknowledgements and recovery.
+6. Agree operating ownership, support, measured capacity and recovery objectives before production use.
+
+The built-in destinations provide reproducible acceptance environments. New targets require their
+own contract and review; an accessible page or a permissive robots file alone is not authorization.
+See [acceptable use](legal/acceptable-use.md), [privacy](legal/privacy.md) and
+[security onboarding](security/controls.md).
+
+## Choose the execution path
+
+| Need | Execution path | Authority and state |
+|---|---|---|
+| Sustained coordinated freight work | Warm fleet actors and watchers | PostgreSQL claims, account pacing and cells |
+| A reviewed business action | MCP proposal plus owner console | Versioned workflow approval and fenced worker |
+| Approved structured data collection | Catalogue cycle | Durable frontier, extraction allowlist and private export |
+| Local content drafting and form save | Standalone local agent | Installed model drafts; SQLite binds human approval and receipt |
+
+Current verification includes the full 260-case regression, separate post-correction agent checks,
+real MCP/model browser flows and 50/70-context fixture endurance hours. These do not establish a
+customer workload or availability SLA. [Testing](testing.md) records their scope;
+[future scale and availability](scaling/README.md) has explicit promotion gates.

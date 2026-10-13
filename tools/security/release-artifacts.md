@@ -14,8 +14,9 @@ in the ignored credentials inventory and a separate protected backup.
 
 1. Freeze and build the reviewed release using the normal release builder. Its existing manifest
    must already match every primary file. New, missing or modified files stop signing.
-2. Build and rehearse the exact release source archive. Inspect the final image's immutable
-   `sha256:` ID or repository digest. Generate a CycloneDX SBOM for that image if available.
+2. Build and rehearse the exact release source archive. Inspect both final application and web
+   images' immutable `sha256:` IDs or repository digests. Generate native CycloneDX SBOMs for the
+   images being deployed. Application and web identities are different and must not be swapped.
 3. Sign the final artifact directory, then verify it using the separately retained trust anchor:
 
 ```sh
@@ -62,6 +63,24 @@ The tool attests the bytes and metadata supplied by the release workflow. It doe
 that a Git commit actually produced an image, that a scanner report is complete, that an artifact
 contains no secrets, or that the deployed runtime still matches it. Those remain separate build,
 security, rehearsal and deployment parity gates.
+
+## Native application and web image binding
+
+The final release records the native application identity/SBOM in provenance and includes the
+separately prepared `WEB-IMAGE.json` and `WEB-SBOM.cdx.json` as signed primary artifacts. Verify
+the complete release against the independent trust anchor before reading either identity as
+approved deployment input. An unsigned image record or a rewritten hash list is insufficient.
+
+Compare backend roles against the application identity and the web role against the web identity
+immediately before startup, then compare running containers afterward. A tag can be reassigned;
+its inspected immutable identity must match. Preserve native scan reports and reject a mismatched
+or substituted image even if another image from the same source passed its scan.
+
+An independently rebuilt image can differ from a local image. Record and scan the actual server
+image rather than claiming binary parity from source parity. Signed metadata establishes the
+operator's attestation of exact supplied bytes, not independent build reproducibility or security
+certification. See [deployment](../../docs/operations/deployment.md) for all-worker drain and
+compatibility-aware rollout/rollback.
 
 For namespace-package type checks use:
 

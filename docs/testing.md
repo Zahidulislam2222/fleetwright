@@ -1,24 +1,49 @@
-# Testing and evidence
+# Testing and verification evidence
 
-Release verification on 2026-10-13 exercised **148 automated cases** against isolated
-PostgreSQL/Redis/Mailpit and real Chromium. The final combined run had147passed and one
-`TooManyConnectionsError` in the contention benchmark (461.34seconds); an accidental overlapping
-test invocation was observed. After stopping the overlap, the unchanged benchmark passed
-separately in205.19seconds. All final cases therefore have passing evidence across those runs;
-this is not a claim that148passed together. The previous full147-case run passed in546.13seconds. This includes publication contracts,
-complete backup settings and reserved workflow-account coexistence rules. The previous core
-extension run passed132tests in467.58seconds; its evidence remains historical.
+The full completion regression passed **260 tests with six expected skips in 777.83 seconds**.
+A later recording exposed unsaved local-agent edits being lost after blur/polling. The strengthened
+native test failed before the correction and passed afterward, including exact edited title/body
+in the final destination receipt. The full affected agent/configuration suite then passed **25 tests
+with five expected skips**. Platform-specific POSIX checks passed separately on Linux, and actual
+installed-model evidence covers all three templates.
 
-Use `python tools/dev/run_tests.py -q` to migrate and run against isolated local test databases.
-Build the dashboard first for the approval UI browser test. Earlier verification split the
-suite into `-m 'not slow'` and the existing 200-competitor/10,000-job test, run sequentially.
-An earlier full run exceeded that test's 900-second convergence deadline; the unchanged isolated
-rerun passed in 202.45 seconds. Its original deadline and correctness assertions were retained.
+## Current assurance
+
+| Gate | Recorded result and scope |
+|---|---|
+| Python | Ruff/format, strict source types and nine workspace wheel/sdist builds passed |
+| Dashboard | ESLint, generated route types, TypeScript, static 18-page build and configured contrast checks passed |
+| Source security | Gitleaks, Bandit and Semgrep passed without suppressions; retained dependency findings are documented separately |
+| Native images | Final application and web images: zero HIGH/CRITICAL findings with native SBOM/identity binding |
+| Exact local release | Both MCP workflows, grant revocation, owner UI, crawler/export, public authorization, SPA navigation and responsive checks passed |
+| Static CSP | Fifteen real routes observed after navigation; no recorded script-policy violations/page errors in the accepted run |
+| Browser endurance | 50 contexts: 3601.986s / 25,800 fixture clicks; 70 contexts: 3602.632s / 32,760 fixture clicks; zero errors |
+| Recovery | Independent encrypted archive restored into fresh local databases with table/COPY-row parity |
+| Dynamic scan | Zero HIGH findings; retained inline-style CSP and cross-origin isolation warnings remain visible |
+
+These are scoped results. Image findings depend on the recorded database/time and exact identity.
+Fixture contexts are not authenticated freight workers; source gates, signed artifacts and live
+deployment are separate proofs. See [release evidence](releases/2026-10-13.md) and
+[capacity observations](scaling/verification-2026-10-13.md).
+
+## Run reproducibly
+
+Use `uv run python tools/dev/run_tests.py -q` after preparing the local data/destination services.
+The harness serializes runs, migrates isolated local databases and propagates settings to child
+workers. Do not overlap database-resetting suites. Build the dashboard before approval-console
+browser tests. The installed-model test is explicit opt-in; its absence in CI is not model proof.
+
+### Historical baseline
+
+The earlier reliable-browser release covered 148 cases across a 147-passing regression run and a
+separate unchanged contention benchmark (205.19s). The combined run had a connection-capacity
+failure; it was never described as 148 passing together. Earlier latency/memory measurements below
+remain historical and retain their hardware/workload boundary.
 
 ## How correctness is checked
 
 The owned freight board keeps a **ground-truth log**: when each load was published and who booked it. Tests
-compare Fleetwright's own records with that log, so the system is never marking its own homework.
+compare Fleetwright's own records with that log, so an internal success flag alone cannot establish the external outcome.
 
 ## Suites
 
@@ -64,7 +89,7 @@ A green test means nothing if it cannot go red. Some checks were mutation-tested
 
 ## Console
 
-Lint, type check and production build; WCAG contrast check on every colour pair; browser checks of
+Lint, type check and production build; configured WCAG contrast-pair checks; browser checks of
 every screen at several widths in light and dark themes; accessibility regression tests for focus,
 dialogs, reduced motion and overflow; Content-Security-Policy violations checked in development and
 production builds.
@@ -77,8 +102,9 @@ production builds.
 | Memory per browser context | ≈ 70–103 MB (USS) | Capacity run at 8, 16, 32 contexts |
 | CPU at 32 contexts | ≈ 1.8 cores | Same run |
 
-Known limits of this evidence: one developer PC; the owned freight board, not a real site; the 50- and
-70-context one-hour runs are still to do ([roadmap](roadmap.md)).
+Historical latency/context-density measurements used one developer PC and owned destinations.
+The later 50/70-context fixture hours above passed under their recorded limits; representative
+authenticated customer throughput remains future work ([roadmap](roadmap.md)).
 
 ## Completion regression coverage
 
@@ -109,3 +135,23 @@ The missing backup fields produced a failing regression before the fix. Same-tar
 acquisition is covered by `apps/worker/tests/test_account_target_scope.py`. Actual worker coexistence
 is also a release-rehearsal gate. GitHub quality CI covers static/config/publication gates; the full
 Docker/Chromium suite remains a separate release gate.
+
+## New durable boundaries and escaped-defect checks
+
+- Crawler: `test_crawler.py` and `test_crawler_adversity.py` cover HTTP/TLS scope, truncated data,
+  physical process termination before retry, pacing, crash fences, quality and export isolation.
+- Detection mailbox: `test_detection_handover.py` covers unread/in-flight delivery, authoritative
+  payloads, transaction rollback and current-cell replay.
+- Account policy: `test_workflow_pacing.py` includes delayed preparation and completion cooldown.
+- Agent: approval authority, prompt injection, API safeguards, receipts, cancellation, POSIX privacy
+  and real dedicated/CDP WebSocket denial. An independent unguarded Chromium control must reach the
+  rejecting sink before guarded zero-contact assertions can pass.
+- UI: exact edited title/body must survive blur, manual refresh and periodic polling, then appear in
+  the fresh proposal and destination receipt; a CONFIRMED label alone is insufficient.
+- Operations: `test_monitor_recovery.py` covers observe-only renewal, safe telemetry, notification
+  persistence, retention and authenticated archive validation. Release-signature tests reject
+  changed/missing/extra/unsafe files and wrong trust anchors.
+
+Retain failing-before evidence and report omitted gates explicitly. The production regression
+suite is committed CI tooling; private manual capture/recovery scripts and their raw artifacts remain
+local. See [maintenance](maintenance.md) for independent review and defect handling.

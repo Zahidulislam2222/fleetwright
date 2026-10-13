@@ -18,18 +18,43 @@ source tests are separate; see [testing](../testing.md) and [maintenance](../mai
 | Data exposure | Bounded redacted JSON evidence, masked public views, log filtering | Raw browser artifacts/archives need private access and retention; complete DSR automation pending |
 | Input/network | Parameterized SQL, validated contracts, action/body limits, crawler DNS/IP pinning, redirect rejection and bounded fetch processes | Public crawl origins need explicit onboarding/egress review; local agent supports controlled form/receipt destinations with HTTP/WS guards |
 | Deployment | Private backend network, loopback edge binding, non-root/read-only app containers, limits and dropped capabilities | PostgreSQL init has explicitly required capabilities; host/Docker administrators remain trusted |
-| Web security | CSP, nosniff, frame/referrer/permissions policies, production TLS; new static releases hash exact inline script bytes | Runtime inline styles remain allowed; stronger script policy requires exact-release browser verification |
-| Supply chain | Lockfiles, pinned container digests, registry validation, source/image scans, CycloneDX inventory and offline Ed25519 provenance tooling | Final exact release must be signed/scanned; local signer identity is not third-party certification |
+| Web security | CSP, nosniff, frame/referrer/permissions policies, production TLS and exact inline-script hashes | Fifteen rc2 routes passed full-window browser checks; inline styles and absent COEP remain explicit ZAP exceptions |
+| Supply chain | Lockfiles, pinned upstream images and patch packages, source/native-image scans, CycloneDX inventories and offline Ed25519 release signatures | Verified rc2 native app/web scans each have zero HIGH/CRITICAL; every subsequent release repeats identity/signature/scan gates; no external certification |
 | Recovery | Verified archives, hash refusal, fresh restore tests, independent encrypted copy and local table-row parity | Full-host/key/application disaster recovery remains distinct from data-only restoration |
 
-## Dependency finding
+## Verified release boundary and exceptions
 
-Full npm audit retains the development-only `braces` 3.0.3 advisory
-[GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) through Next ESLint.
-No patch was available at verification. The identified path concerns repository rootDir patterns,
-which this project does not configure; no application runtime import was found. Production npm
-dependencies and the Python dependency audit were clean at the recorded verification. Retain and
-reassess the advisory; do not suppress it or describe the full audit as clean.
+The recorded full npm dependency scan retains one development-only HIGH finding:
+`braces` 3.0.3, [CVE-2026-93687](https://avd.aquasec.com/nvd/cve-2026-93687), through Next ESLint.
+The scanner returned no fixed version; this does not prove no upstream remedy exists. Its raw
+exit is 1. The reviewed trusted-build exception is supported by the dependency tree, the final
+static image's native SBOM and actual Node/npm/package-tree absence checks. Reassess the finding;
+do not suppress it or report the full dependency scan as clean.
+
+Native verification of `20261013-free-local-rc2` found zero HIGH/CRITICAL vulnerabilities in each
+actual server app/web image, with 1,094 and 72 SBOM components respectively. Image/report hashes
+were checked, and the actual backend passed real Chromium navigation/isolation and module imports.
+The frozen runtime Python audit found zero vulnerabilities across 52 external distributions;
+workspace packages remained under source review rather than public package lookup.
+
+The rc2 passive web baseline found no HIGH alerts but retained a MEDIUM inline-style CSP warning
+and LOW COEP warning; raw exit 2 reflects warnings. It did not test all authenticated attack paths.
+Exact-image results, source tests and live deployment checks are separate. A later release must
+pass its own promotion gates; this page does not assert that a pending release is deployed.
+
+## Operator responsibilities
+
+Protect the signing and encryption keys separately from public verification keys. Verify the
+signature and complete manifest before extraction or activation; preserve the prior release and
+compatible rollback boundary. A valid local signature authenticates approved bytes under that
+key, not the safety of all behavior or a third party's assessment.
+
+Maintain destination permission records, least-privilege accounts, private evidence/archives,
+monitored backup age and restore checks. Review dependency advisories regularly and after new
+images or packages. Validate security controls on the exact rendered deployment, including TLS,
+trusted proxy headers, session flags, health probes and shutdown grace versus drain deadlines.
+Report incidents through [the security process](../../SECURITY.md) and assess the
+[applicable legal notification duties](../legal/README.md).
 
 ## Next assurance work
 

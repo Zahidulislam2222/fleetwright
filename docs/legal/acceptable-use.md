@@ -1,7 +1,8 @@
 # Acceptable use and client onboarding gate
 
 Fleetwright is a tool for automating web workflows **that the client is allowed to automate**.
-This page sets the rules for any deployment outside the bundled public workspace.
+These rules apply to private, customer and public workspace operation. Software licensing,
+destination permission and a lawful processing purpose are separate onboarding requirements.
 
 ## Allowed
 
@@ -21,19 +22,22 @@ This page sets the rules for any deployment outside the bundled public workspace
 - Fake engagement, fake reviews, or AI-generated content presented as human without disclosure.
 - Anything that degrades the target service (load beyond normal human-like use).
 
-## Onboarding gate (required before any real target)
+## Onboarding gate (required before any new destination)
 
-No real target is configured until every item is answered in writing and kept with the contract.
+No new destination is configured until every item is answered in writing and retained with its
+scope/contract. The repository's [license](../../LICENSE) separately requires written permission
+for production/commercial use or third-party-site access.
 
 | # | Question | Evidence kept |
 |---|---|---|
 | 1 | Which site or platform, and which accounts? | Target list, account owners |
 | 2 | Is automation allowed by its terms, or is there written permission? | Link to the terms clause, or the permission letter |
-| 3 | Does the workflow touch personal data? If yes: lawful basis, balancing test, DPIA if large scale | Legitimate-interest assessment / DPIA |
-| 4 | Which proxy, captcha and OTP providers, and are their terms compatible? | Provider list and terms |
+| 3 | Does it process personal data, and which basis/rights/risk-assessment duties apply? | Data inventory, assessed legal basis and DPIA where required; do not assume every task uses legitimate interests |
+| 4 | Which hosting, model, proxy, OTP and other providers are used, with compatible permission/privacy terms? | Provider/subprocessor register; no CAPTCHA or access-control bypass |
 | 5 | Data retention period and deletion process | Retention setting |
 | 6 | Jurisdictions involved (client, target, data subjects, hosting) | Hosting region, transfer mechanism |
 | 7 | Rate limits agreed with, or acceptable to, the target | Configured per-account limits |
+| 8 | Who approves exact actions, handles uncertainty and revokes access? | Named authority, workflow contract, receipt/reconciliation and incident contacts |
 
 **If question 2 cannot be answered with "yes", the project does not go ahead.**
 
@@ -41,3 +45,8 @@ No real target is configured until every item is answered in writing and kept wi
 
 Operators with console access must not change targets, accounts or rate limits outside what was
 approved at onboarding. Every change is recorded in the tenant's audit log.
+
+Stop affected admission when permission expires, an account is revoked, destination behavior
+changes materially or execution becomes uncertain. Preserve evidence and reconcile accepted
+actions before replacements. A working selector or login does not override permission boundaries.
+Do not present generated reviews, identities or engagement as authentic human activity.

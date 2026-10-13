@@ -1,13 +1,15 @@
 # Scale verification — 13 October 2026
 
-This page records measured engineering evidence from local tests and isolated verification on an existing server. It does not establish 100k/1M-user capacity,
+This page records measured evidence from local tests and isolated verification on an existing
+server. It does not establish 100k/1M-user capacity,
 monthly availability, multi-zone failover, or arbitrary destination exactly-once execution.
 
 The final integrated release-source suite passed **260 tests, with 6 platform/opt-in skips,
 in 777.824 seconds**. Five platform-specific cases separately passed on POSIX; the installed
 local-model flow also passed separately. This includes the unchanged 200-competitor/10,000-job
-contention workload and all four real Chromium freight-engine scenarios. Final exact-image
-scanning, signing and deployment rehearsal are separate gates.
+contention workload and all four real Chromium freight-engine scenarios. Exact-image scanning,
+signing and rehearsal are separate gates; subsequent sections record the verified rc2 artifacts
+without declaring a later release deployed.
 
 ## Freight correctness and fair admission
 
@@ -20,7 +22,7 @@ accounts explicitly use a high permitted local test rate; production account lim
 database data. Admission reserves the budget; the ACTING boundary rechecks fenced worker/account
 authority and refreshes the interval. Completion starts another full interval so slow preparation
 or actions cannot consume the following action's cooldown. The final targeted action-boundary
-suite passed27/27cases in65.73seconds (slow contention intentionally excluded from this targeted
+suite passed 27/27 cases in 65.73 seconds (slow contention intentionally excluded from this targeted
 run and retained for the final full suite). Both freight and actual browser workflow delays were
 exercised and retained in the final integrated source suite.
 
@@ -31,8 +33,8 @@ for recovery. These controls are implementation evidence, not a throughput guara
 
 Durable cell handover now persists raw detections before Redis delivery and consumes them atomically
 with the filter/claim decision. New-cell relay retries unread or in-flight detections after a move;
-atomic directory/claim/mailbox changes and retired-slot drain have realDB/Redis crash/rollback tests.
-The targeted21-case handover/control/queue/browser/drain suite passed125.76seconds. A legacy
+atomic directory/claim/mailbox changes and retired-slot drain have real DB/Redis crash/rollback tests.
+The targeted 21-case handover/control/queue/browser/drain suite passed in 125.76 seconds. A legacy
 unpersisted Redis backlog must be drained before upgrading. The final suite also covers the
 new multirow mailbox authority, rollback and tenant-isolation cases.
 
@@ -131,6 +133,26 @@ passed**. Inputs cover regions/zones, private subnets, immutable image, encrypte
 Redis ACL/TLS, replicas, secrets references and private archives. No AWS credentials, paid API calls,
 provisioning or actual zone-loss test were used. The reference documents deployment prerequisites;
 mock validation does not prove the full production topology can be applied successfully.
+
+## Exact-image assurance and remaining scale limits
+
+The `20261013-free-local-rc2` native server app and static-web images each passed Trivy with
+zero HIGH/CRITICAL findings; their identity-verified CycloneDX inventories contain 1,094 and
+72 components. The actual app image passed two-context Chromium navigation/isolation and ten
+module imports. The web image's three exact Alpine security patch versions were verified offline.
+Local rehearsal and native server image IDs differ; source parity is not binary parity.
+
+The scoped passive rc2 rehearsal scan completed in 61.265 seconds with no HIGH alerts, retaining
+one MEDIUM inline-style CSP warning, one LOW COEP warning and six informational alerts. Raw exit 2
+means warnings: there were zero failures, two warnings, 64 passes and no ignored rules. The observed
+web image/release/manifest identity remained unchanged through the scan. All 129 served static files
+matched the release manifest. See [security assurance](../security/asvs.md) for exception boundaries.
+
+These image and browser checks do not increase the measured API/SSE concurrency or establish a
+monthly availability result. The 50/70 fixture-hour image is distinct from the final app image;
+neither run is recast as a final-release throughput test. No 1k/10k/100k/1M-session, representative
+multi-tenant browser-density or actual multi-zone failure result is claimed. Each newer release
+must repeat its own artifact and behavior gates before activation.
 
 See [AWS reference](../../infra/terraform/README.md), [scaling roadmap](README.md),
 [capacity model](capacity-model.md), and [security assurance](../security/asvs.md).

@@ -1,6 +1,6 @@
 # Availability, service objectives and recovery
 
-Fleetwright has a **99% minimum future operating objective** and a **99.9% multi-zone target**.
+Fleetwright has a **99% initial operating objective** and a **99.9% future multi-zone objective**.
 The current single-server release has no published measured monthly availability or contractual
 SLA. Internal health/metrics endpoints do not substitute for independent uptime measurement.
 
@@ -15,14 +15,14 @@ SLA. Internal health/metrics endpoints do not substitute for independent uptime 
 Time-based and request-based availability are different indicators; do not interchange their
 results. Publish both the measurement window and numerator/denominator.
 
-## Proposed indicators
+## Proposed indicators and promotion
 
-| Service | Good event / measurement | Objective after validation |
+| Service | Good event / measurement | Initial objective / future multi-zone objective |
 |---|---|---|
-| Console | Independent regional probe renders essential assets and navigation | At least 99%; 99.9% multi-zone/CDN target |
-| API | Valid authorized request completes without internal failure or overload rejection within its route deadline | 99.9% over rolling 30 days |
+| Console | Independent regional probe renders essential assets and navigation within the agreed deadline | 99% / 99.9% |
+| API | Valid authorized request completes without internal failure or overload rejection within its route deadline | 99% / 99.9%, rolling 30 days |
 | Live updates | Authorized client receives committed change within 2 s | 99% of sampled deliveries, target |
-| Job admission | Permitted proposal persisted with stable identity within 2 s | 99.9%, target |
+| Job admission | Permitted proposal persisted with stable identity within 2 s | 99% / 99.9%, targets |
 | Queued execution | Approved ready job begins within agreed workflow queue deadline | Per-contract objective, measured separately from destination time |
 | Owned freight latency | Detection to confirmed booking | p95 under 1 s, target; historical p95 approximately 540 ms |
 
@@ -34,6 +34,11 @@ maintenance consumes the public objective unless a contract explicitly specifies
 Correctness incidents—wrong approval, tenant crossover or duplicate external action—have no
 acceptable error budget. Freeze affected execution, preserve evidence and investigate.
 
+Latency thresholds here are proposed service definitions, not current guarantees. The network
+fixture and 50/70-browser hour windows do not supply a rolling 30-day availability denominator.
+Promote 99.9% only after representative multi-zone failure/load exercises and independent
+measurement establish that the service and operating team can support the objective.
+
 ## Measurement and response plan
 
 Collect independent synthetic probes, request latency/error histograms, queue/outbox age, workflow
@@ -41,11 +46,20 @@ unknown counts, session health, database saturation, backup age and restore evid
 free of payloads/tokens and avoid tenant/job identifiers as unbounded metric labels. Configure
 authenticated collection and an accountable notification destination; test alert delivery.
 
-Use multi-window burn-rate alerts: for a 99.9% objective, 14.4× burn across 1 h and 5 min consumes
+Define burn rate as `eligible error ratio / (1 - SLO)` for each indicator. Use its applicable
+initial or multi-zone objective; the same error percentage burns different budgets at 99% and
+99.9%. Use multi-window alerts: for a 99.9% objective, 14.4× burn across 1 h and 5 min consumes
 about 2% of the 30-day budget in an hour; 6× across 6 h and 30 min consumes about 5% in six hours.
 Lower sustained burn opens an investigation. Exhausted budget pauses feature releases while
 reliability work proceeds. Review major budget-consuming incidents and publish their user impact.
-This policy follows [Google SRE's SLO guidance](https://sre.google/workbook/implementing-slos/).
+Both paired windows must breach before paging. Define minimum samples and independent probes for
+low-volume periods. Inspect critical routes and tenant classes separately from the aggregate;
+record missing/dropped telemetry as unknown coverage, not successful events.
+
+This proposed policy uses [Google SRE's SLO approach](https://sre.google/workbook/implementing-slos/)
+and [multi-window alerting guidance](https://sre.google/workbook/alerting-on-slos/). Alert rules,
+receivers, escalation ownership and delivery tests must be operational before claiming the policy
+is deployed. A threshold document is not an alert-delivery test.
 
 ## Recovery objectives
 

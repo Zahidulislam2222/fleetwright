@@ -94,3 +94,19 @@ Check the Actions page periodically; see [GitHub's schedule event limitations](h
 
 Official references: [SQLite transaction contexts](https://docs.python.org/3/library/sqlite3.html),
 [systemd service supervision](https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html).
+
+## Operator response and continuity
+
+Assign an operator to review failure/recovery notifications and archive age. This implementation's
+notification sink is a private file/journal, not an unattended email/SMS paging service. Define who
+checks it, how quickly and how incidents are escalated before treating it as an operational alert.
+
+After release replacement, restart the collector and verify its process directory, rendered
+configuration hashes, recent committed samples, credential renewal and predecessor revocation.
+Preserve history; a healthy report without new samples is not current collection evidence. Test a
+bounded failed probe followed by recovery and confirm both notices survive process restart.
+
+Independent scheduled probes require public-repository publication and an observed successful run
+before activation is claimed. They do not share persistent history with the host collector.
+Availability objectives remain [future SLOs](../scaling/slo.md), and operational status belongs in
+the [release record](../releases/2026-10-13.md).
