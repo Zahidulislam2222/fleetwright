@@ -20,6 +20,9 @@ if (!releaseId || !/^[0-9]{8}-[a-z0-9-]+$/.test(releaseId)) {
 
 const config = JSON.parse(readFileSync(join(deployDir, "deploy.config.json"), "utf8"));
 const security = JSON.parse(readFileSync(join(deployDir, "security-headers.json"), "utf8"));
+if (!/^[^\s]+@sha256:[0-9a-f]{64}$/.test(config.webBuild?.baseImage ?? "")) {
+  throw new Error("The web build requires an immutable configured base-image digest");
+}
 const out = join(deployDir, "releases", releaseId);
 if (existsSync(out)) {
   console.error(`Release ${releaseId} already exists; choose a new id (releases are immutable).`);
@@ -136,7 +139,7 @@ mkdirSync(join(out, "infra"));
 cpSync(join(root, "infra", "postgres", "10-roles.sh"), join(out, "infra", "10-roles.sh"));
 const archive = git(["-c", "core.autocrlf=false", "archive", "--format=tar", "-o", join(out, "src.tar"), "HEAD", "--", ...BACKEND_PATHS]);
 if (archive.status !== 0) throw new Error(`git archive failed: ${archive.stderr}`);
-writeFileSync(join(out, "RELEASE.json"), JSON.stringify({ releaseId, commit, appImage: `${config.backend.appImage}:${releaseId}` }, null, 2) + "\n");
+writeFileSync(join(out, "RELEASE.json"), JSON.stringify({ releaseId, commit, appImage: `${config.backend.appImage}:${releaseId}`, webImage: config.webImage, webBuild: config.webBuild }, null, 2) + "\n");
 
 // 3. Hash manifest for local/live parity
 const files = [];

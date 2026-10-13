@@ -12,7 +12,9 @@ investigate stale active rows rather than removing them from health checks.
 
 Deployment-specific paths, hostname, resource limits and backup paths belong to
 `deploy/deploy.config.json`. Backend settings belong to the typed environment boundary; image
-digests come from `infra/compose/local.yaml`. Secrets remain in protected environment files.
+data-service digests come from `infra/compose/local.yaml`. The web base digest/build inputs and
+unique web image tag belong to the deployment configuration; exact OS patch versions live in
+`config/web-security-apk.txt`. Secrets remain in protected environment files.
 `node deploy/build-release.mjs <YYYYMMDD-name>` refuses uncommitted release inputs and creates
 static output, rendered web/Compose/backup configuration, exact committed backend `src.tar`,
 full commit metadata and a SHA-256 manifest. Release IDs are immutable.
@@ -23,7 +25,11 @@ full commit metadata and a SHA-256 manifest. Release IDs are immutable.
 4. Rehearse from its source archive under an isolated local Compose project. Exercise password/TOTP,
    CSRF/roles, public limits, owner approval, both browser workflows, evidence and SSE revocation.
 5. Upload to a new release directory and verify every manifest entry before starting it.
-6. Build the application image from the archive. Back up data, then run additive migrations and
+6. Build both application and web images from the archive. Pass the configured immutable base as
+   `WEB_BASE_IMAGE` to `deploy/docker/web.Dockerfile`; it has no implicit base fallback. Scan both
+   native server images and record their inspected identities and native SBOMs. Include web image
+   metadata/SBOM as additional signed primary release artifacts before finalizing the signature.
+   Back up data, then run additive migrations and
    idempotent seed before API startup. Start freight and approved-workflow workers separately.
 7. Verify origin/public HTTP and TLS, authenticated behavior, destination receipts and service state.
 8. Verify every deployed artifact hash against local, record release/commit and retain rollback.
