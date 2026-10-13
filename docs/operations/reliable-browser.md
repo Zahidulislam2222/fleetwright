@@ -213,10 +213,18 @@ capacity. Keep reserved groups aligned with the seed configuration.
 
 ## Current completion verification and lifecycle
 
-The newer full backend regression passed 260 tests with six expected skips. Exact release rehearsal
+The final completion regression passed 274 tests with six expected skips in 762.41 seconds;
+all 435 source/tool hashes remained unchanged. Exact rc4 release rehearsal
 includes both real MCP workflows, owner review/evidence, crawler and responsive console flows.
 Separate installed-model local-agent proof and 50/70-context owned-fixture hours broaden the evidence;
 they do not establish arbitrary destination correctness or authenticated fleet capacity.
+
+The final rc4 rehearsal passed actual freight drain with four stopped slots and zero held accounts,
+a controlled 12-second workflow drain, and crawler SIGTERM exit 0/non-OOM with its exact container
+restored. All three configured container grace periods are 60 seconds. A separate-process crawler
+resumed only after natural lease expiry; static-only rollback preserved pending durable detections
+and backend identities. These are exact rehearsal proofs; deployed rc4 separately passed public
+MCP/UI/HTTP and running-image/artifact parity checks.
 
 Before dependency/service replacement, gracefully stop the freight worker, workflow worker and
 crawler when present. Verify all stop graces exceed application drain bounds and record successful

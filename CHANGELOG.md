@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased — crawler, local agent and operational recovery
+## 2026-10-13 — crawler, local agent and operational recovery
+
+Deployed as `20261013-free-local-rc4`, runtime source `bee3ebfc`.
 
 - Durable tenant-scoped catalogue crawling, pinned HTTP/TLS destination checks, bounded physical
   request deadlines, JSON/CSS field contracts, quality alarms, retention and private console export.
@@ -16,13 +18,16 @@
 - Professional component READMEs and product/integration/architecture/operations documentation,
   with current fixture evidence and explicit future scale/availability promotion criteria.
 
-Full backend regression: 260 passed / 6 expected skips; subsequent agent UI correction separately
-passed 25 tests. Both 50/70-context fixture hours and actual local-model templates passed. Latest
-exact rehearsal is completion rc2 / source `847bcd40`; final release evidence is recorded separately.
+Full backend regression: 274 passed / 6 expected skips in 762.41 seconds, zero failures/errors,
+with 435 source/tool hashes unchanged. Both 50/70-context fixture hours and actual local-model
+templates passed. Exact rc4 rehearsal / source `bee3ebfc`, native image scans, signed inventory,
+natural-lease crawler restart, all-worker graceful stops and mailbox-preserving static rollback
+passed. Public MCP/browser/HTTP and signed artifact/running-image parity passed after cutover.
+[Release evidence](docs/releases/2026-10-13.md) retains exact boundaries and historical results.
 
 ## 2026-10-13 — reliable browser operations
 
-Deployed as `20261013-reliable-browser-rc5`; [release evidence and boundaries](docs/releases/2026-10-13.md).
+Previously deployed as `20261013-reliable-browser-rc5`; [historical evidence and boundaries](docs/releases/2026-10-13.md).
 
 - Dedicated local MCP package for versioned freight-booking and maintenance-request workflows,
   with scoped revocable access, idempotent submissions and bounded paginated evidence.

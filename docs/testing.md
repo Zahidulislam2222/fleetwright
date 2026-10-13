@@ -1,7 +1,11 @@
 # Testing and verification evidence
 
-The full completion regression passed **260 tests with six expected skips in 777.83 seconds**.
-A later recording exposed unsaved local-agent edits being lost after blur/polling. The strengthened
+The final completion regression passed **274 tests with six expected skips in 762.41 seconds**:
+280 collected cases, zero failures/errors and 435 source/tool hashes unchanged throughout.
+Four POSIX privacy checks and a POSIX release-symlink check passed separately; the installed-model
+opt-in was exercised through three actual local-model/browser receipts.
+
+An earlier recording exposed unsaved local-agent edits being lost after blur/polling. The strengthened
 native test failed before the correction and passed afterward, including exact edited title/body
 in the final destination receipt. The full affected agent/configuration suite then passed **25 tests
 with five expected skips**. Platform-specific POSIX checks passed separately on Linux, and actual
@@ -11,15 +15,19 @@ installed-model evidence covers all three templates.
 
 | Gate | Recorded result and scope |
 |---|---|
-| Python | Ruff/format, strict source types and nine workspace wheel/sdist builds passed |
+| Python | Ruff passed; 234 files passed formatting; strict types passed on 87 source files; nine workspace wheel/sdist builds passed, including repeated affected-package builds |
 | Dashboard | ESLint, generated route types, TypeScript, static 18-page build and configured contrast checks passed |
 | Source security | Gitleaks, Bandit and Semgrep passed without suppressions; retained dependency findings are documented separately |
 | Native images | Final application and web images: zero HIGH/CRITICAL findings with native SBOM/identity binding |
 | Exact local release | Both MCP workflows, grant revocation, owner UI, crawler/export, public authorization, SPA navigation and responsive checks passed |
 | Static CSP | Fifteen real routes observed after navigation; no recorded script-policy violations/page errors in the accepted run |
+| Deployed behavior | Public MCP workflows/receipts/revocation, owner console/crawler export and HTTP/audit/SSE passed; all 15 public routes hydrated with zero recorded CSP/page errors over full ten-second observations |
+| Exact rc4 lifecycle | Freight four slots/zero held accounts/exit 0; controlled 12-second workflow drain; crawler exit 0/non-OOM and exact restart; all used the configured 60-second grace |
+| Durable restart / rollback | Separate crawler processes resumed after natural lease expiry with higher fencing and identical four-record export; static rollback preserved a pending mailbox record and backend identities |
 | Browser endurance | 50 contexts: 3601.986s / 25,800 fixture clicks; 70 contexts: 3602.632s / 32,760 fixture clicks; zero errors |
-| Recovery | Independent encrypted archive restored into fresh local databases with table/COPY-row parity |
-| Dynamic scan | Zero HIGH findings; retained inline-style CSP and cross-origin isolation warnings remain visible |
+| Recovery | Final rc4 independent encrypted archive restored into two fresh local databases: 24+8 public tables / 32,941+83,766 rows; every source COPY-row count matched |
+| Deployed backup | Final post-activity archive restored into two fresh databases with nine jobs/nine approvals/45 events/six grants matched; one scheduler process-death recovery in 70.13 seconds produced a fresh archive |
+| Passive dynamic scan | Exact rc4: 78.450 seconds, zero HIGH / one MEDIUM / one LOW / six informational alerts; raw exit 2, retained inline-style CSP and COEP warnings |
 
 These are scoped results. Image findings depend on the recorded database/time and exact identity.
 Fixture contexts are not authenticated freight workers; source gates, signed artifacts and live
@@ -39,6 +47,11 @@ The earlier reliable-browser release covered 148 cases across a 147-passing regr
 separate unchanged contention benchmark (205.19s). The combined run had a connection-capacity
 failure; it was never described as 148 passing together. Earlier latency/memory measurements below
 remain historical and retain their hardware/workload boundary.
+
+The earlier completion run passed 260 cases with six skips before the final lifecycle regressions.
+A later 270-case attempt failed during application/destination startup. The unchanged failed-node
+selection subsequently passed, followed by the complete 280-case passing run above. The precise
+cause of the earlier startup failures was not established; their records remain preserved.
 
 ## How correctness is checked
 
@@ -125,6 +138,11 @@ authoritative in-flight payloads, relay/dispatch crash boundaries, retry, tenant
 move rollback. Account policy tests include delayed browser preparation and completion cooldown;
 workflow scheduling and retired-generation drain retain bounded fair turns and stopped states.
 These tests supplement the unchanged contention workload rather than replacing it.
+
+Lifecycle regressions also cover a removed retired tenant during fleet drain, failure reporting
+after cleanup and Linux crawler SIGTERM cancellation. The physical crawler control changed a
+forced exit 137 into exit 0 with fetch-child termination/reaping, socket closure and engine cleanup.
+Exact rc4 rehearsal independently verified successful stops and restoration using the final image.
 
 ## Publication regression coverage
 

@@ -46,9 +46,28 @@ Prefer restoring directly from `open_bundle` bytes to avoid plaintext archive fi
    external outcomes, and verify tenant isolation and exact-action approvals before reopening
    mutating workflows. A data restore alone is not an application recovery proof.
 
-## Verified observation
+## Current release recovery status
 
-On 13 October 2026, read-only pinned SSH retrieval produced an authenticated encrypted off-host
+The deployed rc4 post-activity archive passed restoration into two fresh databases. Nine workflow
+jobs, nine approvals, 45 events and six grants matched the source archive. One injected backup
+process death recovered under supervision in 70.13 seconds and produced another valid archive.
+This verifies the server backup/restore boundary separately from independent encrypted recovery.
+
+The final post-activity archive was then copied to the independent operator machine and protected
+in a 3,089,454-byte authenticated encrypted bundle. Restoring from that exact ciphertext created
+two fresh local databases: 24 Fleetwright public tables containing 32,941 rows and eight owned-
+destination tables containing 83,766 rows. Every table's restored row count matched the source
+archive's COPY records, including nine jobs, nine approvals, 45 events and six grants.
+
+No plaintext archive files were written to disk. The independent recovery key was unchanged,
+previous good encrypted copies were retained, and existing production/local databases were not
+overwritten. This proves this archive's encrypted off-host data restoration; it does not establish
+a second running site, complete application/key recovery or a measured RPO/RTO.
+
+## Earlier independently verified observation
+
+Before the final rc4 rollout on 13 October 2026, read-only pinned SSH retrieval produced an
+authenticated encrypted off-host
 bundle of 2,533,091 bytes. Restoring from its exact ciphertext created two fresh local databases:
 20 Fleetwright and 8 owned-destination public tables. All restored row counts matched the source archive's
 COPY records. The archived workflow dataset recovered 4 jobs, 4 approvals, 20 events and 2 grants.

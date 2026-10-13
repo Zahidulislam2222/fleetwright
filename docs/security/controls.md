@@ -18,8 +18,8 @@ source tests are separate; see [testing](../testing.md) and [maintenance](../mai
 | Data exposure | Bounded redacted JSON evidence, masked public views, log filtering | Raw browser artifacts/archives need private access and retention; complete DSR automation pending |
 | Input/network | Parameterized SQL, validated contracts, action/body limits, crawler DNS/IP pinning, redirect rejection and bounded fetch processes | Public crawl origins need explicit onboarding/egress review; local agent supports controlled form/receipt destinations with HTTP/WS guards |
 | Deployment | Private backend network, loopback edge binding, non-root/read-only app containers, limits and dropped capabilities | PostgreSQL init has explicitly required capabilities; host/Docker administrators remain trusted |
-| Web security | CSP, nosniff, frame/referrer/permissions policies, production TLS and exact inline-script hashes | Fifteen rc2 routes passed full-window browser checks; inline styles and absent COEP remain explicit ZAP exceptions |
-| Supply chain | Lockfiles, pinned upstream images and patch packages, source/native-image scans, CycloneDX inventories and offline Ed25519 release signatures | Verified rc2 native app/web scans each have zero HIGH/CRITICAL; every subsequent release repeats identity/signature/scan gates; no external certification |
+| Web security | CSP, nosniff, frame/referrer/permissions policies, production TLS and exact inline-script hashes | Fifteen exact rc4 rehearsal routes passed full ten-second browser checks; inline styles and absent COEP remain explicit ZAP exceptions |
+| Supply chain | Lockfiles, pinned upstream images and patch packages, source/native-image scans, CycloneDX inventories and offline Ed25519 release signatures | Verified rc4 native app/web scans each have zero HIGH/CRITICAL; every subsequent release repeats identity/signature/scan gates; no external certification |
 | Recovery | Verified archives, hash refusal, fresh restore tests, independent encrypted copy and local table-row parity | Full-host/key/application disaster recovery remains distinct from data-only restoration |
 
 ## Verified release boundary and exceptions
@@ -31,16 +31,24 @@ exit is 1. The reviewed trusted-build exception is supported by the dependency t
 static image's native SBOM and actual Node/npm/package-tree absence checks. Reassess the finding;
 do not suppress it or report the full dependency scan as clean.
 
-Native verification of `20261013-free-local-rc2` found zero HIGH/CRITICAL vulnerabilities in each
+Native verification of `20261013-free-local-rc4`, source `bee3ebfc`, found zero HIGH/CRITICAL vulnerabilities in each
 actual server app/web image, with 1,094 and 72 SBOM components respectively. Image/report hashes
 were checked, and the actual backend passed real Chromium navigation/isolation and module imports.
 The frozen runtime Python audit found zero vulnerabilities across 52 external distributions;
 workspace packages remained under source review rather than public package lookup.
 
-The rc2 passive web baseline found no HIGH alerts but retained a MEDIUM inline-style CSP warning
-and LOW COEP warning; raw exit 2 reflects warnings. It did not test all authenticated attack paths.
+The exact rc4 passive web baseline completed in 78.450 seconds: zero HIGH, one MEDIUM inline-style
+CSP warning, one LOW COEP warning and six informational alerts; raw exit 2 reflects warnings.
+Rehearsal image/release/static identities remained unchanged. It did not test all authenticated attack paths.
 Exact-image results, source tests and live deployment checks are separate. A later release must
-pass its own promotion gates; this page does not assert that a pending release is deployed.
+pass its own promotion gates. Deployed rc4 public MCP/UI/HTTP and signed parity checks passed;
+see the release record for operational and publication boundaries.
+
+The full source suite passed 274 cases with six expected skips in 762.41 seconds. The signed
+inventory binds 144 primary artifacts, including native web identity/SBOM evidence. All 222 source
+files matched committed bytes; actual served static hashes matched all 129 manifest files.
+Exact freight/workflow/crawler graceful stops, natural-lease crawler recovery and static-only
+mailbox-preserving rollback passed separately from source tests.
 
 ## Operator responsibilities
 

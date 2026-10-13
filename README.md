@@ -28,20 +28,22 @@ computer; it does not control your browser remotely.
 
 ## Evidence and current boundary
 
-The most recent exact local rehearsal is `20261013-free-local-rc2`, built from source `847bcd40`.
-Final completion integration includes all-worker shutdown-grace checks and updated documentation.
-Deployment status and final verification are maintained in the
+The deployed frontend/backend release is `20261013-free-local-rc4`, built from source `bee3ebfc`.
+Exact rehearsal, native server image checks, independent artifact review, public workflows,
+operator UI and HTTP checks passed. All 146 deployed manifest entries and eight application/web
+service-role image identities matched the signed release. Verification is maintained in the
 [release record](docs/releases/2026-10-13.md).
 
 | Evidence | Verified result and scope |
 |---|---|
-| Full backend regression | 260 passed / 6 expected skips; subsequent local-agent UI correction separately passed 25 tests / 5 expected skips |
+| Full backend regression | 274 passed / 6 expected skips in 762.41 seconds; zero failures/errors and 435 source/tool hashes unchanged |
 | Actual browser/model flows | Both approved MCP workflows and three installed-model local-agent templates confirmed with matching receipts |
 | Exact release UI | Native owner login, fleet confirmation, crawler completion/export, public authorization denial, SPA navigation and responsive layouts passed with zero observed CSP violations/page errors |
 | Browser endurance | Separate 50- and 70-context owned-fixture runs exceeded one hour with zero errors; these are fixture endurance results |
 | Contention | 200 coordination competitors and 10,000 jobs with zero duplicate action attempts; competitors are not 200 browsers |
 | Image assurance | Final native application and web image scans reported zero HIGH/CRITICAL findings at the recorded scan |
-| Recovery | Encrypted independent archive restored into fresh local databases with table row parity |
+| Release lifecycle | Exact rc4 freight, workflow and crawler stops exited successfully; natural-lease crawler restart and mailbox-preserving static rollback passed |
+| Recovery | Final rc4 archive encrypted off-host and restored into two fresh local databases; all 24+8 public tables matched source COPY-row counts |
 
 Historical owned-board latency was approximately 365 ms p50 / 540 ms p95 from detection to
 confirmation. Workload, hardware and limits belong with every measurement:

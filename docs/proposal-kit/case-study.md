@@ -71,11 +71,15 @@ Source and evidence: [architecture](../architecture/overview.md), [testing](../t
 
 ## Current verification and operating lessons
 
-The full completion suite passed 260 cases with six expected skips. Separate 50/70-context fixture
+The final completion suite passed 274 cases with six expected skips in 762.41 seconds, with zero
+failures/errors and 435 source/tool hashes unchanged. Separate 50/70-context fixture
 hours passed without errors, and actual local-model workflows produced three matching receipts.
 Exact local release rehearsal checked owner/MCP actions, crawler export, public authorization,
 responsive navigation and script CSP; final native application/web image scans reported zero
-HIGH/CRITICAL findings at their recorded identities.
+HIGH/CRITICAL findings at their recorded identities. The exact rc4 release also passed graceful
+worker stops, separate-process natural-lease crawler restart and mailbox-preserving static rollback.
+The rc4 frontend/backend is deployed; public workflows/UI/HTTP and signed running-image/artifact
+parity passed. Its final operational evidence remains distinct from these source/rehearsal results.
 
 Recording exposed another gap: a UI refresh could discard unsaved reviewed text. The earlier test
 checked confirmation but omitted content preservation. The corrected regression now verifies both

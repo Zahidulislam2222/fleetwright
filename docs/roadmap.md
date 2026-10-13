@@ -19,18 +19,20 @@ no AWS infrastructure has been provisioned by that evidence.
 
 ## Current verification boundary
 
-The full backend suite passed 260 tests with six expected skips; the later local-agent UI correction
-passed its own 25-case suite and actual three-template installed-model recording. Separate 50/70
-browser-context fixture runs exceeded one hour with zero errors. Exact completion rc2 rehearsal
-passed real owner/MCP/browser/crawler/CSP flows and final native image scans reported zero
-HIGH/CRITICAL findings. Final integration and deployment status belong in the
+The final full backend suite passed 274 tests with six expected skips in 762.41 seconds, with
+435 source/tool hashes unchanged. Actual three-template installed-model recording and separate
+50/70-browser-context fixture hours passed. Exact completion rc4 rehearsal passed real owner/MCP/
+browser/crawler/CSP flows, all-worker lifecycle checks, natural-lease crawler restart and
+mailbox-preserving static rollback. Final native image scans reported zero HIGH/CRITICAL findings.
+The signed rc4 release is deployed; public MCP/browser/HTTP, running-image and artifact parity
+passed. Final operational and publication evidence belongs in the
 [release record](releases/2026-10-13.md); implementation evidence alone is not publication.
 
 ## Expansion milestones
 
 | Priority | Deliverable | Required promotion evidence |
 |---|---|---|
-| 1 | Repeatable operational baseline | Exact all-worker drain, immutable image/signature parity, live authorization/receipts, supervised backup/monitor, independent fresh encrypted restore |
+| 1 | Periodic operational revalidation | Repeat exact all-worker drain, immutable image/signature parity, live authorization/receipts, supervised backup/monitor and independent fresh encrypted restore after relevant changes |
 | 2 | Authorized destination expansion | Maintained account/precondition/action/receipt contract, lawful data scope, rate policy and adversarial real-browser tests |
 | 3 | Client assurance | Actual Codex acceptance on releases; Claude run when the owner's account is available, with no automatic paid fallback |
 | 4 | Representative fleet scale | Authenticated sustained workload, session renewal, tenant skew, account pacing, destination receipts and drain/move measurements |

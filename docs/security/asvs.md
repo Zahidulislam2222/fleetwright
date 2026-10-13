@@ -9,8 +9,9 @@ controls are not evidence for console identity controls.
 Reference: [OWASP ASVS 5.0.0 release](https://github.com/OWASP/ASVS/tree/v5.0.0/5.0/en).
 Requirement identifiers below were checked against that release; descriptions are brief project
 interpretations. Evidence paths are relative to this repository. Results include verified
-`20261013-free-local-rc2` images and rehearsal. Each subsequent release must verify its own
-artifacts and deployment behavior; this page does not declare a newer release deployed.
+`20261013-free-local-rc4` images and rehearsal, source `bee3ebfc`. Each subsequent release must
+verify its own artifacts and deployment behavior. Deployed rc4 public MCP/UI/HTTP and signed
+artifact/running-image parity checks passed; see the release record for remaining boundaries.
 
 | ASVS requirement / area | Project evidence | Status / assessment boundary |
 |---|---|---|
@@ -32,7 +33,7 @@ artifacts and deployment behavior; this page does not declare a newer release de
 | 5.4.1–5.4.2 download names | Fixed/generated JSON export names; owner-authorized evidence endpoints | Existing contract/browser export checks; broader header fuzzing unassessed |
 | V1 encoding/query construction | Parameterized SQL and React rendering | Source patterns reviewed; independent injection assessment not complete |
 | V2 validation/business integrity | Fingerprinted exact-action approval, expiry/replay/changed-input tests, DB fencing | 31-case runtime acceptance includes real owned Chromium workflows and crash recovery |
-| V3 frontend | CSRF, cookie flags, CSP/security headers and origin checks | Exact inline-script hashes; rc2 real 15-route observation passed; inline styles remain an exception |
+| V3 frontend | CSRF, cookie flags, CSP/security headers and origin checks | Exact inline-script hashes; rc4 real 15-route observation passed; inline styles remain an exception |
 | V4 API | Typed request/response contracts, bounded pagination, HTTP authorization | Network mixed-load test below; authorization fuzzing remains bounded test coverage |
 | V7 sessions | Opaque session digests, expiry/revocation, idle SSE authority checks | Existing gateway/session tests; stolen-device posture assessment absent |
 | V9 self-contained tokens | Console/MCP authority is opaque server-side state, not JWT | JWT-specific controls not applicable to present token design |
@@ -41,7 +42,7 @@ artifacts and deployment behavior; this page does not declare a newer release de
 | V12 transport | Public TLS and private backend network; pinned crawl HTTP destination | Internal database/Redis TLS is not established on current single-host network |
 | V13 configuration | Typed environment boundary, lockfiles, private credential recovery inventory | Full-tree source/config checks passed; repeat after relevant changes and for release staging |
 | V14 data protection | Redacted evidence, bounded artifacts, retention, private archives | Full data-subject request automation and independent retention assessment absent |
-| V15 supply chain/design | Native image SBOMs, source hashes, offline Ed25519 release signatures and source scans | Verified rc2 app/web each 0 HIGH/CRITICAL; 1094/72-component native SBOMs; Python 52 external distributions, 0 findings; dev-only npm HIGH retained; no SLSA claim |
+| V15 supply chain/design | Native image SBOMs, source hashes, offline Ed25519 release signatures and source scans | Verified rc4 app/web each 0 HIGH/CRITICAL; 1094/72-component native SBOMs; Python 52 external distributions, 0 findings; dev-only npm HIGH retained; no SLSA claim |
 | V16 audit/errors | Transactional DB audit, redaction, intent/outcome records | External uncertainty retained as UNKNOWN; no automatic replay |
 | V17 WebRTC | No WebRTC feature | Not applicable to present application |
 
@@ -71,7 +72,7 @@ The full npm dependency scan includes development packages and retains one HIGH 
 `braces` 3.0.3, [CVE-2026-93687](https://avd.aquasec.com/nvd/cve-2026-93687). The scanner returned
 no fixed version. That scan exits 1 and must not be reported as green. The package is used in the
 trusted repository build toolchain;
-production static assets do not require Node tooling. The reviewed rc2 boundary was checked:
+production static assets do not require Node tooling. The reviewed rc4 boundary was checked:
 the dependency path is development-only through Next ESLint; the actual static runtime has no
 Node/npm executable or `node_modules` tree; its native 72-component SBOM contains neither Node/npm
 nor `braces`; all 129 served static files match the release manifest. The backend Playwright driver
@@ -87,16 +88,23 @@ Native image scanning covers operating-system and inherited global packages sepa
 
 ## Exact-image and dynamic release evidence
 
-The verified `rc2` server images were built from SHA-verified source. Local rehearsal image IDs
+The verified `rc4` server images were built from 222 SHA-verified committed source files. Local rehearsal image IDs
 differ; source parity is not binary parity. Native Trivy 0.75.0 checked report and CycloneDX
 identities against actual server image IDs, with scanner and downloaded-report checksums.
+
+The native application identity is
+`sha256:7c9319a674260e32cb8fff975a80f42c6ba7b20e04dc40ed93aeb8231edceac0`;
+the native static-web identity is
+`sha256:9097e0935ee5ee3bad9b9c05a6e2d889702ad9dc01e7797705c73d7184a16d3d`.
+Offline verification binds these distinct role identities, 144 signed primary artifacts and
+the complete finalized file inventory. Local signing is not an independent third-party attestation.
 
 | Boundary | Observed result |
 |---|---|
 | Backend image | 0 HIGH/CRITICAL; 1,094 SBOM components; real two-context Chromium isolation and ten module imports passed |
 | Static web image | 0 HIGH/CRITICAL; 72 SBOM components; installed `libexpat=2.8.5-r0`, `pcre2=10.49-r0`, `tiff=4.7.2-r0` verified |
 | Web hardening | Three signed official Alpine patches on a pinned base; no blanket upgrade or CVE suppression; nonroot/read-only original health check passed |
-| Passive ZAP rehearsal | 61.265 seconds; 0 HIGH, 1 MEDIUM, 1 LOW, 6 informational alerts; raw exit 2, 2 warnings, 0 failures, 64 passes, no ignored rules |
+| Passive ZAP rehearsal | 78.450 seconds; 0 HIGH, 1 MEDIUM, 1 LOW, 6 informational alerts; raw exit 2, retained warnings, no ignored rules; exact rehearsal identity unchanged |
 | Browser policy | Fifteen routes observed for full ten-second windows with no recorded CSP/page errors; exact script hashes retained |
 | Artifact trust | Offline Ed25519 signatures bind primary files, provenance and native web identity/SBOM; local signer verification is not third-party attestation |
 
@@ -108,12 +116,14 @@ exercise every authenticated role or replace an authorized penetration test.
 The earlier static image failed with ten HIGH findings and a newer Alpine image still had three;
 the Debian alternative also failed. Results were retained, and three precise patches produced
 the clean image. A subsequent source/configuration fix repeats exact-image and rehearsal gates;
-passing rc2 evidence does not authorize a subsequent release.
+passing rc4 evidence does not authorize a subsequent release. The rc4 production activation and
+public behavioral/parity checks are recorded separately in the release record.
 
 ## Final source and bounded capacity evidence
 
-The integrated release-source suite passed **260 tests with 6 platform/opt-in skips** in
-777.824 seconds. Four agent state-privacy cases and the release symlink case separately passed
+The final integrated release-source suite passed **274 tests with 6 platform/opt-in skips** in
+762.41 seconds, zero failures/errors; all 435 source/tool hashes remained unchanged.
+Four agent state-privacy cases and the release symlink case separately passed
 on real POSIX. The installed local-model/browser verification separately produced three
 confirmed receipts. These supplemental checks retain their distinct platform/workload scope.
 
@@ -122,6 +132,12 @@ errors after fixes; four later source/test deltas also passed. The configured Gi
 and Semgrep hooks passed. The six-file web-hardening integration scan also passed with zero
 findings/parser errors. Artifact identity, native scans and rehearsal remain per-release gates;
 selected source results do not establish ASVS certification.
+
+The five final lifecycle source/test/defect-record changes passed the same 117-rule source scan
+with zero findings and zero scanner/parser errors. Exact rc4 freight/workflow/crawler graceful
+stop, natural-lease crawler process restart and static-only mailbox-preserving rollback passed.
+These lifecycle checks complement the source suite; they do not replace production activation
+and final operational verification.
 
 The isolated no-network browser fixture sustained both 50 and 70 contexts for uninterrupted
 hours: 3,601.986 and 3,602.632 seconds, respectively, with zero action errors and exit code 0.

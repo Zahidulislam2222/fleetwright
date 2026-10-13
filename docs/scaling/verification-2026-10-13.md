@@ -4,12 +4,13 @@ This page records measured evidence from local tests and isolated verification o
 server. It does not establish 100k/1M-user capacity,
 monthly availability, multi-zone failover, or arbitrary destination exactly-once execution.
 
-The final integrated release-source suite passed **260 tests, with 6 platform/opt-in skips,
-in 777.824 seconds**. Five platform-specific cases separately passed on POSIX; the installed
+The final integrated release-source suite passed **274 tests, with 6 platform/opt-in skips,
+in 762.41 seconds**, with zero failures/errors and 435 source/tool hashes unchanged.
+Five platform-specific cases separately passed on POSIX; the installed
 local-model flow also passed separately. This includes the unchanged 200-competitor/10,000-job
 contention workload and all four real Chromium freight-engine scenarios. Exact-image scanning,
-signing and rehearsal are separate gates; subsequent sections record the verified rc2 artifacts
-without declaring a later release deployed.
+signing, rehearsal and deployed behavior are separate gates. The rc4 release is deployed;
+subsequent sections retain the measured scope of each result.
 
 ## Freight correctness and fair admission
 
@@ -136,17 +137,24 @@ mock validation does not prove the full production topology can be applied succe
 
 ## Exact-image assurance and remaining scale limits
 
-The `20261013-free-local-rc2` native server app and static-web images each passed Trivy with
+The `20261013-free-local-rc4` native server app and static-web images each passed Trivy with
 zero HIGH/CRITICAL findings; their identity-verified CycloneDX inventories contain 1,094 and
 72 components. The actual app image passed two-context Chromium navigation/isolation and ten
 module imports. The web image's three exact Alpine security patch versions were verified offline.
 Local rehearsal and native server image IDs differ; source parity is not binary parity.
 
-The scoped passive rc2 rehearsal scan completed in 61.265 seconds with no HIGH alerts, retaining
+The scoped passive rc4 rehearsal scan completed in 78.450 seconds with no HIGH alerts, retaining
 one MEDIUM inline-style CSP warning, one LOW COEP warning and six informational alerts. Raw exit 2
-means warnings: there were zero failures, two warnings, 64 passes and no ignored rules. The observed
+means warnings; no rules were ignored. The observed
 web image/release/manifest identity remained unchanged through the scan. All 129 served static files
 matched the release manifest. See [security assurance](../security/asvs.md) for exception boundaries.
+
+The final rc4 source regression passed 274 cases with six expected skips in 762.41 seconds;
+435 source/tool hashes remained unchanged. Exact local MCP/console/crawler behavior, configured
+60-second graceful worker stops and natural-lease crawler process restart passed. A static-only
+rollback retained the pending durable mailbox row and all backend identities. The deployed rc4
+frontend/backend separately passed public MCP/UI/HTTP and signed parity checks; see the
+[release record](../releases/2026-10-13.md).
 
 These image and browser checks do not increase the measured API/SSE concurrency or establish a
 monthly availability result. The 50/70 fixture-hour image is distinct from the final app image;

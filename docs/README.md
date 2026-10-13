@@ -5,9 +5,10 @@ configuration and destination authorization before enabling actions. Integrators
 API/MCP reference and exact-approval contract; service owners should use deployment, monitoring,
 recovery and incident runbooks.
 
-Most recent exact local rehearsal: `20261013-free-local-rc2`, source `847bcd40`.
-Final completion integration includes updated documentation and all-worker shutdown-grace checks.
-Use the [release record](releases/2026-10-13.md) for deployment status and live verification.
+Deployed frontend/backend release: `20261013-free-local-rc4`, source `bee3ebfc`.
+Its full regression passed 274 cases with six expected skips; exact rehearsal, native image scans,
+signatures and lifecycle checks passed. Public workflows/UI/HTTP, signed service-image identities
+and deployed artifact parity passed. Use the [release record](releases/2026-10-13.md) for status.
 
 | Area | Documents |
 |---|---|

@@ -112,10 +112,21 @@ service correctness, secret hygiene or vulnerability absence. See
 
 ## Acceptance and operational handoff
 
-The latest verified rehearsal is completion rc2 from source `847bcd40`; final release integration
-also requires the documented all-worker shutdown grace. The selected completion release must pass
-its own exact signature/image, browser/MCP, HTTP/TLS, migration, backup, monitoring and recovery
-checks. Use the [release record](../releases/2026-10-13.md) for final installation status.
+The deployed release is completion rc4 from source `bee3ebfc`. Exact signature/native
+image checks, local MCP/browser/crawler/HTTP/CSP flows and all-worker lifecycle checks passed.
+Its configured 60-second grace was exercised for freight, approved-workflow and crawler stops.
+The crawler resumed across separate processes after natural lease expiry with a higher fence.
+Static-only rollback preserved the pending mailbox record and backend identities, then restored
+current mounts and resumed control. Production migration/seed/startup, public MCP/UI/HTTP/TLS,
+eight-role native image identity and all 146 artifact manifest entries passed. The backup service
+is active/enabled with current-release process directory, unit/environment parity and all 222
+source hashes verified. Monitoring/recovery and publication retain their own evidence. Use the
+[release record](../releases/2026-10-13.md) for installation status.
+
+Final public CSP observations passed all 15 hydrated routes. A fresh post-activity archive
+restored into two new databases with workflow row parity; a single backup-process death recovered
+under supervision in 70.13 seconds and produced another valid archive. These checks do not
+establish whole-host recovery or a measured RPO/RTO.
 
 Before closing a rollout, verify protected backup/monitor service working directories and config
 hashes, a fresh archive, observe-only grant renewal and an independent encrypted restore. Record

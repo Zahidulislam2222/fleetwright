@@ -66,6 +66,13 @@ boundary. Do not expose its recovery file or turn the authority adapter into a n
 
 ## Independent availability and proof limits
 
+The deployed `20261013-free-local-rc4` host collector passed active service/source/unit/environment
+parity checks. Its four configured probes—archive freshness, observation grant, origin health and
+workflow metrics—were healthy with zero recorded failures in the verification window. Actual
+process death triggered supervised recovery in 28.42 seconds; observe-only replacement authority
+and predecessor revocation were verified. This is recovery of the collector process, not a
+measurement of whole-service downtime. Its notifications remain a local file/journal sink.
+
 An independent operator-PC collector was exercised against public production HTTPS for three
 successful samples at 60-second intervals on 13 October 2026. A separate real loopback HTTP test
 returned failures until the configured threshold, restarted the collector, then returned success:
@@ -84,8 +91,8 @@ scheduled job has no shared persistent SQLite history between runners.
 
 The operator PC must stay awake and online to collect continuously. The observation establishes
 only its recorded window; it does not establish monthly availability, a 24/7 alert service or an
-availability SLO. Server installation and supervisor recovery must be verified for the exact final
-release before claiming that collector is deployed. Add an independently always-on free host only
+availability SLO. The exact rc4 host installation/supervisor result above does not establish
+independent 24/7 availability collection. Add an independently always-on free host only
 after verifying its current terms, ownership and absence of charges.
 
 GitHub schedules are best effort: high load can delay/drop runs, only the default-branch workflow
