@@ -1,0 +1,15 @@
+{
+  "title": "Your local browser agent",
+  "description": "Draft ideas, prepare content and complete approved form workflows on your own computer.",
+  "back": "Back to console",
+  "open": "Open local app",
+  "localUrl": "http://127.0.0.1:8400",
+  "guide": "Setup and operating guide",
+  "guideUrl": "https://github.com/Zahidulislam2222/fleetwright/blob/main/docs/operations/local-agent.md",
+  "privacy": "The app runs on your device with a local model. Drafts, browser profiles and approval history stay on that device.",
+  "approval": "Review the exact destination and content before approving an action. The model cannot approve its own proposals.",
+  "setupTitle": "Start on your computer",
+  "setup": ["Install Fleetwright and a supported local model using the setup guide.", "Start the local app, then open it with the button below.", "Choose a task, inspect its draft and approve only the action you intend."],
+  "features": ["Three maintained task templates", "Durable local history and receipts", "Bounded browser tabs and action budgets", "Exact-action approval and cancellation"],
+  "offline": "The hosted console does not access your local browser. Start the local app before opening it."
+}

@@ -30,7 +30,7 @@ from redis.asyncio import Redis
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
 
-from fw_core import claims, filters
+from fw_core import claims, detections, filters
 from fw_core.crypto import Envelope
 from fw_core.db import make_engine, system_tx, tenant_tx
 from fw_core.logs import setup_logging
@@ -181,39 +181,46 @@ class Control:
 
     async def dispatch(self, msg: streams.Message) -> None:
         tenant_id = UUID(msg.stream.split("{", 1)[1].split("}", 1)[0])
-        if tenant_id not in self.tenants:  # moved away; the new cell's watchers see it again
-            await streams.ack(self.cell_redis, msg, keys.DISPATCHER_GROUP)
-            return
-        job: dict[str, Any] = json.loads(msg.fields["job"])
-        match = filters.first_match(await self.rules(tenant_id), job)
-        if match is None:
-            self.stats["skipped_no_filter"] += 1
-            await streams.ack(self.cell_redis, msg, keys.DISPATCHER_GROUP)
-            return
-        # Fast path: the first detection of a job owns the key; copies from other watchers stop
-        # here. A redelivery of the owning message (dispatcher crashed) carries the same id.
-        seen = keys.job_seen(tenant_id, msg.fields["key"])
-        fresh = await self.cell_redis.set(seen, msg.id, nx=True, ex=self.cfg.seen_ttl_s)
-        if not fresh and await self.cell_redis.get(seen) != msg.id:
-            self.stats["skipped_duplicate"] += 1
-            await streams.ack(self.cell_redis, msg, keys.DISPATCHER_GROUP)
-            return
-        detection = claims.Detection(
-            key=msg.fields["key"],
-            lane=f"{job.get('origin', '?')} → {job.get('destination', '?')}",
-            rate_usd=int(job.get("rate_usd", 0)),
-            published_at=_ts(msg.fields.get("published_at")),
-            seen_at=_ts(msg.fields["seen_at"]) or datetime.now(UTC),
-            clock_offset_ms=float(msg.fields["offset_ms"]) if msg.fields.get("offset_ms") else None,
-            payload=job,
-            filter_id=match.id,
-        )
+        claim_id = None
+        detection = None
+        disposition = "skipped_duplicate"
         async with tenant_tx(self.engine, tenant_id) as conn:
-            claim_id = await claims.queue_claim(
-                conn, tenant_id, detection, self.cfg.cell, f"dispatcher:{self.consumer}"
+            destination = await conn.scalar(
+                text("SELECT cell_id FROM tenant_cells WHERE tenant_id=:t FOR SHARE"), {"t": tenant_id}
             )
+            if destination is not None:
+                identity = (
+                    int(msg.fields["outbox_id"])
+                    if "outbox_id" in msg.fields
+                    else await detections.persist(
+                        conn, tenant_id, {key: value for key, value in msg.fields.items() if key in detections.FIELDS}
+                    )
+                )
+                stored = await detections.pending(conn, tenant_id, identity)
+                if stored is not None:
+                    job: dict[str, Any] = json.loads(stored["job"])
+                    match = filters.first_match(await self.rules(tenant_id), job)
+                    if match is None:
+                        disposition = "skipped_no_filter"
+                    else:
+                        detection = claims.Detection(
+                            key=stored["key"],
+                            lane=f"{job.get('origin', '?')} → {job.get('destination', '?')}",
+                            rate_usd=int(job.get("rate_usd", 0)),
+                            published_at=_ts(stored.get("published_at")),
+                            seen_at=_ts(stored["seen_at"]) or datetime.now(UTC),
+                            clock_offset_ms=float(stored["offset_ms"]) if stored.get("offset_ms") else None,
+                            payload=job,
+                            filter_id=match.id,
+                        )
+                        claim_id = await claims.queue_claim(
+                            conn, tenant_id, detection, destination, f"dispatcher:{self.consumer}"
+                        )
+                        disposition = "queued" if claim_id is not None else "skipped_existing_claim"
+                    await detections.consume(conn, tenant_id, identity)
+        self.stats[disposition] += 1
         if claim_id is not None:
-            self.stats["queued"] += 1
+            assert detection is not None
             await outbox.drain_tenant(
                 self.engine,
                 self.cell_redis,
@@ -221,10 +228,9 @@ class Control:
                 self.claims_cfg.outbox_batch,
                 self.claims_cfg.stream_maxlen,
                 self.cfg.cell,
+                self.claims_cfg.detection_retry_s,
             )
             await self.emit(tenant_id, {"type": "claim", "state": "QUEUED", "claim_id": claim_id, "key": detection.key})
-        else:
-            self.stats["skipped_existing_claim"] += 1
         await streams.ack(self.cell_redis, msg, keys.DISPATCHER_GROUP)
 
     # ---------------- relay ----------------
@@ -239,6 +245,7 @@ class Control:
                     self.claims_cfg.outbox_batch,
                     self.claims_cfg.stream_maxlen,
                     self.cfg.cell,
+                    self.claims_cfg.detection_retry_s,
                 )
                 self.stats["relayed"] += sent
             await self._sleep(self.claims_cfg.outbox_poll_ms / 1000)
@@ -339,7 +346,7 @@ async def move_tenant(engine: AsyncEngine, tenant_id: UUID, to_cell: str, actor:
     refresh interval. Claims still QUEUED are dispatched again through the outbox, which the new
     cell's relay publishes on its own Redis (a duplicate delivery is harmless: one lease wins).
     Returns how many queued claims were re-dispatched."""
-    async with system_tx(engine) as conn:
+    async with tenant_tx(engine, tenant_id) as conn:
         await conn.execute(
             text(
                 """UPDATE tenant_cells SET cell_id = :c, version = version + 1, moved_at = clock_timestamp()
@@ -347,7 +354,6 @@ async def move_tenant(engine: AsyncEngine, tenant_id: UUID, to_cell: str, actor:
             ),
             {"t": tenant_id, "c": to_cell},
         )
-    async with tenant_tx(engine, tenant_id) as conn:
         moved = await conn.execute(
             text(
                 """WITH q AS (UPDATE claims SET cell_id = :c WHERE tenant_id = :t AND state = 'QUEUED' RETURNING tenant_id, id)
@@ -355,6 +361,10 @@ async def move_tenant(engine: AsyncEngine, tenant_id: UUID, to_cell: str, actor:
                    SELECT tenant_id, :topic, jsonb_build_object('claim_id', id) FROM q"""
             ),
             {"t": tenant_id, "c": to_cell, "topic": claims.DISPATCH_TOPIC},
+        )
+        await conn.execute(
+            text("UPDATE outbox SET published_at=NULL WHERE tenant_id=:t AND topic=:topic AND consumed_at IS NULL"),
+            {"t": tenant_id, "topic": detections.DETECTED_TOPIC},
         )
         await conn.execute(
             text(

@@ -27,6 +27,9 @@ flowchart LR
 | Coordinator | Password/TOTP sessions, CSRF and roles, approvals/grants, audit, freight dispatch, workflow investigation/metrics |
 | Freight worker | One Chromium with isolated watcher/claimer contexts, warm sessions and freight-specific action handling |
 | Workflow worker | Separate process for approved freight and maintenance contracts, durable job/account holds and receipt reconciliation |
+| Catalogue crawler | Tenant/cell-scoped PostgreSQL frontier, pinned bounded HTTP requests, extraction/quality guards and private JSONL exports |
+| Standalone local agent | SQLite/WAL, local model drafts, bounded dedicated/isolated-CDP browser contexts and exact approved form saves |
+| Operational tools | Renewable observe-only collection, independent encrypted recovery and offline artifact signing |
 | Browser adapters | Generic authentication separated from freight fields, permitted owned origins, form/receipt validation |
 | MCP server | Six bounded stdio tools; every call checks tenant, user, grant scope, expiry and revocation |
 | Dashboard/gateway | Live operator views, owner workflow review, bounded SSE fan-out and periodic authorization rechecks |
@@ -54,11 +57,15 @@ generalize controlled destination results into exactly-once delivery on all webs
 
 ## Existing freight pipeline
 
-Watchers capture bounded feed responses and publish detections. Filters/schedules select jobs;
+Watchers capture bounded feed responses and persist raw detections before delivery. Filters/schedules select jobs;
 claims and outbox rows commit together. The relay publishes to a cell stream. Warm actors lease,
 act and record outcomes. The control reconciler examines uncertain bookings without blind retry.
 Redis consumer groups reclaim interrupted deliveries; PostgreSQL unique constraints and fencing
 remain authoritative. See [claim lifecycle](claim-lifecycle.md).
+Raw detections remain in the PostgreSQL mailbox until their filter/claim decision commits. Tenant
+moves reset unconsumed delivery under the directory lock, so unread old-cell streams and in-flight
+messages are replayed using current authority. Legacy Redis-only upgrade data requires an explicit
+drain; older backends cannot safely consume the new topic. See [deployment](../operations/deployment.md).
 
 ## Isolation and evidence
 
@@ -73,8 +80,8 @@ they do not prove authorship. Browser artifacts may contain sensitive data and s
 ## Scale boundaries
 
 The freight engine has tenant-to-cell routing and Redis hash tags. The approved-workflow runner
-currently enumerates tenants and processes bounded work per tenant: it is not yet assigned to
-independent cells. SSE-triggered refetch traffic, database pools and workflow scheduling must be
+uses bounded cell-scoped tenant pages and per-tenant turns, rechecking assignment before admission.
+SSE-triggered refetch is coalesced; database pools and workflow scheduling must be
 measured and redesigned at later milestones. A single-server deployment shares its host failure
 domain. Multi-zone placement, gateway fleets, sharding and regional recovery remain
 [future architecture](../scaling/README.md), with explicit [decision records](../adr/README.md).

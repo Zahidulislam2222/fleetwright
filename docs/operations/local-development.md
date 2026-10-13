@@ -24,6 +24,7 @@ uv run python -m fw_gateway
 uv run python -m fw_coordinator.control
 uv run python -m fw_worker
 uv run python -m fw_worker.workflows
+uv run python -m fw_coordinator.crawls
 ```
 
 The board bind port above must match `FWDEV_BOARD_PORT` / the client URL if changed. API and gateway
@@ -32,8 +33,10 @@ production outbound mail service. The approved-workflow runner is distinct from 
 
 From `apps/dashboard`, run `npm ci` then `npm run dev`. The development proxy forwards `/v1` to the
 configured local API/gateway. The console detects live sessions; an absent API selects explicit
-offline reference mode. The `/agent` interface remains local planned interaction data. Configure
-real MCP clients using [the workflow runbook](reliable-browser.md).
+offline reference mode. The `/agent` page launches the separate local application; start it with
+`uv run --package fw-agent python -m fw_agent` after following the
+[local-model setup guide](local-agent.md). It requires no database/Redis/Docker services.
+Configure real MCP clients using [the workflow runbook](reliable-browser.md).
 
 ## Verification
 

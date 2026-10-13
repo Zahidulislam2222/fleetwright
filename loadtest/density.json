@@ -1,0 +1,12 @@
+{
+  "context_counts": [50, 70],
+  "duration_s": 3600,
+  "tick_s": 5,
+  "launch_batch": 5,
+  "action_timeout_ms": 10000,
+  "minimum_available_bytes": 2147483648,
+  "maximum_process_rss_bytes": 8589934592,
+  "memory_accounting": "rss",
+  "report_dir": "var/security-scale/density",
+  "fixture": "fixture.html"
+}

@@ -80,6 +80,26 @@ production builds.
 Known limits of this evidence: one developer PC; the owned freight board, not a real site; the 50- and
 70-context one-hour runs are still to do ([roadmap](roadmap.md)).
 
+## Completion regression coverage
+
+The durable crawler suite exercises real HTTP, numeric DNS pinning, trusted-CA TLS hostname
+verification, redirect refusal, valid-JSON truncation, physical slow-response termination,
+per-request pacing, crash fences, quality guards, cancellation, tenant/export boundaries and
+retention. The standalone agent suite exercises exact-action authority, unknown-outcome receipts,
+loopback API boundaries, prompt injection, lifetime WebSocket denial and private state. Its actual
+local Ollama/Chromium run is a separate proof; POSIX-only permissions run on Linux.
+
+Operational tests cover bounded collection, observe-only renewal/revocation, failure/recovery
+persistence, retention cursor reuse and encrypted archive validation. Release-artifact tests reject
+tampering, missing/extra files, unsafe paths, symlinks and wrong trust anchors. The published settings
+schema is checked against typed model definitions without loading runtime environment values.
+
+Raw-detection handover tests use real Redis and isolated databases to prove unread old-cell replay,
+authoritative in-flight payloads, relay/dispatch crash boundaries, retry, tenant isolation and atomic
+move rollback. Account policy tests include delayed browser preparation and completion cooldown;
+workflow scheduling and retired-generation drain retain bounded fair turns and stopped states.
+These tests supplement the unchanged contention workload rather than replacing it.
+
 ## Publication regression coverage
 
 `test_publication_contract.py` checks maintained display wording, public links/required topics,

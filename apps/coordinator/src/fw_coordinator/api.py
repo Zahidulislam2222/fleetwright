@@ -30,6 +30,7 @@ from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine
 
 from fw_coordinator import schemas, views
 from fw_coordinator.auth import Auth, BadCredentials, LockedOut, ip_prefix
+from fw_coordinator.crawl_api import install as install_crawls
 from fw_coordinator.demo import Demo, DemoConfig, RunActive, load_demo
 from fw_coordinator.workflow_api import install as install_workflows
 from fw_core.crypto import Envelope
@@ -568,6 +569,7 @@ def create_app(cfg: CoordinatorSettings | None = None, demo_data: DemoConfig | N
         return status
 
     install_workflows(app, services, principal, csrf_checked)
+    install_crawls(app, services, principal, csrf_checked, audit)
     return app
 
 

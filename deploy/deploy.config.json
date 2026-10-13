@@ -37,6 +37,9 @@
     "workerStopGraceS": 60,
     "workflowWorkerMemory": "768m",
     "workflowWorkerCpus": 1.0,
+    "crawlerMemory": "256m",
+    "crawlerCpus": 0.5,
+    "crawlOutputDirectory": "/data/evidence/crawls",
     "edgeSubnet": "172.30.90.0/24",
     "apiRatePerS": 10,
     "apiBurst": 40,
@@ -56,6 +59,19 @@
     "backupDatabases": ["fleetwright", "mockboard"],
     "backupRestartS": 60,
     "backupMemoryMax": "512M"
+  },
+  "monitor": {
+    "monitorDirectory": "/srv/apps/fleetwright/monitor",
+    "monitorEnvFile": "/srv/apps/fleetwright/shared/monitor.env",
+    "monitorRestartS": 10,
+    "monitorMemoryMax": "256M",
+    "monitorIntervalS": 60,
+    "monitorTimeoutS": 10,
+    "monitorFailuresBeforeAlert": 3,
+    "monitorRetentionDays": 30,
+    "monitorBackupMaxAgeS": 172800,
+    "monitorResponseMaxBytes": 65536,
+    "monitorNotificationLimit": 200
   },
   "cloudflare": {
     "source": "https://www.cloudflare.com/ips-v4 and https://www.cloudflare.com/ips-v6 (checked 2026-10-06)",

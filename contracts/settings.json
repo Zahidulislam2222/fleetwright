@@ -1,0 +1,4087 @@
+{
+  "AgentAppSettings": {
+    "$defs": {
+      "AgentSettings": {
+        "properties": {
+          "action_timeout_ms": {
+            "default": 10000,
+            "minimum": 100,
+            "title": "Action Timeout Ms",
+            "type": "integer"
+          },
+          "allowed_origins": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Allowed Origins",
+            "type": "array"
+          },
+          "approval_ttl_s": {
+            "default": 300,
+            "minimum": 1,
+            "title": "Approval Ttl S",
+            "type": "integer"
+          },
+          "cdp_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Cdp Url"
+          },
+          "database": {
+            "format": "path",
+            "title": "Database",
+            "type": "string"
+          },
+          "evidence_directory": {
+            "format": "path",
+            "title": "Evidence Directory",
+            "type": "string"
+          },
+          "headless": {
+            "default": true,
+            "title": "Headless",
+            "type": "boolean"
+          },
+          "history_limit": {
+            "default": 100,
+            "maximum": 10000,
+            "minimum": 1,
+            "title": "History Limit",
+            "type": "integer"
+          },
+          "host": {
+            "title": "Host",
+            "type": "string"
+          },
+          "lab_enabled": {
+            "default": true,
+            "title": "Lab Enabled",
+            "type": "boolean"
+          },
+          "max_actions": {
+            "default": 12,
+            "maximum": 100,
+            "minimum": 1,
+            "title": "Max Actions",
+            "type": "integer"
+          },
+          "max_content_chars": {
+            "default": 2000,
+            "maximum": 20000,
+            "minimum": 1,
+            "title": "Max Content Chars",
+            "type": "integer"
+          },
+          "max_request_bytes": {
+            "default": 16384,
+            "minimum": 1024,
+            "title": "Max Request Bytes",
+            "type": "integer"
+          },
+          "max_requests": {
+            "default": 100,
+            "maximum": 10000,
+            "minimum": 1,
+            "title": "Max Requests",
+            "type": "integer"
+          },
+          "max_tabs": {
+            "default": 3,
+            "maximum": 20,
+            "minimum": 1,
+            "title": "Max Tabs",
+            "type": "integer"
+          },
+          "model_id": {
+            "title": "Model Id",
+            "type": "string"
+          },
+          "model_keep_alive_s": {
+            "default": 0,
+            "maximum": 3600,
+            "minimum": 0,
+            "title": "Model Keep Alive S",
+            "type": "integer"
+          },
+          "model_max_bytes": {
+            "default": 65536,
+            "minimum": 1024,
+            "title": "Model Max Bytes",
+            "type": "integer"
+          },
+          "model_max_tokens": {
+            "default": 512,
+            "maximum": 8192,
+            "minimum": 1,
+            "title": "Model Max Tokens",
+            "type": "integer"
+          },
+          "model_timeout_s": {
+            "default": 120,
+            "exclusiveMinimum": 0,
+            "title": "Model Timeout S",
+            "type": "number"
+          },
+          "model_url": {
+            "title": "Model Url",
+            "type": "string"
+          },
+          "port": {
+            "maximum": 65535,
+            "minimum": 1,
+            "title": "Port",
+            "type": "integer"
+          },
+          "profile_directory": {
+            "format": "path",
+            "title": "Profile Directory",
+            "type": "string"
+          },
+          "task_timeout_s": {
+            "default": 180,
+            "exclusiveMinimum": 0,
+            "title": "Task Timeout S",
+            "type": "number"
+          }
+        },
+        "required": [
+          "database",
+          "profile_directory",
+          "evidence_directory",
+          "model_url",
+          "model_id",
+          "host",
+          "port",
+          "allowed_origins"
+        ],
+        "title": "AgentSettings",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "agent": {
+        "$ref": "#/$defs/AgentSettings"
+      },
+      "config_dir": {
+        "format": "path",
+        "title": "Config Dir",
+        "type": "string"
+      },
+      "environment": {
+        "enum": [
+          "local",
+          "test",
+          "vps",
+          "aws"
+        ],
+        "title": "Environment",
+        "type": "string"
+      },
+      "log_level": {
+        "default": "INFO",
+        "enum": [
+          "DEBUG",
+          "INFO",
+          "WARNING",
+          "ERROR"
+        ],
+        "title": "Log Level",
+        "type": "string"
+      }
+    },
+    "required": [
+      "environment",
+      "config_dir",
+      "agent"
+    ],
+    "title": "AgentAppSettings",
+    "type": "object"
+  },
+  "BackupAppSettings": {
+    "$defs": {
+      "BackupSettings": {
+        "properties": {
+          "container": {
+            "title": "Container",
+            "type": "string"
+          },
+          "databases": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Databases",
+            "type": "array"
+          },
+          "directory": {
+            "format": "path",
+            "title": "Directory",
+            "type": "string"
+          },
+          "executable": {
+            "title": "Executable",
+            "type": "string"
+          },
+          "interval_s": {
+            "default": 86400.0,
+            "exclusiveMinimum": 0,
+            "title": "Interval S",
+            "type": "number"
+          },
+          "retention_count": {
+            "default": 7,
+            "minimum": 1,
+            "title": "Retention Count",
+            "type": "integer"
+          },
+          "timeout_s": {
+            "default": 120.0,
+            "exclusiveMinimum": 0,
+            "title": "Timeout S",
+            "type": "number"
+          },
+          "username": {
+            "title": "Username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "directory",
+          "container",
+          "executable",
+          "username",
+          "databases"
+        ],
+        "title": "BackupSettings",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "backup": {
+        "$ref": "#/$defs/BackupSettings"
+      },
+      "config_dir": {
+        "format": "path",
+        "title": "Config Dir",
+        "type": "string"
+      },
+      "environment": {
+        "enum": [
+          "local",
+          "test",
+          "vps",
+          "aws"
+        ],
+        "title": "Environment",
+        "type": "string"
+      },
+      "log_level": {
+        "default": "INFO",
+        "enum": [
+          "DEBUG",
+          "INFO",
+          "WARNING",
+          "ERROR"
+        ],
+        "title": "Log Level",
+        "type": "string"
+      }
+    },
+    "required": [
+      "environment",
+      "config_dir",
+      "backup"
+    ],
+    "title": "BackupAppSettings",
+    "type": "object"
+  },
+  "BoardAppSettings": {
+    "$defs": {
+      "BoardSettings": {
+        "description": "The fictitious mock load board itself (Phase 2 test target).",
+        "properties": {
+          "admin_token": {
+            "format": "password",
+            "title": "Admin Token",
+            "type": "string",
+            "writeOnly": true
+          },
+          "cookie_secure": {
+            "default": true,
+            "title": "Cookie Secure",
+            "type": "boolean"
+          },
+          "email_domain": {
+            "title": "Email Domain",
+            "type": "string"
+          },
+          "feed_page_limit": {
+            "default": 200,
+            "maximum": 1000,
+            "minimum": 1,
+            "title": "Feed Page Limit",
+            "type": "integer"
+          },
+          "feed_poll_ms": {
+            "default": 500,
+            "minimum": 50,
+            "title": "Feed Poll Ms",
+            "type": "integer"
+          },
+          "feed_rate_max_per_min": {
+            "default": 6000.0,
+            "minimum": 0,
+            "title": "Feed Rate Max Per Min",
+            "type": "number"
+          },
+          "feed_rate_per_min": {
+            "default": 6.0,
+            "minimum": 0,
+            "title": "Feed Rate Per Min",
+            "type": "number"
+          },
+          "load_visible_s": {
+            "default": 900,
+            "minimum": 10,
+            "title": "Load Visible S",
+            "type": "integer"
+          },
+          "mail_from": {
+            "title": "Mail From",
+            "type": "string"
+          },
+          "otp_length": {
+            "default": 6,
+            "maximum": 10,
+            "minimum": 4,
+            "title": "Otp Length",
+            "type": "integer"
+          },
+          "otp_ttl_s": {
+            "default": 300,
+            "minimum": 30,
+            "title": "Otp Ttl S",
+            "type": "integer"
+          },
+          "session_ttl_s": {
+            "default": 1800,
+            "minimum": 30,
+            "title": "Session Ttl S",
+            "type": "integer"
+          },
+          "smtp_host": {
+            "title": "Smtp Host",
+            "type": "string"
+          },
+          "smtp_port": {
+            "maximum": 65535,
+            "minimum": 1,
+            "title": "Smtp Port",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "admin_token",
+          "email_domain",
+          "smtp_host",
+          "smtp_port",
+          "mail_from"
+        ],
+        "title": "BoardSettings",
+        "type": "object"
+      },
+      "DatabaseSettings": {
+        "description": "One Postgres connection pool. Each service gets only the role it needs:\nfw_app (API + control loops), fw_worker (narrow grants), fw_owner (migrations/seeding only),\nfw_board (the mock board's own database). RLS applies to fw_app and fw_worker.",
+        "properties": {
+          "dsn": {
+            "format": "password",
+            "title": "Dsn",
+            "type": "string",
+            "writeOnly": true
+          },
+          "pool_max_overflow": {
+            "default": 5,
+            "maximum": 200,
+            "minimum": 0,
+            "title": "Pool Max Overflow",
+            "type": "integer"
+          },
+          "pool_size": {
+            "default": 10,
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Pool Size",
+            "type": "integer"
+          },
+          "pool_timeout_s": {
+            "default": 5.0,
+            "exclusiveMinimum": 0,
+            "title": "Pool Timeout S",
+            "type": "number"
+          },
+          "statement_timeout_ms": {
+            "default": 5000,
+            "minimum": 100,
+            "title": "Statement Timeout Ms",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "dsn"
+        ],
+        "title": "DatabaseSettings",
+        "type": "object"
+      }
+    },
+    "description": "Mock board process. Holds no Fleetwright secret.",
+    "properties": {
+      "board": {
+        "$ref": "#/$defs/BoardSettings"
+      },
+      "board_db": {
+        "$ref": "#/$defs/DatabaseSettings"
+      },
+      "config_dir": {
+        "format": "path",
+        "title": "Config Dir",
+        "type": "string"
+      },
+      "environment": {
+        "enum": [
+          "local",
+          "test",
+          "vps",
+          "aws"
+        ],
+        "title": "Environment",
+        "type": "string"
+      },
+      "log_level": {
+        "default": "INFO",
+        "enum": [
+          "DEBUG",
+          "INFO",
+          "WARNING",
+          "ERROR"
+        ],
+        "title": "Log Level",
+        "type": "string"
+      }
+    },
+    "required": [
+      "environment",
+      "config_dir",
+      "board",
+      "board_db"
+    ],
+    "title": "BoardAppSettings",
+    "type": "object"
+  },
+  "ControlAppSettings": {
+    "$defs": {
+      "BoardClientSettings": {
+        "description": "How Fleetwright services reach the mock board.",
+        "properties": {
+          "admin_token": {
+            "format": "password",
+            "title": "Admin Token",
+            "type": "string",
+            "writeOnly": true
+          },
+          "internal_url": {
+            "title": "Internal Url",
+            "type": "string"
+          },
+          "public_url": {
+            "title": "Public Url",
+            "type": "string"
+          },
+          "timeout_s": {
+            "default": 10.0,
+            "exclusiveMinimum": 0,
+            "title": "Timeout S",
+            "type": "number"
+          }
+        },
+        "required": [
+          "internal_url",
+          "public_url",
+          "admin_token"
+        ],
+        "title": "BoardClientSettings",
+        "type": "object"
+      },
+      "ClaimSettings": {
+        "properties": {
+          "autoclaim_idle_ms": {
+            "default": 5000,
+            "minimum": 100,
+            "title": "Autoclaim Idle Ms",
+            "type": "integer"
+          },
+          "detection_retry_s": {
+            "default": 5.0,
+            "minimum": 0.1,
+            "title": "Detection Retry S",
+            "type": "number"
+          },
+          "fast_lock_ttl_ms": {
+            "default": 30000,
+            "minimum": 100,
+            "title": "Fast Lock Ttl Ms",
+            "type": "integer"
+          },
+          "filter_reload_s": {
+            "default": 30.0,
+            "exclusiveMinimum": 0,
+            "title": "Filter Reload S",
+            "type": "number"
+          },
+          "lease_ttl_ms": {
+            "default": 8000,
+            "minimum": 200,
+            "title": "Lease Ttl Ms",
+            "type": "integer"
+          },
+          "max_deliveries": {
+            "default": 5,
+            "minimum": 1,
+            "title": "Max Deliveries",
+            "type": "integer"
+          },
+          "outbox_batch": {
+            "default": 200,
+            "maximum": 5000,
+            "minimum": 1,
+            "title": "Outbox Batch",
+            "type": "integer"
+          },
+          "outbox_poll_ms": {
+            "default": 250,
+            "minimum": 10,
+            "title": "Outbox Poll Ms",
+            "type": "integer"
+          },
+          "queued_max_age_s": {
+            "default": 120,
+            "minimum": 1,
+            "title": "Queued Max Age S",
+            "type": "integer"
+          },
+          "reconcile_interval_s": {
+            "default": 2.0,
+            "exclusiveMinimum": 0,
+            "title": "Reconcile Interval S",
+            "type": "number"
+          },
+          "stream_maxlen": {
+            "default": 100000,
+            "minimum": 100,
+            "title": "Stream Maxlen",
+            "type": "integer"
+          }
+        },
+        "title": "ClaimSettings",
+        "type": "object"
+      },
+      "ControlSettings": {
+        "description": "Per-cell control loops: dispatcher, outbox relay, reconciler.",
+        "properties": {
+          "cell": {
+            "title": "Cell",
+            "type": "string"
+          },
+          "read_block_ms": {
+            "default": 500,
+            "minimum": 10,
+            "title": "Read Block Ms",
+            "type": "integer"
+          },
+          "read_count": {
+            "default": 200,
+            "minimum": 1,
+            "title": "Read Count",
+            "type": "integer"
+          },
+          "seen_ttl_s": {
+            "default": 600,
+            "minimum": 1,
+            "title": "Seen Ttl S",
+            "type": "integer"
+          },
+          "tenant_refresh_s": {
+            "default": 2.0,
+            "exclusiveMinimum": 0,
+            "title": "Tenant Refresh S",
+            "type": "number"
+          },
+          "unknown_grace_ms": {
+            "default": 2000,
+            "minimum": 0,
+            "title": "Unknown Grace Ms",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "cell"
+        ],
+        "title": "ControlSettings",
+        "type": "object"
+      },
+      "DatabaseSettings": {
+        "description": "One Postgres connection pool. Each service gets only the role it needs:\nfw_app (API + control loops), fw_worker (narrow grants), fw_owner (migrations/seeding only),\nfw_board (the mock board's own database). RLS applies to fw_app and fw_worker.",
+        "properties": {
+          "dsn": {
+            "format": "password",
+            "title": "Dsn",
+            "type": "string",
+            "writeOnly": true
+          },
+          "pool_max_overflow": {
+            "default": 5,
+            "maximum": 200,
+            "minimum": 0,
+            "title": "Pool Max Overflow",
+            "type": "integer"
+          },
+          "pool_size": {
+            "default": 10,
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Pool Size",
+            "type": "integer"
+          },
+          "pool_timeout_s": {
+            "default": 5.0,
+            "exclusiveMinimum": 0,
+            "title": "Pool Timeout S",
+            "type": "number"
+          },
+          "statement_timeout_ms": {
+            "default": 5000,
+            "minimum": 100,
+            "title": "Statement Timeout Ms",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "dsn"
+        ],
+        "title": "DatabaseSettings",
+        "type": "object"
+      },
+      "RedisSettings": {
+        "description": "`core` carries live-update pub/sub and rate limits; each cell has its own Redis for streams.",
+        "properties": {
+          "cells": {
+            "additionalProperties": {
+              "format": "password",
+              "type": "string",
+              "writeOnly": true
+            },
+            "title": "Cells",
+            "type": "object"
+          },
+          "core_url": {
+            "format": "password",
+            "title": "Core Url",
+            "type": "string",
+            "writeOnly": true
+          },
+          "socket_timeout_s": {
+            "default": 2.0,
+            "exclusiveMinimum": 0,
+            "title": "Socket Timeout S",
+            "type": "number"
+          }
+        },
+        "required": [
+          "core_url",
+          "cells"
+        ],
+        "title": "RedisSettings",
+        "type": "object"
+      },
+      "VaultSettings": {
+        "description": "Envelope encryption: a per-record data key, wrapped by this master key (KMS on AWS later).",
+        "properties": {
+          "key_id": {
+            "default": "local-1",
+            "title": "Key Id",
+            "type": "string"
+          },
+          "master_key_b64": {
+            "format": "password",
+            "title": "Master Key B64",
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "master_key_b64"
+        ],
+        "title": "VaultSettings",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "app_db": {
+        "$ref": "#/$defs/DatabaseSettings"
+      },
+      "board_client": {
+        "$ref": "#/$defs/BoardClientSettings"
+      },
+      "claims": {
+        "$ref": "#/$defs/ClaimSettings",
+        "default": {
+          "autoclaim_idle_ms": 5000,
+          "detection_retry_s": 5.0,
+          "fast_lock_ttl_ms": 30000,
+          "filter_reload_s": 30.0,
+          "lease_ttl_ms": 8000,
+          "max_deliveries": 5,
+          "outbox_batch": 200,
+          "outbox_poll_ms": 250,
+          "queued_max_age_s": 120,
+          "reconcile_interval_s": 2.0,
+          "stream_maxlen": 100000
+        }
+      },
+      "config_dir": {
+        "format": "path",
+        "title": "Config Dir",
+        "type": "string"
+      },
+      "control": {
+        "$ref": "#/$defs/ControlSettings"
+      },
+      "environment": {
+        "enum": [
+          "local",
+          "test",
+          "vps",
+          "aws"
+        ],
+        "title": "Environment",
+        "type": "string"
+      },
+      "log_level": {
+        "default": "INFO",
+        "enum": [
+          "DEBUG",
+          "INFO",
+          "WARNING",
+          "ERROR"
+        ],
+        "title": "Log Level",
+        "type": "string"
+      },
+      "redis": {
+        "$ref": "#/$defs/RedisSettings"
+      },
+      "vault": {
+        "$ref": "#/$defs/VaultSettings"
+      }
+    },
+    "required": [
+      "environment",
+      "config_dir",
+      "app_db",
+      "redis",
+      "board_client",
+      "vault",
+      "control"
+    ],
+    "title": "ControlAppSettings",
+    "type": "object"
+  },
+  "CoordinatorSettings": {
+    "$defs": {
+      "ApiSettings": {
+        "properties": {
+          "host": {
+            "title": "Host",
+            "type": "string"
+          },
+          "latency_window_s": {
+            "default": 3600,
+            "minimum": 60,
+            "title": "Latency Window S",
+            "type": "integer"
+          },
+          "page_size_default": {
+            "default": 25,
+            "minimum": 1,
+            "title": "Page Size Default",
+            "type": "integer"
+          },
+          "page_size_max": {
+            "default": 200,
+            "minimum": 1,
+            "title": "Page Size Max",
+            "type": "integer"
+          },
+          "port": {
+            "maximum": 65535,
+            "minimum": 1,
+            "title": "Port",
+            "type": "integer"
+          },
+          "series_minutes": {
+            "default": 60,
+            "maximum": 1440,
+            "minimum": 5,
+            "title": "Series Minutes",
+            "type": "integer"
+          },
+          "trusted_proxy_hops": {
+            "default": 1,
+            "minimum": 0,
+            "title": "Trusted Proxy Hops",
+            "type": "integer"
+          },
+          "worker_dead_after_s": {
+            "default": 60.0,
+            "exclusiveMinimum": 0,
+            "title": "Worker Dead After S",
+            "type": "number"
+          },
+          "worker_recent_s": {
+            "default": 3600.0,
+            "exclusiveMinimum": 0,
+            "title": "Worker Recent S",
+            "type": "number"
+          },
+          "worker_stale_after_s": {
+            "default": 10.0,
+            "exclusiveMinimum": 0,
+            "title": "Worker Stale After S",
+            "type": "number"
+          }
+        },
+        "required": [
+          "host",
+          "port"
+        ],
+        "title": "ApiSettings",
+        "type": "object"
+      },
+      "AuthSettings": {
+        "properties": {
+          "cookie_name": {
+            "default": "fw_session",
+            "title": "Cookie Name",
+            "type": "string"
+          },
+          "cookie_secure": {
+            "default": true,
+            "title": "Cookie Secure",
+            "type": "boolean"
+          },
+          "csrf_header": {
+            "default": "X-CSRF-Token",
+            "title": "Csrf Header",
+            "type": "string"
+          },
+          "hash_concurrency": {
+            "default": 2,
+            "minimum": 1,
+            "title": "Hash Concurrency",
+            "type": "integer"
+          },
+          "lockout_s": {
+            "default": 900,
+            "minimum": 10,
+            "title": "Lockout S",
+            "type": "integer"
+          },
+          "login_max_attempts": {
+            "default": 5,
+            "minimum": 1,
+            "title": "Login Max Attempts",
+            "type": "integer"
+          },
+          "login_window_s": {
+            "default": 900,
+            "minimum": 10,
+            "title": "Login Window S",
+            "type": "integer"
+          },
+          "mfa_cookie_name": {
+            "default": "fw_mfa",
+            "title": "Mfa Cookie Name",
+            "type": "string"
+          },
+          "mfa_pending_ttl_s": {
+            "default": 300,
+            "minimum": 30,
+            "title": "Mfa Pending Ttl S",
+            "type": "integer"
+          },
+          "password_attempts_per_window": {
+            "default": 30,
+            "minimum": 1,
+            "title": "Password Attempts Per Window",
+            "type": "integer"
+          },
+          "session_ttl_s": {
+            "default": 28800,
+            "minimum": 60,
+            "title": "Session Ttl S",
+            "type": "integer"
+          },
+          "totp_issuer": {
+            "default": "Fleetwright",
+            "title": "Totp Issuer",
+            "type": "string"
+          },
+          "totp_valid_window": {
+            "default": 1,
+            "maximum": 2,
+            "minimum": 0,
+            "title": "Totp Valid Window",
+            "type": "integer"
+          }
+        },
+        "title": "AuthSettings",
+        "type": "object"
+      },
+      "BoardClientSettings": {
+        "description": "How Fleetwright services reach the mock board.",
+        "properties": {
+          "admin_token": {
+            "format": "password",
+            "title": "Admin Token",
+            "type": "string",
+            "writeOnly": true
+          },
+          "internal_url": {
+            "title": "Internal Url",
+            "type": "string"
+          },
+          "public_url": {
+            "title": "Public Url",
+            "type": "string"
+          },
+          "timeout_s": {
+            "default": 10.0,
+            "exclusiveMinimum": 0,
+            "title": "Timeout S",
+            "type": "number"
+          }
+        },
+        "required": [
+          "internal_url",
+          "public_url",
+          "admin_token"
+        ],
+        "title": "BoardClientSettings",
+        "type": "object"
+      },
+      "CrawlSettings": {
+        "properties": {
+          "cell": {
+            "title": "Cell",
+            "type": "string"
+          },
+          "domain_delay_s": {
+            "default": 1,
+            "minimum": 0,
+            "title": "Domain Delay S",
+            "type": "number"
+          },
+          "drop_alert_share": {
+            "default": 0.5,
+            "exclusiveMaximum": 1,
+            "exclusiveMinimum": 0,
+            "title": "Drop Alert Share",
+            "type": "number"
+          },
+          "lease_s": {
+            "default": 60,
+            "exclusiveMinimum": 0,
+            "title": "Lease S",
+            "type": "number"
+          },
+          "max_attempts": {
+            "default": 3,
+            "maximum": 10,
+            "minimum": 1,
+            "title": "Max Attempts",
+            "type": "integer"
+          },
+          "max_items_per_page": {
+            "default": 1000,
+            "maximum": 10000,
+            "minimum": 1,
+            "title": "Max Items Per Page",
+            "type": "integer"
+          },
+          "max_pages": {
+            "default": 100,
+            "maximum": 10000,
+            "minimum": 1,
+            "title": "Max Pages",
+            "type": "integer"
+          },
+          "max_response_bytes": {
+            "default": 2097152,
+            "minimum": 1024,
+            "title": "Max Response Bytes",
+            "type": "integer"
+          },
+          "origins": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Origins",
+            "type": "object"
+          },
+          "output_directory": {
+            "format": "path",
+            "title": "Output Directory",
+            "type": "string"
+          },
+          "owned_origin_private_access": {
+            "default": false,
+            "title": "Owned Origin Private Access",
+            "type": "boolean"
+          },
+          "poll_s": {
+            "default": 2,
+            "exclusiveMinimum": 0,
+            "title": "Poll S",
+            "type": "number"
+          },
+          "request_budget_s": {
+            "default": 10,
+            "exclusiveMinimum": 0,
+            "title": "Request Budget S",
+            "type": "number"
+          },
+          "retention_batch": {
+            "default": 100,
+            "maximum": 10000,
+            "minimum": 1,
+            "title": "Retention Batch",
+            "type": "integer"
+          },
+          "retention_days": {
+            "default": 7,
+            "minimum": 1,
+            "title": "Retention Days",
+            "type": "integer"
+          },
+          "retry_base_s": {
+            "default": 2,
+            "exclusiveMinimum": 0,
+            "title": "Retry Base S",
+            "type": "number"
+          },
+          "retry_jitter_s": {
+            "default": 1,
+            "minimum": 0,
+            "title": "Retry Jitter S",
+            "type": "number"
+          },
+          "tenant_batch": {
+            "default": 100,
+            "maximum": 10000,
+            "minimum": 1,
+            "title": "Tenant Batch",
+            "type": "integer"
+          },
+          "timeout_s": {
+            "default": 5,
+            "exclusiveMinimum": 0,
+            "title": "Timeout S",
+            "type": "number"
+          },
+          "user_agent": {
+            "default": "FleetwrightCrawler",
+            "title": "User Agent",
+            "type": "string"
+          }
+        },
+        "required": [
+          "output_directory",
+          "cell"
+        ],
+        "title": "CrawlSettings",
+        "type": "object"
+      },
+      "DatabaseSettings": {
+        "description": "One Postgres connection pool. Each service gets only the role it needs:\nfw_app (API + control loops), fw_worker (narrow grants), fw_owner (migrations/seeding only),\nfw_board (the mock board's own database). RLS applies to fw_app and fw_worker.",
+        "properties": {
+          "dsn": {
+            "format": "password",
+            "title": "Dsn",
+            "type": "string",
+            "writeOnly": true
+          },
+          "pool_max_overflow": {
+            "default": 5,
+            "maximum": 200,
+            "minimum": 0,
+            "title": "Pool Max Overflow",
+            "type": "integer"
+          },
+          "pool_size": {
+            "default": 10,
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Pool Size",
+            "type": "integer"
+          },
+          "pool_timeout_s": {
+            "default": 5.0,
+            "exclusiveMinimum": 0,
+            "title": "Pool Timeout S",
+            "type": "number"
+          },
+          "statement_timeout_ms": {
+            "default": 5000,
+            "minimum": 100,
+            "title": "Statement Timeout Ms",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "dsn"
+        ],
+        "title": "DatabaseSettings",
+        "type": "object"
+      },
+      "DemoSettings": {
+        "description": "Public demo behaviour. Caps are enforced server-side, whatever the browser sends.",
+        "properties": {
+          "account_email": {
+            "default": "demo@fleetwright.demo",
+            "title": "Account Email",
+            "type": "string"
+          },
+          "account_password": {
+            "anyOf": [
+              {
+                "format": "password",
+                "type": "string",
+                "writeOnly": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Account Password"
+          },
+          "public_read": {
+            "default": false,
+            "title": "Public Read",
+            "type": "boolean"
+          },
+          "reset_after_s": {
+            "default": 900,
+            "minimum": 60,
+            "title": "Reset After S",
+            "type": "integer"
+          },
+          "reset_check_s": {
+            "default": 15.0,
+            "exclusiveMinimum": 0,
+            "title": "Reset Check S",
+            "type": "number"
+          },
+          "run_max_minutes": {
+            "default": 5,
+            "maximum": 60,
+            "minimum": 1,
+            "title": "Run Max Minutes",
+            "type": "integer"
+          },
+          "run_max_rate_per_min": {
+            "default": 120.0,
+            "exclusiveMinimum": 0,
+            "title": "Run Max Rate Per Min",
+            "type": "number"
+          },
+          "show_demo_mfa_code": {
+            "default": false,
+            "title": "Show Demo Mfa Code",
+            "type": "boolean"
+          },
+          "tenant_slug": {
+            "default": "demo",
+            "title": "Tenant Slug",
+            "type": "string"
+          }
+        },
+        "title": "DemoSettings",
+        "type": "object"
+      },
+      "RedisSettings": {
+        "description": "`core` carries live-update pub/sub and rate limits; each cell has its own Redis for streams.",
+        "properties": {
+          "cells": {
+            "additionalProperties": {
+              "format": "password",
+              "type": "string",
+              "writeOnly": true
+            },
+            "title": "Cells",
+            "type": "object"
+          },
+          "core_url": {
+            "format": "password",
+            "title": "Core Url",
+            "type": "string",
+            "writeOnly": true
+          },
+          "socket_timeout_s": {
+            "default": 2.0,
+            "exclusiveMinimum": 0,
+            "title": "Socket Timeout S",
+            "type": "number"
+          }
+        },
+        "required": [
+          "core_url",
+          "cells"
+        ],
+        "title": "RedisSettings",
+        "type": "object"
+      },
+      "VaultSettings": {
+        "description": "Envelope encryption: a per-record data key, wrapped by this master key (KMS on AWS later).",
+        "properties": {
+          "key_id": {
+            "default": "local-1",
+            "title": "Key Id",
+            "type": "string"
+          },
+          "master_key_b64": {
+            "format": "password",
+            "title": "Master Key B64",
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "master_key_b64"
+        ],
+        "title": "VaultSettings",
+        "type": "object"
+      },
+      "WorkflowSettings": {
+        "properties": {
+          "action_timeout_ms": {
+            "default": 10000,
+            "minimum": 100,
+            "title": "Action Timeout Ms",
+            "type": "integer"
+          },
+          "alert_unknown_after_s": {
+            "default": 300.0,
+            "exclusiveMinimum": 0,
+            "title": "Alert Unknown After S",
+            "type": "number"
+          },
+          "approval_ttl_s": {
+            "default": 300,
+            "minimum": 1,
+            "title": "Approval Ttl S",
+            "type": "integer"
+          },
+          "drain_timeout_s": {
+            "default": 20,
+            "exclusiveMinimum": 0,
+            "title": "Drain Timeout S",
+            "type": "number"
+          },
+          "evidence_page_size": {
+            "default": 100,
+            "maximum": 1000,
+            "minimum": 1,
+            "title": "Evidence Page Size",
+            "type": "integer"
+          },
+          "grant_ttl_s": {
+            "default": 3600,
+            "minimum": 1,
+            "title": "Grant Ttl S",
+            "type": "integer"
+          },
+          "jobs_per_tenant": {
+            "default": 1,
+            "maximum": 16,
+            "minimum": 1,
+            "title": "Jobs Per Tenant",
+            "type": "integer"
+          },
+          "lease_margin_s": {
+            "default": 5.0,
+            "exclusiveMinimum": 0,
+            "title": "Lease Margin S",
+            "type": "number"
+          },
+          "lease_s": {
+            "default": 90.0,
+            "exclusiveMinimum": 0,
+            "title": "Lease S",
+            "type": "number"
+          },
+          "poll_s": {
+            "default": 1.0,
+            "exclusiveMinimum": 0,
+            "title": "Poll S",
+            "type": "number"
+          },
+          "reconcile_grace_s": {
+            "default": 10.0,
+            "minimum": 0,
+            "title": "Reconcile Grace S",
+            "type": "number"
+          },
+          "response_max_bytes": {
+            "default": 65536,
+            "minimum": 1024,
+            "title": "Response Max Bytes",
+            "type": "integer"
+          },
+          "tenant_batch": {
+            "default": 32,
+            "maximum": 256,
+            "minimum": 1,
+            "title": "Tenant Batch",
+            "type": "integer"
+          }
+        },
+        "title": "WorkflowSettings",
+        "type": "object"
+      }
+    },
+    "description": "The console's `/v1` API (`fw_coordinator.api`).",
+    "properties": {
+      "api": {
+        "$ref": "#/$defs/ApiSettings"
+      },
+      "app_db": {
+        "$ref": "#/$defs/DatabaseSettings"
+      },
+      "auth": {
+        "$ref": "#/$defs/AuthSettings",
+        "default": {
+          "cookie_name": "fw_session",
+          "cookie_secure": true,
+          "csrf_header": "X-CSRF-Token",
+          "hash_concurrency": 2,
+          "lockout_s": 900,
+          "login_max_attempts": 5,
+          "login_window_s": 900,
+          "mfa_cookie_name": "fw_mfa",
+          "mfa_pending_ttl_s": 300,
+          "password_attempts_per_window": 30,
+          "session_ttl_s": 28800,
+          "totp_issuer": "Fleetwright",
+          "totp_valid_window": 1
+        }
+      },
+      "board_client": {
+        "$ref": "#/$defs/BoardClientSettings"
+      },
+      "config_dir": {
+        "format": "path",
+        "title": "Config Dir",
+        "type": "string"
+      },
+      "crawl": {
+        "$ref": "#/$defs/CrawlSettings"
+      },
+      "demo": {
+        "$ref": "#/$defs/DemoSettings",
+        "default": {
+          "account_email": "demo@fleetwright.demo",
+          "account_password": null,
+          "public_read": false,
+          "reset_after_s": 900,
+          "reset_check_s": 15.0,
+          "run_max_minutes": 5,
+          "run_max_rate_per_min": 120.0,
+          "show_demo_mfa_code": false,
+          "tenant_slug": "demo"
+        }
+      },
+      "environment": {
+        "enum": [
+          "local",
+          "test",
+          "vps",
+          "aws"
+        ],
+        "title": "Environment",
+        "type": "string"
+      },
+      "log_level": {
+        "default": "INFO",
+        "enum": [
+          "DEBUG",
+          "INFO",
+          "WARNING",
+          "ERROR"
+        ],
+        "title": "Log Level",
+        "type": "string"
+      },
+      "redis": {
+        "$ref": "#/$defs/RedisSettings"
+      },
+      "vault": {
+        "$ref": "#/$defs/VaultSettings"
+      },
+      "workflows": {
+        "$ref": "#/$defs/WorkflowSettings",
+        "default": {
+          "action_timeout_ms": 10000,
+          "alert_unknown_after_s": 300.0,
+          "approval_ttl_s": 300,
+          "drain_timeout_s": 20.0,
+          "evidence_page_size": 100,
+          "grant_ttl_s": 3600,
+          "jobs_per_tenant": 1,
+          "lease_margin_s": 5.0,
+          "lease_s": 90.0,
+          "poll_s": 1.0,
+          "reconcile_grace_s": 10.0,
+          "response_max_bytes": 65536,
+          "tenant_batch": 32
+        }
+      }
+    },
+    "required": [
+      "environment",
+      "config_dir",
+      "app_db",
+      "redis",
+      "board_client",
+      "vault",
+      "api",
+      "crawl"
+    ],
+    "title": "CoordinatorSettings",
+    "type": "object"
+  },
+  "CrawlAppSettings": {
+    "$defs": {
+      "BoardClientSettings": {
+        "description": "How Fleetwright services reach the mock board.",
+        "properties": {
+          "admin_token": {
+            "format": "password",
+            "title": "Admin Token",
+            "type": "string",
+            "writeOnly": true
+          },
+          "internal_url": {
+            "title": "Internal Url",
+            "type": "string"
+          },
+          "public_url": {
+            "title": "Public Url",
+            "type": "string"
+          },
+          "timeout_s": {
+            "default": 10.0,
+            "exclusiveMinimum": 0,
+            "title": "Timeout S",
+            "type": "number"
+          }
+        },
+        "required": [
+          "internal_url",
+          "public_url",
+          "admin_token"
+        ],
+        "title": "BoardClientSettings",
+        "type": "object"
+      },
+      "CrawlSettings": {
+        "properties": {
+          "cell": {
+            "title": "Cell",
+            "type": "string"
+          },
+          "domain_delay_s": {
+            "default": 1,
+            "minimum": 0,
+            "title": "Domain Delay S",
+            "type": "number"
+          },
+          "drop_alert_share": {
+            "default": 0.5,
+            "exclusiveMaximum": 1,
+            "exclusiveMinimum": 0,
+            "title": "Drop Alert Share",
+            "type": "number"
+          },
+          "lease_s": {
+            "default": 60,
+            "exclusiveMinimum": 0,
+            "title": "Lease S",
+            "type": "number"
+          },
+          "max_attempts": {
+            "default": 3,
+            "maximum": 10,
+            "minimum": 1,
+            "title": "Max Attempts",
+            "type": "integer"
+          },
+          "max_items_per_page": {
+            "default": 1000,
+            "maximum": 10000,
+            "minimum": 1,
+            "title": "Max Items Per Page",
+            "type": "integer"
+          },
+          "max_pages": {
+            "default": 100,
+            "maximum": 10000,
+            "minimum": 1,
+            "title": "Max Pages",
+            "type": "integer"
+          },
+          "max_response_bytes": {
+            "default": 2097152,
+            "minimum": 1024,
+            "title": "Max Response Bytes",
+            "type": "integer"
+          },
+          "origins": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Origins",
+            "type": "object"
+          },
+          "output_directory": {
+            "format": "path",
+            "title": "Output Directory",
+            "type": "string"
+          },
+          "owned_origin_private_access": {
+            "default": false,
+            "title": "Owned Origin Private Access",
+            "type": "boolean"
+          },
+          "poll_s": {
+            "default": 2,
+            "exclusiveMinimum": 0,
+            "title": "Poll S",
+            "type": "number"
+          },
+          "request_budget_s": {
+            "default": 10,
+            "exclusiveMinimum": 0,
+            "title": "Request Budget S",
+            "type": "number"
+          },
+          "retention_batch": {
+            "default": 100,
+            "maximum": 10000,
+            "minimum": 1,
+            "title": "Retention Batch",
+            "type": "integer"
+          },
+          "retention_days": {
+            "default": 7,
+            "minimum": 1,
+            "title": "Retention Days",
+            "type": "integer"
+          },
+          "retry_base_s": {
+            "default": 2,
+            "exclusiveMinimum": 0,
+            "title": "Retry Base S",
+            "type": "number"
+          },
+          "retry_jitter_s": {
+            "default": 1,
+            "minimum": 0,
+            "title": "Retry Jitter S",
+            "type": "number"
+          },
+          "tenant_batch": {
+            "default": 100,
+            "maximum": 10000,
+            "minimum": 1,
+            "title": "Tenant Batch",
+            "type": "integer"
+          },
+          "timeout_s": {
+            "default": 5,
+            "exclusiveMinimum": 0,
+            "title": "Timeout S",
+            "type": "number"
+          },
+          "user_agent": {
+            "default": "FleetwrightCrawler",
+            "title": "User Agent",
+            "type": "string"
+          }
+        },
+        "required": [
+          "output_directory",
+          "cell"
+        ],
+        "title": "CrawlSettings",
+        "type": "object"
+      },
+      "DatabaseSettings": {
+        "description": "One Postgres connection pool. Each service gets only the role it needs:\nfw_app (API + control loops), fw_worker (narrow grants), fw_owner (migrations/seeding only),\nfw_board (the mock board's own database). RLS applies to fw_app and fw_worker.",
+        "properties": {
+          "dsn": {
+            "format": "password",
+            "title": "Dsn",
+            "type": "string",
+            "writeOnly": true
+          },
+          "pool_max_overflow": {
+            "default": 5,
+            "maximum": 200,
+            "minimum": 0,
+            "title": "Pool Max Overflow",
+            "type": "integer"
+          },
+          "pool_size": {
+            "default": 10,
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Pool Size",
+            "type": "integer"
+          },
+          "pool_timeout_s": {
+            "default": 5.0,
+            "exclusiveMinimum": 0,
+            "title": "Pool Timeout S",
+            "type": "number"
+          },
+          "statement_timeout_ms": {
+            "default": 5000,
+            "minimum": 100,
+            "title": "Statement Timeout Ms",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "dsn"
+        ],
+        "title": "DatabaseSettings",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "app_db": {
+        "$ref": "#/$defs/DatabaseSettings"
+      },
+      "board_client": {
+        "$ref": "#/$defs/BoardClientSettings"
+      },
+      "config_dir": {
+        "format": "path",
+        "title": "Config Dir",
+        "type": "string"
+      },
+      "crawl": {
+        "$ref": "#/$defs/CrawlSettings"
+      },
+      "environment": {
+        "enum": [
+          "local",
+          "test",
+          "vps",
+          "aws"
+        ],
+        "title": "Environment",
+        "type": "string"
+      },
+      "log_level": {
+        "default": "INFO",
+        "enum": [
+          "DEBUG",
+          "INFO",
+          "WARNING",
+          "ERROR"
+        ],
+        "title": "Log Level",
+        "type": "string"
+      }
+    },
+    "required": [
+      "environment",
+      "config_dir",
+      "app_db",
+      "board_client",
+      "crawl"
+    ],
+    "title": "CrawlAppSettings",
+    "type": "object"
+  },
+  "GatewayAppSettings": {
+    "$defs": {
+      "AuthSettings": {
+        "properties": {
+          "cookie_name": {
+            "default": "fw_session",
+            "title": "Cookie Name",
+            "type": "string"
+          },
+          "cookie_secure": {
+            "default": true,
+            "title": "Cookie Secure",
+            "type": "boolean"
+          },
+          "csrf_header": {
+            "default": "X-CSRF-Token",
+            "title": "Csrf Header",
+            "type": "string"
+          },
+          "hash_concurrency": {
+            "default": 2,
+            "minimum": 1,
+            "title": "Hash Concurrency",
+            "type": "integer"
+          },
+          "lockout_s": {
+            "default": 900,
+            "minimum": 10,
+            "title": "Lockout S",
+            "type": "integer"
+          },
+          "login_max_attempts": {
+            "default": 5,
+            "minimum": 1,
+            "title": "Login Max Attempts",
+            "type": "integer"
+          },
+          "login_window_s": {
+            "default": 900,
+            "minimum": 10,
+            "title": "Login Window S",
+            "type": "integer"
+          },
+          "mfa_cookie_name": {
+            "default": "fw_mfa",
+            "title": "Mfa Cookie Name",
+            "type": "string"
+          },
+          "mfa_pending_ttl_s": {
+            "default": 300,
+            "minimum": 30,
+            "title": "Mfa Pending Ttl S",
+            "type": "integer"
+          },
+          "password_attempts_per_window": {
+            "default": 30,
+            "minimum": 1,
+            "title": "Password Attempts Per Window",
+            "type": "integer"
+          },
+          "session_ttl_s": {
+            "default": 28800,
+            "minimum": 60,
+            "title": "Session Ttl S",
+            "type": "integer"
+          },
+          "totp_issuer": {
+            "default": "Fleetwright",
+            "title": "Totp Issuer",
+            "type": "string"
+          },
+          "totp_valid_window": {
+            "default": 1,
+            "maximum": 2,
+            "minimum": 0,
+            "title": "Totp Valid Window",
+            "type": "integer"
+          }
+        },
+        "title": "AuthSettings",
+        "type": "object"
+      },
+      "DatabaseSettings": {
+        "description": "One Postgres connection pool. Each service gets only the role it needs:\nfw_app (API + control loops), fw_worker (narrow grants), fw_owner (migrations/seeding only),\nfw_board (the mock board's own database). RLS applies to fw_app and fw_worker.",
+        "properties": {
+          "dsn": {
+            "format": "password",
+            "title": "Dsn",
+            "type": "string",
+            "writeOnly": true
+          },
+          "pool_max_overflow": {
+            "default": 5,
+            "maximum": 200,
+            "minimum": 0,
+            "title": "Pool Max Overflow",
+            "type": "integer"
+          },
+          "pool_size": {
+            "default": 10,
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Pool Size",
+            "type": "integer"
+          },
+          "pool_timeout_s": {
+            "default": 5.0,
+            "exclusiveMinimum": 0,
+            "title": "Pool Timeout S",
+            "type": "number"
+          },
+          "statement_timeout_ms": {
+            "default": 5000,
+            "minimum": 100,
+            "title": "Statement Timeout Ms",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "dsn"
+        ],
+        "title": "DatabaseSettings",
+        "type": "object"
+      },
+      "DemoSettings": {
+        "description": "Public demo behaviour. Caps are enforced server-side, whatever the browser sends.",
+        "properties": {
+          "account_email": {
+            "default": "demo@fleetwright.demo",
+            "title": "Account Email",
+            "type": "string"
+          },
+          "account_password": {
+            "anyOf": [
+              {
+                "format": "password",
+                "type": "string",
+                "writeOnly": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Account Password"
+          },
+          "public_read": {
+            "default": false,
+            "title": "Public Read",
+            "type": "boolean"
+          },
+          "reset_after_s": {
+            "default": 900,
+            "minimum": 60,
+            "title": "Reset After S",
+            "type": "integer"
+          },
+          "reset_check_s": {
+            "default": 15.0,
+            "exclusiveMinimum": 0,
+            "title": "Reset Check S",
+            "type": "number"
+          },
+          "run_max_minutes": {
+            "default": 5,
+            "maximum": 60,
+            "minimum": 1,
+            "title": "Run Max Minutes",
+            "type": "integer"
+          },
+          "run_max_rate_per_min": {
+            "default": 120.0,
+            "exclusiveMinimum": 0,
+            "title": "Run Max Rate Per Min",
+            "type": "number"
+          },
+          "show_demo_mfa_code": {
+            "default": false,
+            "title": "Show Demo Mfa Code",
+            "type": "boolean"
+          },
+          "tenant_slug": {
+            "default": "demo",
+            "title": "Tenant Slug",
+            "type": "string"
+          }
+        },
+        "title": "DemoSettings",
+        "type": "object"
+      },
+      "GatewaySettings": {
+        "properties": {
+          "client_queue": {
+            "default": 200,
+            "minimum": 1,
+            "title": "Client Queue",
+            "type": "integer"
+          },
+          "host": {
+            "title": "Host",
+            "type": "string"
+          },
+          "keepalive_s": {
+            "default": 15.0,
+            "exclusiveMinimum": 0,
+            "title": "Keepalive S",
+            "type": "number"
+          },
+          "max_clients": {
+            "default": 2000,
+            "minimum": 1,
+            "title": "Max Clients",
+            "type": "integer"
+          },
+          "port": {
+            "maximum": 65535,
+            "minimum": 1,
+            "title": "Port",
+            "type": "integer"
+          },
+          "revocation_check_s": {
+            "default": 1.0,
+            "exclusiveMinimum": 0,
+            "title": "Revocation Check S",
+            "type": "number"
+          }
+        },
+        "required": [
+          "host",
+          "port"
+        ],
+        "title": "GatewaySettings",
+        "type": "object"
+      },
+      "RedisSettings": {
+        "description": "`core` carries live-update pub/sub and rate limits; each cell has its own Redis for streams.",
+        "properties": {
+          "cells": {
+            "additionalProperties": {
+              "format": "password",
+              "type": "string",
+              "writeOnly": true
+            },
+            "title": "Cells",
+            "type": "object"
+          },
+          "core_url": {
+            "format": "password",
+            "title": "Core Url",
+            "type": "string",
+            "writeOnly": true
+          },
+          "socket_timeout_s": {
+            "default": 2.0,
+            "exclusiveMinimum": 0,
+            "title": "Socket Timeout S",
+            "type": "number"
+          }
+        },
+        "required": [
+          "core_url",
+          "cells"
+        ],
+        "title": "RedisSettings",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "app_db": {
+        "$ref": "#/$defs/DatabaseSettings"
+      },
+      "auth": {
+        "$ref": "#/$defs/AuthSettings",
+        "default": {
+          "cookie_name": "fw_session",
+          "cookie_secure": true,
+          "csrf_header": "X-CSRF-Token",
+          "hash_concurrency": 2,
+          "lockout_s": 900,
+          "login_max_attempts": 5,
+          "login_window_s": 900,
+          "mfa_cookie_name": "fw_mfa",
+          "mfa_pending_ttl_s": 300,
+          "password_attempts_per_window": 30,
+          "session_ttl_s": 28800,
+          "totp_issuer": "Fleetwright",
+          "totp_valid_window": 1
+        }
+      },
+      "config_dir": {
+        "format": "path",
+        "title": "Config Dir",
+        "type": "string"
+      },
+      "demo": {
+        "$ref": "#/$defs/DemoSettings",
+        "default": {
+          "account_email": "demo@fleetwright.demo",
+          "account_password": null,
+          "public_read": false,
+          "reset_after_s": 900,
+          "reset_check_s": 15.0,
+          "run_max_minutes": 5,
+          "run_max_rate_per_min": 120.0,
+          "show_demo_mfa_code": false,
+          "tenant_slug": "demo"
+        }
+      },
+      "environment": {
+        "enum": [
+          "local",
+          "test",
+          "vps",
+          "aws"
+        ],
+        "title": "Environment",
+        "type": "string"
+      },
+      "gateway": {
+        "$ref": "#/$defs/GatewaySettings"
+      },
+      "log_level": {
+        "default": "INFO",
+        "enum": [
+          "DEBUG",
+          "INFO",
+          "WARNING",
+          "ERROR"
+        ],
+        "title": "Log Level",
+        "type": "string"
+      },
+      "redis": {
+        "$ref": "#/$defs/RedisSettings"
+      }
+    },
+    "required": [
+      "environment",
+      "config_dir",
+      "app_db",
+      "redis",
+      "gateway"
+    ],
+    "title": "GatewayAppSettings",
+    "type": "object"
+  },
+  "McpAppSettings": {
+    "$defs": {
+      "DatabaseSettings": {
+        "description": "One Postgres connection pool. Each service gets only the role it needs:\nfw_app (API + control loops), fw_worker (narrow grants), fw_owner (migrations/seeding only),\nfw_board (the mock board's own database). RLS applies to fw_app and fw_worker.",
+        "properties": {
+          "dsn": {
+            "format": "password",
+            "title": "Dsn",
+            "type": "string",
+            "writeOnly": true
+          },
+          "pool_max_overflow": {
+            "default": 5,
+            "maximum": 200,
+            "minimum": 0,
+            "title": "Pool Max Overflow",
+            "type": "integer"
+          },
+          "pool_size": {
+            "default": 10,
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Pool Size",
+            "type": "integer"
+          },
+          "pool_timeout_s": {
+            "default": 5.0,
+            "exclusiveMinimum": 0,
+            "title": "Pool Timeout S",
+            "type": "number"
+          },
+          "statement_timeout_ms": {
+            "default": 5000,
+            "minimum": 100,
+            "title": "Statement Timeout Ms",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "dsn"
+        ],
+        "title": "DatabaseSettings",
+        "type": "object"
+      },
+      "McpSettings": {
+        "properties": {
+          "access_token": {
+            "format": "password",
+            "title": "Access Token",
+            "type": "string",
+            "writeOnly": true
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tenant_id",
+          "access_token"
+        ],
+        "title": "McpSettings",
+        "type": "object"
+      },
+      "WorkflowSettings": {
+        "properties": {
+          "action_timeout_ms": {
+            "default": 10000,
+            "minimum": 100,
+            "title": "Action Timeout Ms",
+            "type": "integer"
+          },
+          "alert_unknown_after_s": {
+            "default": 300.0,
+            "exclusiveMinimum": 0,
+            "title": "Alert Unknown After S",
+            "type": "number"
+          },
+          "approval_ttl_s": {
+            "default": 300,
+            "minimum": 1,
+            "title": "Approval Ttl S",
+            "type": "integer"
+          },
+          "drain_timeout_s": {
+            "default": 20,
+            "exclusiveMinimum": 0,
+            "title": "Drain Timeout S",
+            "type": "number"
+          },
+          "evidence_page_size": {
+            "default": 100,
+            "maximum": 1000,
+            "minimum": 1,
+            "title": "Evidence Page Size",
+            "type": "integer"
+          },
+          "grant_ttl_s": {
+            "default": 3600,
+            "minimum": 1,
+            "title": "Grant Ttl S",
+            "type": "integer"
+          },
+          "jobs_per_tenant": {
+            "default": 1,
+            "maximum": 16,
+            "minimum": 1,
+            "title": "Jobs Per Tenant",
+            "type": "integer"
+          },
+          "lease_margin_s": {
+            "default": 5.0,
+            "exclusiveMinimum": 0,
+            "title": "Lease Margin S",
+            "type": "number"
+          },
+          "lease_s": {
+            "default": 90.0,
+            "exclusiveMinimum": 0,
+            "title": "Lease S",
+            "type": "number"
+          },
+          "poll_s": {
+            "default": 1.0,
+            "exclusiveMinimum": 0,
+            "title": "Poll S",
+            "type": "number"
+          },
+          "reconcile_grace_s": {
+            "default": 10.0,
+            "minimum": 0,
+            "title": "Reconcile Grace S",
+            "type": "number"
+          },
+          "response_max_bytes": {
+            "default": 65536,
+            "minimum": 1024,
+            "title": "Response Max Bytes",
+            "type": "integer"
+          },
+          "tenant_batch": {
+            "default": 32,
+            "maximum": 256,
+            "minimum": 1,
+            "title": "Tenant Batch",
+            "type": "integer"
+          }
+        },
+        "title": "WorkflowSettings",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "app_db": {
+        "$ref": "#/$defs/DatabaseSettings"
+      },
+      "config_dir": {
+        "format": "path",
+        "title": "Config Dir",
+        "type": "string"
+      },
+      "environment": {
+        "enum": [
+          "local",
+          "test",
+          "vps",
+          "aws"
+        ],
+        "title": "Environment",
+        "type": "string"
+      },
+      "log_level": {
+        "default": "INFO",
+        "enum": [
+          "DEBUG",
+          "INFO",
+          "WARNING",
+          "ERROR"
+        ],
+        "title": "Log Level",
+        "type": "string"
+      },
+      "mcp": {
+        "$ref": "#/$defs/McpSettings"
+      },
+      "workflows": {
+        "$ref": "#/$defs/WorkflowSettings",
+        "default": {
+          "action_timeout_ms": 10000,
+          "alert_unknown_after_s": 300.0,
+          "approval_ttl_s": 300,
+          "drain_timeout_s": 20.0,
+          "evidence_page_size": 100,
+          "grant_ttl_s": 3600,
+          "jobs_per_tenant": 1,
+          "lease_margin_s": 5.0,
+          "lease_s": 90.0,
+          "poll_s": 1.0,
+          "reconcile_grace_s": 10.0,
+          "response_max_bytes": 65536,
+          "tenant_batch": 32
+        }
+      }
+    },
+    "required": [
+      "environment",
+      "config_dir",
+      "app_db",
+      "mcp"
+    ],
+    "title": "McpAppSettings",
+    "type": "object"
+  },
+  "MigrationSettings": {
+    "$defs": {
+      "BoardClientSettings": {
+        "description": "How Fleetwright services reach the mock board.",
+        "properties": {
+          "admin_token": {
+            "format": "password",
+            "title": "Admin Token",
+            "type": "string",
+            "writeOnly": true
+          },
+          "internal_url": {
+            "title": "Internal Url",
+            "type": "string"
+          },
+          "public_url": {
+            "title": "Public Url",
+            "type": "string"
+          },
+          "timeout_s": {
+            "default": 10.0,
+            "exclusiveMinimum": 0,
+            "title": "Timeout S",
+            "type": "number"
+          }
+        },
+        "required": [
+          "internal_url",
+          "public_url",
+          "admin_token"
+        ],
+        "title": "BoardClientSettings",
+        "type": "object"
+      },
+      "DatabaseSettings": {
+        "description": "One Postgres connection pool. Each service gets only the role it needs:\nfw_app (API + control loops), fw_worker (narrow grants), fw_owner (migrations/seeding only),\nfw_board (the mock board's own database). RLS applies to fw_app and fw_worker.",
+        "properties": {
+          "dsn": {
+            "format": "password",
+            "title": "Dsn",
+            "type": "string",
+            "writeOnly": true
+          },
+          "pool_max_overflow": {
+            "default": 5,
+            "maximum": 200,
+            "minimum": 0,
+            "title": "Pool Max Overflow",
+            "type": "integer"
+          },
+          "pool_size": {
+            "default": 10,
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Pool Size",
+            "type": "integer"
+          },
+          "pool_timeout_s": {
+            "default": 5.0,
+            "exclusiveMinimum": 0,
+            "title": "Pool Timeout S",
+            "type": "number"
+          },
+          "statement_timeout_ms": {
+            "default": 5000,
+            "minimum": 100,
+            "title": "Statement Timeout Ms",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "dsn"
+        ],
+        "title": "DatabaseSettings",
+        "type": "object"
+      },
+      "VaultSettings": {
+        "description": "Envelope encryption: a per-record data key, wrapped by this master key (KMS on AWS later).",
+        "properties": {
+          "key_id": {
+            "default": "local-1",
+            "title": "Key Id",
+            "type": "string"
+          },
+          "master_key_b64": {
+            "format": "password",
+            "title": "Master Key B64",
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "master_key_b64"
+        ],
+        "title": "VaultSettings",
+        "type": "object"
+      }
+    },
+    "description": "Schema migrations and seeding (role fw_owner); never used by a long-running service.",
+    "properties": {
+      "board_client": {
+        "$ref": "#/$defs/BoardClientSettings"
+      },
+      "config_dir": {
+        "format": "path",
+        "title": "Config Dir",
+        "type": "string"
+      },
+      "environment": {
+        "enum": [
+          "local",
+          "test",
+          "vps",
+          "aws"
+        ],
+        "title": "Environment",
+        "type": "string"
+      },
+      "log_level": {
+        "default": "INFO",
+        "enum": [
+          "DEBUG",
+          "INFO",
+          "WARNING",
+          "ERROR"
+        ],
+        "title": "Log Level",
+        "type": "string"
+      },
+      "owner_db": {
+        "$ref": "#/$defs/DatabaseSettings"
+      },
+      "vault": {
+        "$ref": "#/$defs/VaultSettings"
+      }
+    },
+    "required": [
+      "environment",
+      "config_dir",
+      "owner_db",
+      "vault",
+      "board_client"
+    ],
+    "title": "MigrationSettings",
+    "type": "object"
+  },
+  "MonitorAppSettings": {
+    "$defs": {
+      "DatabaseSettings": {
+        "description": "One Postgres connection pool. Each service gets only the role it needs:\nfw_app (API + control loops), fw_worker (narrow grants), fw_owner (migrations/seeding only),\nfw_board (the mock board's own database). RLS applies to fw_app and fw_worker.",
+        "properties": {
+          "dsn": {
+            "format": "password",
+            "title": "Dsn",
+            "type": "string",
+            "writeOnly": true
+          },
+          "pool_max_overflow": {
+            "default": 5,
+            "maximum": 200,
+            "minimum": 0,
+            "title": "Pool Max Overflow",
+            "type": "integer"
+          },
+          "pool_size": {
+            "default": 10,
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Pool Size",
+            "type": "integer"
+          },
+          "pool_timeout_s": {
+            "default": 5.0,
+            "exclusiveMinimum": 0,
+            "title": "Pool Timeout S",
+            "type": "number"
+          },
+          "statement_timeout_ms": {
+            "default": 5000,
+            "minimum": 100,
+            "title": "Statement Timeout Ms",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "dsn"
+        ],
+        "title": "DatabaseSettings",
+        "type": "object"
+      },
+      "MonitorGrantSettings": {
+        "properties": {
+          "authority_command": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Authority Command"
+          },
+          "renewal_margin_s": {
+            "default": 300,
+            "exclusiveMinimum": 0,
+            "title": "Renewal Margin S",
+            "type": "number"
+          },
+          "tenant_id": {
+            "format": "uuid",
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "token_file": {
+            "format": "path",
+            "title": "Token File",
+            "type": "string"
+          },
+          "ttl_s": {
+            "default": 3600,
+            "minimum": 60,
+            "title": "Ttl S",
+            "type": "integer"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tenant_id",
+          "user_id",
+          "token_file"
+        ],
+        "title": "MonitorGrantSettings",
+        "type": "object"
+      },
+      "MonitorSettings": {
+        "properties": {
+          "backup_directory": {
+            "anyOf": [
+              {
+                "format": "path",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Backup Directory"
+          },
+          "backup_max_age_s": {
+            "default": 172800,
+            "exclusiveMinimum": 0,
+            "title": "Backup Max Age S",
+            "type": "number"
+          },
+          "database": {
+            "format": "path",
+            "title": "Database",
+            "type": "string"
+          },
+          "failures_before_alert": {
+            "default": 3,
+            "minimum": 1,
+            "title": "Failures Before Alert",
+            "type": "integer"
+          },
+          "interval_s": {
+            "default": 60,
+            "minimum": 1,
+            "title": "Interval S",
+            "type": "number"
+          },
+          "notification_file": {
+            "format": "path",
+            "title": "Notification File",
+            "type": "string"
+          },
+          "notification_limit": {
+            "default": 200,
+            "maximum": 10000,
+            "minimum": 1,
+            "title": "Notification Limit",
+            "type": "integer"
+          },
+          "probes": {
+            "items": {
+              "$ref": "#/$defs/ProbeSettings"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Probes",
+            "type": "array"
+          },
+          "response_max_bytes": {
+            "default": 65536,
+            "minimum": 1024,
+            "title": "Response Max Bytes",
+            "type": "integer"
+          },
+          "retention_days": {
+            "default": 30,
+            "minimum": 1,
+            "title": "Retention Days",
+            "type": "integer"
+          },
+          "timeout_s": {
+            "default": 10,
+            "exclusiveMinimum": 0,
+            "maximum": 60,
+            "title": "Timeout S",
+            "type": "number"
+          }
+        },
+        "required": [
+          "database",
+          "probes",
+          "notification_file"
+        ],
+        "title": "MonitorSettings",
+        "type": "object"
+      },
+      "ProbeSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "bearer_token": {
+            "anyOf": [
+              {
+                "format": "password",
+                "type": "string",
+                "writeOnly": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Bearer Token"
+          },
+          "expected_status": {
+            "default": 200,
+            "maximum": 599,
+            "minimum": 100,
+            "title": "Expected Status",
+            "type": "integer"
+          },
+          "name": {
+            "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+            "title": "Name",
+            "type": "string"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Tenant Id"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "url"
+        ],
+        "title": "ProbeSettings",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "app_db": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/DatabaseSettings"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "config_dir": {
+        "format": "path",
+        "title": "Config Dir",
+        "type": "string"
+      },
+      "environment": {
+        "enum": [
+          "local",
+          "test",
+          "vps",
+          "aws"
+        ],
+        "title": "Environment",
+        "type": "string"
+      },
+      "log_level": {
+        "default": "INFO",
+        "enum": [
+          "DEBUG",
+          "INFO",
+          "WARNING",
+          "ERROR"
+        ],
+        "title": "Log Level",
+        "type": "string"
+      },
+      "monitor": {
+        "$ref": "#/$defs/MonitorSettings"
+      },
+      "monitor_grant": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/MonitorGrantSettings"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    },
+    "required": [
+      "environment",
+      "config_dir",
+      "monitor"
+    ],
+    "title": "MonitorAppSettings",
+    "type": "object"
+  },
+  "MonitorAuthorityAppSettings": {
+    "$defs": {
+      "DatabaseSettings": {
+        "description": "One Postgres connection pool. Each service gets only the role it needs:\nfw_app (API + control loops), fw_worker (narrow grants), fw_owner (migrations/seeding only),\nfw_board (the mock board's own database). RLS applies to fw_app and fw_worker.",
+        "properties": {
+          "dsn": {
+            "format": "password",
+            "title": "Dsn",
+            "type": "string",
+            "writeOnly": true
+          },
+          "pool_max_overflow": {
+            "default": 5,
+            "maximum": 200,
+            "minimum": 0,
+            "title": "Pool Max Overflow",
+            "type": "integer"
+          },
+          "pool_size": {
+            "default": 10,
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Pool Size",
+            "type": "integer"
+          },
+          "pool_timeout_s": {
+            "default": 5.0,
+            "exclusiveMinimum": 0,
+            "title": "Pool Timeout S",
+            "type": "number"
+          },
+          "statement_timeout_ms": {
+            "default": 5000,
+            "minimum": 100,
+            "title": "Statement Timeout Ms",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "dsn"
+        ],
+        "title": "DatabaseSettings",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "app_db": {
+        "$ref": "#/$defs/DatabaseSettings"
+      },
+      "config_dir": {
+        "format": "path",
+        "title": "Config Dir",
+        "type": "string"
+      },
+      "environment": {
+        "enum": [
+          "local",
+          "test",
+          "vps",
+          "aws"
+        ],
+        "title": "Environment",
+        "type": "string"
+      },
+      "log_level": {
+        "default": "INFO",
+        "enum": [
+          "DEBUG",
+          "INFO",
+          "WARNING",
+          "ERROR"
+        ],
+        "title": "Log Level",
+        "type": "string"
+      }
+    },
+    "required": [
+      "environment",
+      "config_dir",
+      "app_db"
+    ],
+    "title": "MonitorAuthorityAppSettings",
+    "type": "object"
+  },
+  "RecoveryAppSettings": {
+    "$defs": {
+      "RecoverySettings": {
+        "properties": {
+          "directory": {
+            "format": "path",
+            "title": "Directory",
+            "type": "string"
+          },
+          "key_id": {
+            "title": "Key Id",
+            "type": "string"
+          },
+          "master_key_b64": {
+            "format": "password",
+            "title": "Master Key B64",
+            "type": "string",
+            "writeOnly": true
+          },
+          "max_archive_bytes": {
+            "default": 268435456,
+            "minimum": 1024,
+            "title": "Max Archive Bytes",
+            "type": "integer"
+          },
+          "retention_count": {
+            "default": 7,
+            "minimum": 2,
+            "title": "Retention Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "directory",
+          "master_key_b64",
+          "key_id"
+        ],
+        "title": "RecoverySettings",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "config_dir": {
+        "format": "path",
+        "title": "Config Dir",
+        "type": "string"
+      },
+      "environment": {
+        "enum": [
+          "local",
+          "test",
+          "vps",
+          "aws"
+        ],
+        "title": "Environment",
+        "type": "string"
+      },
+      "log_level": {
+        "default": "INFO",
+        "enum": [
+          "DEBUG",
+          "INFO",
+          "WARNING",
+          "ERROR"
+        ],
+        "title": "Log Level",
+        "type": "string"
+      },
+      "recovery": {
+        "$ref": "#/$defs/RecoverySettings"
+      }
+    },
+    "required": [
+      "environment",
+      "config_dir",
+      "recovery"
+    ],
+    "title": "RecoveryAppSettings",
+    "type": "object"
+  },
+  "ReleaseSigningAppSettings": {
+    "$defs": {
+      "ReleaseSigningSettings": {
+        "properties": {
+          "key_id": {
+            "title": "Key Id",
+            "type": "string"
+          },
+          "private_key_file": {
+            "format": "path",
+            "title": "Private Key File",
+            "type": "string"
+          },
+          "public_key_file": {
+            "format": "path",
+            "title": "Public Key File",
+            "type": "string"
+          }
+        },
+        "required": [
+          "private_key_file",
+          "public_key_file",
+          "key_id"
+        ],
+        "title": "ReleaseSigningSettings",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "config_dir": {
+        "format": "path",
+        "title": "Config Dir",
+        "type": "string"
+      },
+      "environment": {
+        "enum": [
+          "local",
+          "test",
+          "vps",
+          "aws"
+        ],
+        "title": "Environment",
+        "type": "string"
+      },
+      "log_level": {
+        "default": "INFO",
+        "enum": [
+          "DEBUG",
+          "INFO",
+          "WARNING",
+          "ERROR"
+        ],
+        "title": "Log Level",
+        "type": "string"
+      },
+      "release_signing": {
+        "$ref": "#/$defs/ReleaseSigningSettings"
+      }
+    },
+    "required": [
+      "environment",
+      "config_dir",
+      "release_signing"
+    ],
+    "title": "ReleaseSigningAppSettings",
+    "type": "object"
+  },
+  "SeedAppSettings": {
+    "$defs": {
+      "BoardClientSettings": {
+        "description": "How Fleetwright services reach the mock board.",
+        "properties": {
+          "admin_token": {
+            "format": "password",
+            "title": "Admin Token",
+            "type": "string",
+            "writeOnly": true
+          },
+          "internal_url": {
+            "title": "Internal Url",
+            "type": "string"
+          },
+          "public_url": {
+            "title": "Public Url",
+            "type": "string"
+          },
+          "timeout_s": {
+            "default": 10.0,
+            "exclusiveMinimum": 0,
+            "title": "Timeout S",
+            "type": "number"
+          }
+        },
+        "required": [
+          "internal_url",
+          "public_url",
+          "admin_token"
+        ],
+        "title": "BoardClientSettings",
+        "type": "object"
+      },
+      "DatabaseSettings": {
+        "description": "One Postgres connection pool. Each service gets only the role it needs:\nfw_app (API + control loops), fw_worker (narrow grants), fw_owner (migrations/seeding only),\nfw_board (the mock board's own database). RLS applies to fw_app and fw_worker.",
+        "properties": {
+          "dsn": {
+            "format": "password",
+            "title": "Dsn",
+            "type": "string",
+            "writeOnly": true
+          },
+          "pool_max_overflow": {
+            "default": 5,
+            "maximum": 200,
+            "minimum": 0,
+            "title": "Pool Max Overflow",
+            "type": "integer"
+          },
+          "pool_size": {
+            "default": 10,
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Pool Size",
+            "type": "integer"
+          },
+          "pool_timeout_s": {
+            "default": 5.0,
+            "exclusiveMinimum": 0,
+            "title": "Pool Timeout S",
+            "type": "number"
+          },
+          "statement_timeout_ms": {
+            "default": 5000,
+            "minimum": 100,
+            "title": "Statement Timeout Ms",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "dsn"
+        ],
+        "title": "DatabaseSettings",
+        "type": "object"
+      },
+      "DemoSettings": {
+        "description": "Public demo behaviour. Caps are enforced server-side, whatever the browser sends.",
+        "properties": {
+          "account_email": {
+            "default": "demo@fleetwright.demo",
+            "title": "Account Email",
+            "type": "string"
+          },
+          "account_password": {
+            "anyOf": [
+              {
+                "format": "password",
+                "type": "string",
+                "writeOnly": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Account Password"
+          },
+          "public_read": {
+            "default": false,
+            "title": "Public Read",
+            "type": "boolean"
+          },
+          "reset_after_s": {
+            "default": 900,
+            "minimum": 60,
+            "title": "Reset After S",
+            "type": "integer"
+          },
+          "reset_check_s": {
+            "default": 15.0,
+            "exclusiveMinimum": 0,
+            "title": "Reset Check S",
+            "type": "number"
+          },
+          "run_max_minutes": {
+            "default": 5,
+            "maximum": 60,
+            "minimum": 1,
+            "title": "Run Max Minutes",
+            "type": "integer"
+          },
+          "run_max_rate_per_min": {
+            "default": 120.0,
+            "exclusiveMinimum": 0,
+            "title": "Run Max Rate Per Min",
+            "type": "number"
+          },
+          "show_demo_mfa_code": {
+            "default": false,
+            "title": "Show Demo Mfa Code",
+            "type": "boolean"
+          },
+          "tenant_slug": {
+            "default": "demo",
+            "title": "Tenant Slug",
+            "type": "string"
+          }
+        },
+        "title": "DemoSettings",
+        "type": "object"
+      },
+      "SeedSettings": {
+        "description": "`python -m fw_coordinator.seed`: the demo tenant, its owner, the shared demo login and the\ndemo board accounts. Idempotent; secrets come from env (generated by tools/dev/make_env.py).",
+        "properties": {
+          "cell": {
+            "title": "Cell",
+            "type": "string"
+          },
+          "owner_email": {
+            "title": "Owner Email",
+            "type": "string"
+          },
+          "owner_name": {
+            "default": "Owner",
+            "title": "Owner Name",
+            "type": "string"
+          },
+          "owner_password": {
+            "format": "password",
+            "title": "Owner Password",
+            "type": "string",
+            "writeOnly": true
+          },
+          "owner_totp_b32": {
+            "format": "password",
+            "title": "Owner Totp B32",
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "cell",
+          "owner_email",
+          "owner_password",
+          "owner_totp_b32"
+        ],
+        "title": "SeedSettings",
+        "type": "object"
+      },
+      "VaultSettings": {
+        "description": "Envelope encryption: a per-record data key, wrapped by this master key (KMS on AWS later).",
+        "properties": {
+          "key_id": {
+            "default": "local-1",
+            "title": "Key Id",
+            "type": "string"
+          },
+          "master_key_b64": {
+            "format": "password",
+            "title": "Master Key B64",
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "master_key_b64"
+        ],
+        "title": "VaultSettings",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "app_db": {
+        "$ref": "#/$defs/DatabaseSettings"
+      },
+      "board_client": {
+        "$ref": "#/$defs/BoardClientSettings"
+      },
+      "config_dir": {
+        "format": "path",
+        "title": "Config Dir",
+        "type": "string"
+      },
+      "demo": {
+        "$ref": "#/$defs/DemoSettings",
+        "default": {
+          "account_email": "demo@fleetwright.demo",
+          "account_password": null,
+          "public_read": false,
+          "reset_after_s": 900,
+          "reset_check_s": 15.0,
+          "run_max_minutes": 5,
+          "run_max_rate_per_min": 120.0,
+          "show_demo_mfa_code": false,
+          "tenant_slug": "demo"
+        }
+      },
+      "environment": {
+        "enum": [
+          "local",
+          "test",
+          "vps",
+          "aws"
+        ],
+        "title": "Environment",
+        "type": "string"
+      },
+      "log_level": {
+        "default": "INFO",
+        "enum": [
+          "DEBUG",
+          "INFO",
+          "WARNING",
+          "ERROR"
+        ],
+        "title": "Log Level",
+        "type": "string"
+      },
+      "seed": {
+        "$ref": "#/$defs/SeedSettings"
+      },
+      "vault": {
+        "$ref": "#/$defs/VaultSettings"
+      }
+    },
+    "required": [
+      "environment",
+      "config_dir",
+      "app_db",
+      "vault",
+      "board_client",
+      "seed"
+    ],
+    "title": "SeedAppSettings",
+    "type": "object"
+  },
+  "WorkerAppSettings": {
+    "$defs": {
+      "BoardClientSettings": {
+        "description": "How Fleetwright services reach the mock board.",
+        "properties": {
+          "admin_token": {
+            "format": "password",
+            "title": "Admin Token",
+            "type": "string",
+            "writeOnly": true
+          },
+          "internal_url": {
+            "title": "Internal Url",
+            "type": "string"
+          },
+          "public_url": {
+            "title": "Public Url",
+            "type": "string"
+          },
+          "timeout_s": {
+            "default": 10.0,
+            "exclusiveMinimum": 0,
+            "title": "Timeout S",
+            "type": "number"
+          }
+        },
+        "required": [
+          "internal_url",
+          "public_url",
+          "admin_token"
+        ],
+        "title": "BoardClientSettings",
+        "type": "object"
+      },
+      "ClaimSettings": {
+        "properties": {
+          "autoclaim_idle_ms": {
+            "default": 5000,
+            "minimum": 100,
+            "title": "Autoclaim Idle Ms",
+            "type": "integer"
+          },
+          "detection_retry_s": {
+            "default": 5.0,
+            "minimum": 0.1,
+            "title": "Detection Retry S",
+            "type": "number"
+          },
+          "fast_lock_ttl_ms": {
+            "default": 30000,
+            "minimum": 100,
+            "title": "Fast Lock Ttl Ms",
+            "type": "integer"
+          },
+          "filter_reload_s": {
+            "default": 30.0,
+            "exclusiveMinimum": 0,
+            "title": "Filter Reload S",
+            "type": "number"
+          },
+          "lease_ttl_ms": {
+            "default": 8000,
+            "minimum": 200,
+            "title": "Lease Ttl Ms",
+            "type": "integer"
+          },
+          "max_deliveries": {
+            "default": 5,
+            "minimum": 1,
+            "title": "Max Deliveries",
+            "type": "integer"
+          },
+          "outbox_batch": {
+            "default": 200,
+            "maximum": 5000,
+            "minimum": 1,
+            "title": "Outbox Batch",
+            "type": "integer"
+          },
+          "outbox_poll_ms": {
+            "default": 250,
+            "minimum": 10,
+            "title": "Outbox Poll Ms",
+            "type": "integer"
+          },
+          "queued_max_age_s": {
+            "default": 120,
+            "minimum": 1,
+            "title": "Queued Max Age S",
+            "type": "integer"
+          },
+          "reconcile_interval_s": {
+            "default": 2.0,
+            "exclusiveMinimum": 0,
+            "title": "Reconcile Interval S",
+            "type": "number"
+          },
+          "stream_maxlen": {
+            "default": 100000,
+            "minimum": 100,
+            "title": "Stream Maxlen",
+            "type": "integer"
+          }
+        },
+        "title": "ClaimSettings",
+        "type": "object"
+      },
+      "DatabaseSettings": {
+        "description": "One Postgres connection pool. Each service gets only the role it needs:\nfw_app (API + control loops), fw_worker (narrow grants), fw_owner (migrations/seeding only),\nfw_board (the mock board's own database). RLS applies to fw_app and fw_worker.",
+        "properties": {
+          "dsn": {
+            "format": "password",
+            "title": "Dsn",
+            "type": "string",
+            "writeOnly": true
+          },
+          "pool_max_overflow": {
+            "default": 5,
+            "maximum": 200,
+            "minimum": 0,
+            "title": "Pool Max Overflow",
+            "type": "integer"
+          },
+          "pool_size": {
+            "default": 10,
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Pool Size",
+            "type": "integer"
+          },
+          "pool_timeout_s": {
+            "default": 5.0,
+            "exclusiveMinimum": 0,
+            "title": "Pool Timeout S",
+            "type": "number"
+          },
+          "statement_timeout_ms": {
+            "default": 5000,
+            "minimum": 100,
+            "title": "Statement Timeout Ms",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "dsn"
+        ],
+        "title": "DatabaseSettings",
+        "type": "object"
+      },
+      "MailpitSettings": {
+        "properties": {
+          "api_url": {
+            "title": "Api Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "api_url"
+        ],
+        "title": "MailpitSettings",
+        "type": "object"
+      },
+      "RedisSettings": {
+        "description": "`core` carries live-update pub/sub and rate limits; each cell has its own Redis for streams.",
+        "properties": {
+          "cells": {
+            "additionalProperties": {
+              "format": "password",
+              "type": "string",
+              "writeOnly": true
+            },
+            "title": "Cells",
+            "type": "object"
+          },
+          "core_url": {
+            "format": "password",
+            "title": "Core Url",
+            "type": "string",
+            "writeOnly": true
+          },
+          "socket_timeout_s": {
+            "default": 2.0,
+            "exclusiveMinimum": 0,
+            "title": "Socket Timeout S",
+            "type": "number"
+          }
+        },
+        "required": [
+          "core_url",
+          "cells"
+        ],
+        "title": "RedisSettings",
+        "type": "object"
+      },
+      "StorageSettings": {
+        "properties": {
+          "backend": {
+            "const": "local",
+            "default": "local",
+            "title": "Backend",
+            "type": "string"
+          },
+          "local_dir": {
+            "format": "path",
+            "title": "Local Dir",
+            "type": "string"
+          },
+          "retention_days": {
+            "default": 7,
+            "minimum": 1,
+            "title": "Retention Days",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "local_dir"
+        ],
+        "title": "StorageSettings",
+        "type": "object"
+      },
+      "VaultSettings": {
+        "description": "Envelope encryption: a per-record data key, wrapped by this master key (KMS on AWS later).",
+        "properties": {
+          "key_id": {
+            "default": "local-1",
+            "title": "Key Id",
+            "type": "string"
+          },
+          "master_key_b64": {
+            "format": "password",
+            "title": "Master Key B64",
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "master_key_b64"
+        ],
+        "title": "VaultSettings",
+        "type": "object"
+      },
+      "WorkerSettings": {
+        "properties": {
+          "account_hold_s": {
+            "default": 15.0,
+            "exclusiveMinimum": 0,
+            "title": "Account Hold S",
+            "type": "number"
+          },
+          "action_mode": {
+            "default": "http",
+            "enum": [
+              "http",
+              "click"
+            ],
+            "title": "Action Mode",
+            "type": "string"
+          },
+          "action_timeout_ms": {
+            "default": 5000,
+            "minimum": 100,
+            "title": "Action Timeout Ms",
+            "type": "integer"
+          },
+          "cell": {
+            "title": "Cell",
+            "type": "string"
+          },
+          "contexts": {
+            "default": 4,
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Contexts",
+            "type": "integer"
+          },
+          "detection_batch": {
+            "default": 100,
+            "maximum": 1000,
+            "minimum": 1,
+            "title": "Detection Batch",
+            "type": "integer"
+          },
+          "drain_timeout_s": {
+            "default": 20.0,
+            "exclusiveMinimum": 0,
+            "title": "Drain Timeout S",
+            "type": "number"
+          },
+          "evidence_on_failure": {
+            "default": true,
+            "title": "Evidence On Failure",
+            "type": "boolean"
+          },
+          "headless": {
+            "default": true,
+            "title": "Headless",
+            "type": "boolean"
+          },
+          "heartbeat_s": {
+            "default": 2.0,
+            "exclusiveMinimum": 0,
+            "title": "Heartbeat S",
+            "type": "number"
+          },
+          "heartbeat_ttl_s": {
+            "default": 10.0,
+            "exclusiveMinimum": 0,
+            "title": "Heartbeat Ttl S",
+            "type": "number"
+          },
+          "login_timeout_ms": {
+            "default": 20000,
+            "minimum": 1000,
+            "title": "Login Timeout Ms",
+            "type": "integer"
+          },
+          "otp_clock_margin_s": {
+            "default": 2.0,
+            "minimum": 0,
+            "title": "Otp Clock Margin S",
+            "type": "number"
+          },
+          "otp_wait_s": {
+            "default": 30.0,
+            "exclusiveMinimum": 0,
+            "title": "Otp Wait S",
+            "type": "number"
+          },
+          "recycle_after_actions": {
+            "default": 500,
+            "minimum": 1,
+            "title": "Recycle After Actions",
+            "type": "integer"
+          },
+          "reserved_account_groups": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Reserved Account Groups",
+            "type": "array"
+          },
+          "restart_backoff_s": {
+            "default": 5.0,
+            "exclusiveMinimum": 0,
+            "title": "Restart Backoff S",
+            "type": "number"
+          },
+          "session_refresh_share": {
+            "default": 0.7,
+            "exclusiveMaximum": 1,
+            "exclusiveMinimum": 0,
+            "title": "Session Refresh Share",
+            "type": "number"
+          },
+          "watchers": {
+            "default": 1,
+            "maximum": 50,
+            "minimum": 0,
+            "title": "Watchers",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "cell"
+        ],
+        "title": "WorkerSettings",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "board_client": {
+        "$ref": "#/$defs/BoardClientSettings"
+      },
+      "claims": {
+        "$ref": "#/$defs/ClaimSettings",
+        "default": {
+          "autoclaim_idle_ms": 5000,
+          "detection_retry_s": 5.0,
+          "fast_lock_ttl_ms": 30000,
+          "filter_reload_s": 30.0,
+          "lease_ttl_ms": 8000,
+          "max_deliveries": 5,
+          "outbox_batch": 200,
+          "outbox_poll_ms": 250,
+          "queued_max_age_s": 120,
+          "reconcile_interval_s": 2.0,
+          "stream_maxlen": 100000
+        }
+      },
+      "config_dir": {
+        "format": "path",
+        "title": "Config Dir",
+        "type": "string"
+      },
+      "environment": {
+        "enum": [
+          "local",
+          "test",
+          "vps",
+          "aws"
+        ],
+        "title": "Environment",
+        "type": "string"
+      },
+      "log_level": {
+        "default": "INFO",
+        "enum": [
+          "DEBUG",
+          "INFO",
+          "WARNING",
+          "ERROR"
+        ],
+        "title": "Log Level",
+        "type": "string"
+      },
+      "mailpit": {
+        "$ref": "#/$defs/MailpitSettings"
+      },
+      "redis": {
+        "$ref": "#/$defs/RedisSettings"
+      },
+      "storage": {
+        "$ref": "#/$defs/StorageSettings"
+      },
+      "vault": {
+        "$ref": "#/$defs/VaultSettings"
+      },
+      "worker": {
+        "$ref": "#/$defs/WorkerSettings"
+      },
+      "worker_db": {
+        "$ref": "#/$defs/DatabaseSettings"
+      }
+    },
+    "required": [
+      "environment",
+      "config_dir",
+      "worker_db",
+      "redis",
+      "board_client",
+      "mailpit",
+      "vault",
+      "worker",
+      "storage"
+    ],
+    "title": "WorkerAppSettings",
+    "type": "object"
+  },
+  "WorkflowAppSettings": {
+    "$defs": {
+      "BoardClientSettings": {
+        "description": "How Fleetwright services reach the mock board.",
+        "properties": {
+          "admin_token": {
+            "format": "password",
+            "title": "Admin Token",
+            "type": "string",
+            "writeOnly": true
+          },
+          "internal_url": {
+            "title": "Internal Url",
+            "type": "string"
+          },
+          "public_url": {
+            "title": "Public Url",
+            "type": "string"
+          },
+          "timeout_s": {
+            "default": 10.0,
+            "exclusiveMinimum": 0,
+            "title": "Timeout S",
+            "type": "number"
+          }
+        },
+        "required": [
+          "internal_url",
+          "public_url",
+          "admin_token"
+        ],
+        "title": "BoardClientSettings",
+        "type": "object"
+      },
+      "DatabaseSettings": {
+        "description": "One Postgres connection pool. Each service gets only the role it needs:\nfw_app (API + control loops), fw_worker (narrow grants), fw_owner (migrations/seeding only),\nfw_board (the mock board's own database). RLS applies to fw_app and fw_worker.",
+        "properties": {
+          "dsn": {
+            "format": "password",
+            "title": "Dsn",
+            "type": "string",
+            "writeOnly": true
+          },
+          "pool_max_overflow": {
+            "default": 5,
+            "maximum": 200,
+            "minimum": 0,
+            "title": "Pool Max Overflow",
+            "type": "integer"
+          },
+          "pool_size": {
+            "default": 10,
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Pool Size",
+            "type": "integer"
+          },
+          "pool_timeout_s": {
+            "default": 5.0,
+            "exclusiveMinimum": 0,
+            "title": "Pool Timeout S",
+            "type": "number"
+          },
+          "statement_timeout_ms": {
+            "default": 5000,
+            "minimum": 100,
+            "title": "Statement Timeout Ms",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "dsn"
+        ],
+        "title": "DatabaseSettings",
+        "type": "object"
+      },
+      "MailpitSettings": {
+        "properties": {
+          "api_url": {
+            "title": "Api Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "api_url"
+        ],
+        "title": "MailpitSettings",
+        "type": "object"
+      },
+      "VaultSettings": {
+        "description": "Envelope encryption: a per-record data key, wrapped by this master key (KMS on AWS later).",
+        "properties": {
+          "key_id": {
+            "default": "local-1",
+            "title": "Key Id",
+            "type": "string"
+          },
+          "master_key_b64": {
+            "format": "password",
+            "title": "Master Key B64",
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "master_key_b64"
+        ],
+        "title": "VaultSettings",
+        "type": "object"
+      },
+      "WorkerSettings": {
+        "properties": {
+          "account_hold_s": {
+            "default": 15.0,
+            "exclusiveMinimum": 0,
+            "title": "Account Hold S",
+            "type": "number"
+          },
+          "action_mode": {
+            "default": "http",
+            "enum": [
+              "http",
+              "click"
+            ],
+            "title": "Action Mode",
+            "type": "string"
+          },
+          "action_timeout_ms": {
+            "default": 5000,
+            "minimum": 100,
+            "title": "Action Timeout Ms",
+            "type": "integer"
+          },
+          "cell": {
+            "title": "Cell",
+            "type": "string"
+          },
+          "contexts": {
+            "default": 4,
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Contexts",
+            "type": "integer"
+          },
+          "detection_batch": {
+            "default": 100,
+            "maximum": 1000,
+            "minimum": 1,
+            "title": "Detection Batch",
+            "type": "integer"
+          },
+          "drain_timeout_s": {
+            "default": 20.0,
+            "exclusiveMinimum": 0,
+            "title": "Drain Timeout S",
+            "type": "number"
+          },
+          "evidence_on_failure": {
+            "default": true,
+            "title": "Evidence On Failure",
+            "type": "boolean"
+          },
+          "headless": {
+            "default": true,
+            "title": "Headless",
+            "type": "boolean"
+          },
+          "heartbeat_s": {
+            "default": 2.0,
+            "exclusiveMinimum": 0,
+            "title": "Heartbeat S",
+            "type": "number"
+          },
+          "heartbeat_ttl_s": {
+            "default": 10.0,
+            "exclusiveMinimum": 0,
+            "title": "Heartbeat Ttl S",
+            "type": "number"
+          },
+          "login_timeout_ms": {
+            "default": 20000,
+            "minimum": 1000,
+            "title": "Login Timeout Ms",
+            "type": "integer"
+          },
+          "otp_clock_margin_s": {
+            "default": 2.0,
+            "minimum": 0,
+            "title": "Otp Clock Margin S",
+            "type": "number"
+          },
+          "otp_wait_s": {
+            "default": 30.0,
+            "exclusiveMinimum": 0,
+            "title": "Otp Wait S",
+            "type": "number"
+          },
+          "recycle_after_actions": {
+            "default": 500,
+            "minimum": 1,
+            "title": "Recycle After Actions",
+            "type": "integer"
+          },
+          "reserved_account_groups": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Reserved Account Groups",
+            "type": "array"
+          },
+          "restart_backoff_s": {
+            "default": 5.0,
+            "exclusiveMinimum": 0,
+            "title": "Restart Backoff S",
+            "type": "number"
+          },
+          "session_refresh_share": {
+            "default": 0.7,
+            "exclusiveMaximum": 1,
+            "exclusiveMinimum": 0,
+            "title": "Session Refresh Share",
+            "type": "number"
+          },
+          "watchers": {
+            "default": 1,
+            "maximum": 50,
+            "minimum": 0,
+            "title": "Watchers",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "cell"
+        ],
+        "title": "WorkerSettings",
+        "type": "object"
+      },
+      "WorkflowSettings": {
+        "properties": {
+          "action_timeout_ms": {
+            "default": 10000,
+            "minimum": 100,
+            "title": "Action Timeout Ms",
+            "type": "integer"
+          },
+          "alert_unknown_after_s": {
+            "default": 300.0,
+            "exclusiveMinimum": 0,
+            "title": "Alert Unknown After S",
+            "type": "number"
+          },
+          "approval_ttl_s": {
+            "default": 300,
+            "minimum": 1,
+            "title": "Approval Ttl S",
+            "type": "integer"
+          },
+          "drain_timeout_s": {
+            "default": 20,
+            "exclusiveMinimum": 0,
+            "title": "Drain Timeout S",
+            "type": "number"
+          },
+          "evidence_page_size": {
+            "default": 100,
+            "maximum": 1000,
+            "minimum": 1,
+            "title": "Evidence Page Size",
+            "type": "integer"
+          },
+          "grant_ttl_s": {
+            "default": 3600,
+            "minimum": 1,
+            "title": "Grant Ttl S",
+            "type": "integer"
+          },
+          "jobs_per_tenant": {
+            "default": 1,
+            "maximum": 16,
+            "minimum": 1,
+            "title": "Jobs Per Tenant",
+            "type": "integer"
+          },
+          "lease_margin_s": {
+            "default": 5.0,
+            "exclusiveMinimum": 0,
+            "title": "Lease Margin S",
+            "type": "number"
+          },
+          "lease_s": {
+            "default": 90.0,
+            "exclusiveMinimum": 0,
+            "title": "Lease S",
+            "type": "number"
+          },
+          "poll_s": {
+            "default": 1.0,
+            "exclusiveMinimum": 0,
+            "title": "Poll S",
+            "type": "number"
+          },
+          "reconcile_grace_s": {
+            "default": 10.0,
+            "minimum": 0,
+            "title": "Reconcile Grace S",
+            "type": "number"
+          },
+          "response_max_bytes": {
+            "default": 65536,
+            "minimum": 1024,
+            "title": "Response Max Bytes",
+            "type": "integer"
+          },
+          "tenant_batch": {
+            "default": 32,
+            "maximum": 256,
+            "minimum": 1,
+            "title": "Tenant Batch",
+            "type": "integer"
+          }
+        },
+        "title": "WorkflowSettings",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "app_db": {
+        "$ref": "#/$defs/DatabaseSettings"
+      },
+      "board_client": {
+        "$ref": "#/$defs/BoardClientSettings"
+      },
+      "config_dir": {
+        "format": "path",
+        "title": "Config Dir",
+        "type": "string"
+      },
+      "environment": {
+        "enum": [
+          "local",
+          "test",
+          "vps",
+          "aws"
+        ],
+        "title": "Environment",
+        "type": "string"
+      },
+      "log_level": {
+        "default": "INFO",
+        "enum": [
+          "DEBUG",
+          "INFO",
+          "WARNING",
+          "ERROR"
+        ],
+        "title": "Log Level",
+        "type": "string"
+      },
+      "mailpit": {
+        "$ref": "#/$defs/MailpitSettings"
+      },
+      "vault": {
+        "$ref": "#/$defs/VaultSettings"
+      },
+      "worker": {
+        "$ref": "#/$defs/WorkerSettings"
+      },
+      "workflows": {
+        "$ref": "#/$defs/WorkflowSettings",
+        "default": {
+          "action_timeout_ms": 10000,
+          "alert_unknown_after_s": 300.0,
+          "approval_ttl_s": 300,
+          "drain_timeout_s": 20.0,
+          "evidence_page_size": 100,
+          "grant_ttl_s": 3600,
+          "jobs_per_tenant": 1,
+          "lease_margin_s": 5.0,
+          "lease_s": 90.0,
+          "poll_s": 1.0,
+          "reconcile_grace_s": 10.0,
+          "response_max_bytes": 65536,
+          "tenant_batch": 32
+        }
+      }
+    },
+    "required": [
+      "environment",
+      "config_dir",
+      "app_db",
+      "board_client",
+      "vault",
+      "mailpit",
+      "worker"
+    ],
+    "title": "WorkflowAppSettings",
+    "type": "object"
+  }
+}

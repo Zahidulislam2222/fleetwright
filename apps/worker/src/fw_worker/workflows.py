@@ -8,8 +8,10 @@ dispatch authority, so a notification lost during a crash cannot strand a submit
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
-from dataclasses import dataclass
+import signal
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any, Literal
 from uuid import UUID, uuid4
@@ -20,6 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 
 from fw_browser.otp import MailpitOtp
 from fw_browser.workflows import BrowserWorkflow, DestinationSessionExpired
+from fw_core import claims
 from fw_core import workflows as jobs
 from fw_core.crypto import Envelope
 from fw_core.db import make_engine, system_tx, tenant_tx
@@ -38,6 +41,8 @@ class Runner:
     browser: Browser
     otp: MailpitOtp
     worker_id: str
+    stopping: asyncio.Event = field(default_factory=asyncio.Event)
+    tenant_cursor: UUID | None = None
 
     async def open_account(self, account: Account, reservation: str) -> tuple[BrowserContext, Page]:
         vault = Vault(Envelope(self.cfg.vault.master_key_b64.get_secret_value(), self.cfg.vault.key_id))
@@ -79,7 +84,25 @@ class Runner:
         deadline = asyncio.get_running_loop().time() + self.cfg.workflows.lease_s - self.cfg.workflows.lease_margin_s
         specs = load_workflows(self.cfg.config_dir)
         async with tenant_tx(self.engine, tenant) as conn:
-            held = await jobs.take(conn, tenant, job, self.worker_id, self.cfg.workflows.lease_s)
+            # A directory page can become stale during a move. Lock assignment through
+            # admission so old-cell runners cannot lease new work after the move commits.
+            assigned = await conn.scalar(
+                text("SELECT tenant_id FROM tenant_cells WHERE tenant_id=:t AND cell_id=:c FOR SHARE"),
+                {"t": tenant, "c": self.cfg.worker.cell},
+            )
+            if assigned is None or self.stopping.is_set():
+                return False
+            # The take and pacing reservation either both commit or both roll back.
+            async with conn.begin_nested() as admission:
+                held = await jobs.take(conn, tenant, job, self.worker_id, self.cfg.workflows.lease_s)
+                if held is not None:
+                    account_id = await conn.scalar(
+                        text("SELECT account_id FROM workflow_jobs WHERE tenant_id=:t AND id=:j"),
+                        {"t": tenant, "j": job},
+                    )
+                    if not await claims.admit_account(conn, tenant, account_id):
+                        await admission.rollback()
+                        held = None
             if held is None:
                 return False
             row = (
@@ -120,6 +143,8 @@ class Runner:
                 await adapter.prepare(page, spec, row["inputs"])
             async with tenant_tx(self.engine, tenant) as conn:
                 acting = await jobs.begin_action(conn, held, spec, self.cfg.workflows)
+                if acting:
+                    await claims.extend_account_cooldown(conn, tenant, account.id)
                 if not acting:
                     await jobs.reject_before_action(conn, held)
             if not acting:
@@ -139,9 +164,12 @@ class Runner:
                         log.warning(
                             "workflow result lost its lease; recovery must reconcile", extra={"job_id": str(job)}
                         )
+                    else:
+                        await claims.extend_account_cooldown(conn, tenant, account.id)
             except Exception:
                 async with tenant_tx(self.engine, tenant) as conn:
-                    await jobs.finish(conn, held, "UNKNOWN", {"reason": "response_interrupted"})
+                    if await jobs.finish(conn, held, "UNKNOWN", {"reason": "response_interrupted"}):
+                        await claims.extend_account_cooldown(conn, tenant, account.id)
             return True
         except Exception as error:
             # Pre-action failure is safe to retry after lease recovery; no action was authorized.
@@ -208,15 +236,42 @@ class Runner:
 
     async def tick(self) -> None:
         async with system_tx(self.engine) as conn:
-            tenants = list((await conn.execute(text("SELECT id FROM tenants"))).scalars())
+            tenants = list(
+                (
+                    await conn.execute(
+                        text("""SELECT tenant_id FROM tenant_cells WHERE cell_id=:cell
+                     AND (CAST(:cursor AS uuid) IS NULL OR tenant_id>CAST(:cursor AS uuid))
+                     ORDER BY tenant_id LIMIT :n"""),
+                        {
+                            "cell": self.cfg.worker.cell,
+                            "cursor": self.tenant_cursor,
+                            "n": self.cfg.workflows.tenant_batch,
+                        },
+                    )
+                ).scalars()
+            )
+        if not tenants:
+            self.tenant_cursor = None
+            return
         for tenant in tenants:
+            if self.stopping.is_set():
+                return
+            self.tenant_cursor = tenant
             async with tenant_tx(self.engine, tenant) as conn:
                 await jobs.recover(conn, tenant, self.cfg.workflows.evidence_page_size)
-                ready = await jobs.ready_jobs(conn, tenant, self.cfg.workflows.evidence_page_size)
-                rows = await jobs.reconciliation_batch(conn, tenant, self.cfg.workflows)
+                ready = await jobs.ready_jobs(conn, tenant, self.cfg.workflows.jobs_per_tenant)
+                rows = await jobs.reconciliation_batch(
+                    conn,
+                    tenant,
+                    self.cfg.workflows.model_copy(update={"evidence_page_size": self.cfg.workflows.jobs_per_tenant}),
+                )
             for job_id in ready:
+                if self.stopping.is_set():
+                    return
                 await self.run_one(tenant, job_id)
             for row in rows:
+                if self.stopping.is_set():
+                    return
                 try:
                     await self.reconcile_one(tenant, dict(row))
                 except Exception:
@@ -232,9 +287,28 @@ async def main() -> None:
             browser = await playwright.chromium.launch(headless=cfg.worker.headless)
             try:
                 runner = Runner(cfg, engine, browser, otp, f"workflow-{uuid4().hex}")
-                while True:
-                    await runner.tick()
-                    await asyncio.sleep(cfg.workflows.poll_s)
+                loop = asyncio.get_running_loop()
+                for name in (signal.SIGINT, signal.SIGTERM):
+                    try:
+                        loop.add_signal_handler(name, runner.stopping.set)
+                    except NotImplementedError:
+                        # Windows local runner uses the same event with its native signal handler.
+                        signal.signal(name, lambda *_: loop.call_soon_threadsafe(runner.stopping.set))
+                while not runner.stopping.is_set():
+                    task = asyncio.create_task(runner.tick())
+                    stopped = asyncio.create_task(runner.stopping.wait())
+                    await asyncio.wait({task, stopped}, return_when=asyncio.FIRST_COMPLETED)
+                    if runner.stopping.is_set():
+                        # Cancellation preserves durable LEASED/ACTING state for recovery.
+                        with contextlib.suppress(TimeoutError):
+                            await asyncio.wait_for(task, cfg.workflows.drain_timeout_s)
+                    else:
+                        await task
+                    stopped.cancel()
+                    await asyncio.gather(stopped, return_exceptions=True)
+                    if not runner.stopping.is_set():
+                        with contextlib.suppress(TimeoutError):
+                            await asyncio.wait_for(runner.stopping.wait(), cfg.workflows.poll_s)
             finally:
                 await browser.close()
     finally:

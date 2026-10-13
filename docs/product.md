@@ -25,10 +25,21 @@ request safe cancellation. Viewers observe authorized information. Public access
 controls and masked data; it cannot approve workflows or issue integration grants. MCP observation
 and execution scopes remain separate and current authorization is checked on every invocation.
 
-The standalone conversational-agent page describes planned integration behavior and keeps its
-notes locally; it does not execute external actions. Current model-supervised execution uses the
-dedicated MCP package and owner workflow console. Codex integration has end-to-end verification;
-Claude configuration and transport support are documented, with account-level verification deferred.
+The hosted `/agent` page links to the separate local SQLite/Ollama application. Three maintained
+owned templates draft maintenance, handover and inspection records, then require exact human
+approval before a browser form save. Local state, private browser profile and receipts remain on
+the owner's device. Optional CDP uses an isolated context and preserves existing tabs; it does
+not inherit their logins. The hosted page does not control the local browser.
+
+The console's catalogue crawler runs validated same-origin definitions with durable progress,
+bounded HTTP egress, quality guards and private JSONL exports. Public visitors see aggregate state;
+operators can start/cancel/export. See [crawler](operations/crawler.md) and
+[local agent](operations/local-agent.md) for supported behavior and limits.
+
+The dedicated MCP package supports model-supervised fleet workflows with the owner console.
+Codex integration has end-to-end verification; Claude configuration and transport support are
+documented, with account-level verification deferred. Implementation and release verification
+are separate; consult the release record for what is currently deployed.
 
 ## Delivery boundaries
 

@@ -16,7 +16,7 @@ from importlib import resources
 from typing import Annotated, Any
 
 from fastapi import Depends, FastAPI, Form, Header, HTTPException, Query, Request, Response
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field, ValidationError
@@ -30,7 +30,7 @@ from fw_core.timeutil import iso
 from mockboard import security, store
 from mockboard.feed import Feed
 from mockboard.mail import send_otp
-from mockboard.models import Adversity, Catalogue
+from mockboard.models import Adversity, Catalogue, CrawlCatalogue
 from mockboard.portal import install as install_portal
 
 log = logging.getLogger("mockboard")
@@ -99,6 +99,7 @@ def create_app(settings: BoardAppSettings | None = None) -> FastAPI:
     cfg = settings or load(BoardAppSettings)
     setup_logging("mockboard", cfg.log_level)
     catalogue = load_yaml(cfg.config_dir, "board_catalogue.yaml", Catalogue)
+    crawl_catalogue = load_yaml(cfg.config_dir, "crawl_catalogue.yaml", CrawlCatalogue)
     engine: AsyncEngine = make_engine(cfg.board_db.dsn, cfg.board_db, "mockboard")
     board = cfg.board
     package = resources.files("mockboard")
@@ -141,6 +142,18 @@ def create_app(settings: BoardAppSettings | None = None) -> FastAPI:
                 cache["value"] = await store.get_settings(conn)
             cache["at"] = loop.time()
         return cache["value"]  # type: ignore[no-any-return]
+
+    @app.get("/robots.txt", response_class=PlainTextResponse)
+    async def robots() -> str:
+        return crawl_catalogue.robots
+
+    @app.get("/catalogue.json")
+    async def crawl_catalogue_page(page: int = Query(default=1, ge=1, le=10000)) -> dict[str, Any]:
+        start = (page - 1) * crawl_catalogue.page_size
+        items = crawl_catalogue.items[start : start + crawl_catalogue.page_size]
+        links = [f"/catalogue.json?page={page + 1}"] if start + len(items) < len(crawl_catalogue.items) else []
+        key = "items" if (await adversity()).layout_variant == "a" else "entries"
+        return {key: items, "next": links}
 
     def set_cookie(response: Response, name: str, value: str, max_age: int) -> None:
         response.set_cookie(

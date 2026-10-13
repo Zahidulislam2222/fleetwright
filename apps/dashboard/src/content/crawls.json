@@ -1,0 +1,27 @@
+{
+  "title": "Crawl jobs",
+  "description": "Collect approved catalogue fields with durable progress, bounded requests and robots policy checks.",
+  "definition": "Catalogue",
+  "start": "Start crawl",
+  "refresh": "Refresh",
+  "older": "Older jobs",
+  "empty": "No crawl cycles on this page.",
+  "loading": "Loading crawl jobs…",
+  "error": "The request failed. Refresh and try again.",
+  "queued": "Crawl queued. Progress will appear as the worker collects pages.",
+  "cancelled": "Cancellation requested. The current bounded page may finish first.",
+  "cancel": "Cancel crawl",
+  "download": "Download JSONL",
+  "access": "Sign in as an operator or owner to start, cancel or export a crawl.",
+  "pages": "Pages",
+  "items": "Items",
+  "errors": "Attempts with errors",
+  "changes": "New / changed / removed",
+  "policy": "Robots rules are respected. Exports include only approved fields and expire under the retention policy.",
+  "alerts": {
+    "zero_results": "No records extracted. Check the destination layout and extraction contract.",
+    "result_drop": "The result count dropped substantially from the previous completed cycle.",
+    "duplicate_items": "Duplicate identities were found in the destination response.",
+    "page_limit": "The configured page limit was reached; this cycle is incomplete."
+  }
+}

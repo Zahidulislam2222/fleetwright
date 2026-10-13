@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fleetwright Local Agent</title><link rel="stylesheet" href="/assets/agent.css">
+<script src="/assets/agent.js" defer></script></head><body><main>
+<header><p>FLEETWRIGHT · LOCAL WORKSPACE</p><h1 id="heading"></h1><p id="subtitle"></p><p id="model"></p></header>
+<aside id="notice"></aside><p id="error" role="alert"></p>
+<section><form id="task-form"><label id="template-label" for="template"></label><select id="template"></select>
+<label id="origin-label" for="origin"></label><select id="origin"></select>
+<label id="request-label" for="request"></label><textarea id="request" required></textarea>
+<button id="prepare" type="submit"></button></form></section>
+<section><div class="toolbar"><h2 id="tasks-heading"></h2><button id="refresh"></button><button id="kill" class="danger"></button></div>
+<div id="tasks" aria-live="polite"></div></section></main></body></html>

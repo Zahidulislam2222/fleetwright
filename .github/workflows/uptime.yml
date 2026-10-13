@@ -1,0 +1,30 @@
+name: independent-uptime
+on:
+  schedule:
+    - cron: '3-58/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: independent-uptime
+  cancel-in-progress: false
+
+jobs:
+  public-https-probes:
+    # Standard hosted runners are free for public repositories. Refuse private-repository runs.
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.12.10"
+          enable-cache: false
+      - name: Install frozen local collector dependencies
+        run: uv sync --package fw-coordinator --frozen --no-dev --python 3.12
+      - name: Independent bounded public HTTPS checks
+        run: uv run --package fw-coordinator --no-sync python -m fw_coordinator.monitor once --settings-file config/uptime.json
+      # No caches, artifact uploads, third-party integrations, issue creation or messages.

@@ -2,7 +2,7 @@
 name = "fw-coordinator"
 version = "0.2.0"
 requires-python = ">=3.12,<3.13"
-dependencies = ["fw-core", "fw-queue", "fastapi==0.142.2", "uvicorn==0.54.0", "alembic==1.20.0", "argon2-cffi==25.1.0", "pyotp==2.10.0", "httpx==0.28.1"]
+dependencies = ["fw-core", "fw-queue", "fastapi==0.142.2", "uvicorn==0.54.0", "alembic==1.20.0", "argon2-cffi==25.1.0", "pyotp==2.10.0", "httpx==0.28.1", "beautifulsoup4==4.15.0"]
 
 [build-system]
 requires = ["uv_build>=0.12.23,<0.13"]

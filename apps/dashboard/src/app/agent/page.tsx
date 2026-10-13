@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { AgentWindow } from "@/components/agent/AgentWindow";
-import copy from "@/content/prototype.json";
+import { LocalAgentIntro } from "@/components/agent/LocalAgentIntro";
+import copy from "@/content/local-agent.json";
 
-export const metadata: Metadata = { title: { absolute: copy.agent.title }, robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: { absolute: copy.title }, robots: { index: false, follow: false } };
 
 export default function AgentPage() {
-  return <AgentWindow />;
+  return <LocalAgentIntro />;
 }

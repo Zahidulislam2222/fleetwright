@@ -1,0 +1,5 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Owned density fixture</title>
+<body><h1>Owned density fixture</h1><p>This local fixture measures browser context overhead only.</p>
+<button id="tick" type="button">Apply local operation</button><output id="count">0</output>
+<script>let count = 0;document.getElementById('tick').addEventListener('click', () => {
+document.getElementById('count').textContent = String(++count);});</script></body></html>

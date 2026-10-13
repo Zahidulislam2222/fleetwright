@@ -1,0 +1,19 @@
+version: 1
+definitions:
+  owned-catalogue:
+    name: Owned freight catalogue
+    origin: owned_board
+    seeds: [/catalogue.json]
+    format: json
+    rows: /items
+    links: /next
+    identity_field: ref
+    personal_data: false
+    fields:
+      ref: {source: /ref, type: string, max_length: 128}
+      origin: {source: /origin, type: string}
+      destination: {source: /destination, type: string}
+      equipment: {source: /equipment, type: string}
+      rate_usd: {source: /rate_usd, type: integer}
+    required_fields: [ref, origin, destination, equipment, rate_usd]
+    respect_robots: true

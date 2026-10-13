@@ -1,0 +1,10 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Owned draft destination</title>
+<script src="/assets/lab.js" defer></script></head><body>
+<h1>Owned draft destination</h1><p>This lab saves a local record only.</p>
+<form id="record" data-template="{template_id}">
+<label>Task<input id="task_id"></label>
+<label>Approved hash<input id="proposal_hash"></label>
+<input type="hidden" id="token" value="{token}">
+<label>Title<input id="title" required></label>
+<label>Body<textarea id="body" required></textarea></label>
+<button id="submit">Save owned record</button></form><pre id="receipt"></pre></body></html>

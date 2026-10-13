@@ -16,6 +16,8 @@ the session's configured CSRF header. Session cookies are HttpOnly and Secure in
 | `/v1/workflows/jobs/{job_id}` | Inspect, cancel and review a specific job | Tenant and role checks |
 | `/v1/workflows/health` | Operational workflow health | Authenticated operator/owner |
 | `/v1/workflows/metrics` | Prometheus-compatible workflow measurements | Observation grant and tenant header |
+| `/v1/crawls/contracts`, `/v1/crawls/jobs` | Maintained catalogue contracts and durable cycles | Tenant reads; operator/user and CSRF for start/cancel |
+| `/v1/crawls/jobs/{job_id}/export` | Private retained JSONL download | Authenticated operator/owner in the same tenant |
 | `/v1/stream` | Live invalidation hints | Current session; bounded revocation recheck |
 
 Check the generated schema for exact methods, request bodies and subresource paths. Do not

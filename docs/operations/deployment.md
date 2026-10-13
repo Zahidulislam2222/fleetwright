@@ -53,6 +53,25 @@ copy, monitor backup age/failure and prove restoration with configuration and ke
 
 ## Rollback and data safety
 
+The durable-detection mailbox upgrade is a **backend compatibility boundary**. The previous rc5
+relay accepts only claim messages; it can reject new detection messages or prune published rows
+whose detection decision has not committed. Do not restart that old control/worker backend against
+the upgraded database and queues. Keep the compatible backend and roll back only static web
+assets, or deploy a reviewed forward fix. A full backend rollback requires a separately tested
+mailbox-preserving migration/export/import procedure; it is not the normal rollback path.
+
+Before this upgrade, stop and drain the old freight watcher/actor process while the old control
+loop remains available. Verify every configured cell's legacy detection streams have zero unread
+and pending messages, then stop the old control loop and take the pre-migration archive. Abort the
+upgrade if the backlog cannot be accounted for. Migration cannot make a previously unpersisted
+Redis-only detection durable retroactively. Keep the old stream data and private evidence.
+
+Rehearse static-only rollback with a pending durable detection: replace only the web service's
+static/config mounts, keep all backend image identities unchanged, then restore the current web
+mounts. Verify public pages/API and the pending mailbox record survive both changes. The current
+release pointer continues to identify the compatible backend; record a temporary static override
+explicitly. Stop the new monitor before any deliberately incompatible full backend recovery.
+
 Retain the previous manifest/image and use the same Compose project/volumes when rolling back.
 Check schema compatibility first: additive workflow migrations preserve old freight tables, but
 an older API cannot supervise new jobs. Pause new execution if its UI/worker authority would be

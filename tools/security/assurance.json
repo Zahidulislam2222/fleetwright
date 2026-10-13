@@ -1,0 +1,9 @@
+{
+  "trivy": "var/security-scale/bin/trivy",
+  "cache_dir": "var/security-scale/trivy-cache",
+  "report_dir": "var/security-scale/supply-chain",
+  "source_roots": ["uv.lock", "apps/dashboard/package-lock.json"],
+  "provenance_roots": ["packages", "apps/coordinator", "apps/mockboard", "apps/gateway", "apps/worker", "apps/standalone", "config", "contracts", "deploy", "infra", "loadtest", "tools/security", "uv.lock"],
+  "excluded_parts": [".git", ".venv", "node_modules", ".next", ".terraform", "__pycache__", "tests", "releases"],
+  "timeout_s": 600
+}

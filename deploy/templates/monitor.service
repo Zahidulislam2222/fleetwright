@@ -1,0 +1,24 @@
+# Generated from the committed release. Host authority is restricted to existing Docker exec.
+[Unit]
+Description=Fleetwright bounded workflow and archive monitor
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=exec
+User=root
+WorkingDirectory={{buildDirectory}}
+EnvironmentFile={{monitorEnvFile}}
+ExecStart={{buildDirectory}}/.venv/bin/python -m fw_coordinator.monitor loop
+UMask=0077
+Restart=on-failure
+RestartSec={{monitorRestartS}}
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths={{monitorDirectory}}
+MemoryMax={{monitorMemoryMax}}
+
+[Install]
+WantedBy=multi-user.target

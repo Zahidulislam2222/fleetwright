@@ -91,6 +91,7 @@ class Fleet:
     behaviours: dict[Role, Behaviour]
     process_id: str = field(default_factory=lambda: f"{socket.gethostname()}-{os.getpid()}")
     slots: list[Slot] = field(default_factory=list)
+    _retired_slots: list[Slot] = field(default_factory=list, repr=False)
     stopping: asyncio.Event = field(default_factory=asyncio.Event)
     memory_mb: int = 0
     clock_offset_ms: float | None = None  # database clock minus this host's clock
@@ -129,6 +130,12 @@ class Fleet:
         starts. Simple and correct; moves are rare."""
         for slot in self.slots:
             slot.retired = True
+        self._retired_slots = [
+            slot
+            for slot in self._retired_slots
+            if slot.state != "stopped" or slot.context is not None or slot.account is not None
+        ]
+        self._retired_slots.extend(self.slots)
         self.generation += 1
         self.tenants = tenants
         self.slots = plan_slots(self, tenants)
@@ -158,10 +165,11 @@ class Fleet:
             if task.get_name() == "heartbeat":
                 task.cancel()
         await asyncio.gather(*self._tasks, return_exceptions=True)
-        for slot in self.slots:
+        for slot in [*self._retired_slots, *self.slots]:
             await slot.close(release=True)
         await self._heartbeat(state_override="stopped")
         log.info("fleet drained", extra={"slots": len(self.slots), "forced": len(pending)})
+        self._retired_slots.clear()
 
     # ---------------- heartbeat ----------------
 
@@ -182,7 +190,8 @@ class Fleet:
     async def _heartbeat(self, state_override: str | None = None) -> None:
         self.memory_mb, cpu = self.meter.sample()
         per_slot = self.memory_mb // max(1, sum(s.context is not None for s in self.slots))
-        for slot in self.slots:
+        heartbeat_slots = [*self._retired_slots, *self.slots] if state_override is not None else self.slots
+        for slot in heartbeat_slots:
             async with tenant_tx(self.engine, slot.tenant_id) as conn:
                 if (
                     slot.account is not None

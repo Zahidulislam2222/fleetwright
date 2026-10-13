@@ -44,7 +44,38 @@ DISPATCH_TOPIC = "claim.dispatch"
 
 
 class AccountBusy(Exception):
-    """The account already holds an active lease (the claim-level account mutex)."""
+    """Account busy, paced, disabled or outside this claim's permitted account group.
+
+    Callers must preserve dispatch messages for a later eligible account.
+    """
+
+
+async def admit_account(conn: AsyncConnection, tenant_id: UUID, account_id: UUID) -> bool:
+    """Reserve one conservative action interval atomically using the database clock.
+
+    Runs inside the caller's transaction; a failed lease must roll back this reservation.
+    Pre-action failures can consume an interval, which is safer than exceeding destination limits.
+    """
+    admitted = await conn.scalar(
+        text("""UPDATE accounts SET next_action_at=clock_timestamp()+make_interval(secs=>60.0/rate_limit_per_min)
+             WHERE tenant_id=:t AND id=:a AND enabled
+               AND (next_action_at IS NULL OR next_action_at<=clock_timestamp()) RETURNING id"""),
+        {"t": tenant_id, "a": account_id},
+    )
+    return admitted is not None
+
+
+async def extend_account_cooldown(conn: AsyncConnection, tenant_id: UUID, account_id: UUID) -> None:
+    """Start a fresh interval at the action boundary and again after an owned outcome.
+
+    The completion cooldown prevents slow preparation/actions from consuming the admission
+    interval and allowing the following action immediately after this one.
+    """
+    await conn.execute(
+        text("""UPDATE accounts SET next_action_at=GREATEST(next_action_at,
+             clock_timestamp()+make_interval(secs=>60.0/rate_limit_per_min)) WHERE tenant_id=:t AND id=:a"""),
+        {"t": tenant_id, "a": account_id},
+    )
 
 
 @dataclass(frozen=True)
@@ -141,11 +172,32 @@ async def lease(
     account_id: UUID,
     ttl_ms: int,
     max_age_s: int,
+    cell_id: str | None = None,
 ) -> Lease | None:
     """QUEUED -> LEASED with a fresh fencing token. None if the claim is gone, taken or too old.
     Raises AccountBusy if this account already holds an active lease."""
     try:
         async with conn.begin_nested():
+            candidate = (
+                await conn.execute(
+                    text("""SELECT c.id,f.account_group FROM claims c LEFT JOIN filters f
+                         ON f.tenant_id=c.tenant_id AND f.id=c.filter_id
+                         WHERE c.tenant_id=:t AND c.id=:c AND c.state='QUEUED'
+                           AND (CAST(:cell AS text) IS NULL OR c.cell_id=:cell)
+                           AND c.queued_at>clock_timestamp()-make_interval(secs=>:age)
+                         FOR UPDATE OF c SKIP LOCKED"""),
+                    {"t": tenant_id, "c": claim_id, "age": max_age_s, "cell": cell_id},
+                )
+            ).one_or_none()
+            if candidate is None:
+                return None
+            eligible = await conn.scalar(
+                text("""SELECT id FROM accounts WHERE tenant_id=:t AND id=:a AND enabled
+                     AND (CAST(:g AS text) IS NULL OR account_group=:g) FOR UPDATE"""),
+                {"t": tenant_id, "a": account_id, "g": candidate.account_group},
+            )
+            if eligible is None or not await admit_account(conn, tenant_id, account_id):
+                raise AccountBusy("account is not currently eligible")
             row = (
                 await conn.execute(
                     text(
@@ -175,13 +227,27 @@ async def start_acting(conn: AsyncConnection, tenant_id: UUID, held: Lease, work
     row = (
         await conn.execute(
             text(
-                """UPDATE claims SET state = 'ACTING', act_sent_at = clock_timestamp(),
+                """WITH authority AS MATERIALIZED (
+                     SELECT c.id,c.account_id FROM claims c JOIN accounts a
+                       ON a.tenant_id=c.tenant_id AND a.id=c.account_id
+                     LEFT JOIN filters f ON f.tenant_id=c.tenant_id AND f.id=c.filter_id
+                     WHERE c.tenant_id=:t AND c.id=:c AND c.fence=:f AND c.worker_id=:w
+                       AND c.state='LEASED' AND c.lease_expires_at>clock_timestamp() AND a.enabled
+                       AND (f.account_group IS NULL OR a.account_group=f.account_group)
+                       AND (a.holder_worker IS NULL OR a.holder_worker=:w OR a.holder_expires_at<=clock_timestamp())
+                     FOR UPDATE OF c,a
+                   ), budget AS (
+                     UPDATE accounts a SET next_action_at=GREATEST(next_action_at,
+                       clock_timestamp()+make_interval(secs=>60.0/rate_limit_per_min))
+                     FROM authority x WHERE a.tenant_id=:t AND a.id=x.account_id RETURNING a.id
+                   ) UPDATE claims SET state = 'ACTING', act_sent_at = clock_timestamp(),
                           lease_expires_at = clock_timestamp() + make_interval(secs => :ttl / 1000.0)
                    WHERE tenant_id = :t AND id = :c AND fence = :f AND state = 'LEASED'
                      AND lease_expires_at > clock_timestamp()
+                     AND account_id IN (SELECT id FROM budget)
                    RETURNING id"""
             ),
-            {"t": tenant_id, "c": held.claim_id, "f": held.fence, "ttl": ttl_ms},
+            {"t": tenant_id, "c": held.claim_id, "f": held.fence, "ttl": ttl_ms, "w": worker_id},
         )
     ).one_or_none()
     if row is None:
@@ -200,13 +266,14 @@ async def finish(
 
     A late actor still knows the truth: if the reconciler already marked the claim UNKNOWN (or even
     resolved it as not booked) and the fence still matches, the actor's definite answer wins."""
-    params = {"t": tenant_id, "c": held.claim_id, "f": held.fence, "n": note}
+    params = {"t": tenant_id, "c": held.claim_id, "f": held.fence, "n": note, "w": worker_id}
     if outcome == "unknown":
         row = (
             await conn.execute(
                 text(
                     """UPDATE claims SET state = 'UNKNOWN', result = :n
-                       WHERE tenant_id = :t AND id = :c AND fence = :f AND state = 'ACTING' RETURNING state"""
+                       WHERE tenant_id = :t AND id = :c AND fence = :f AND worker_id=:w
+                         AND state = 'ACTING' RETURNING state,account_id"""
                 ),
                 params,
             )
@@ -222,15 +289,16 @@ async def finish(
                          resolution = CASE WHEN state = 'ACTING' THEN resolution ELSE :r || '_by_late_actor' END,
                          confirmed_at = CASE WHEN :s = 'CONFIRMED' THEN clock_timestamp() ELSE confirmed_at END,
                          finished_at = clock_timestamp(), result = :n
-                       WHERE tenant_id = :t AND id = :c AND fence = :f
+                       WHERE tenant_id = :t AND id = :c AND fence = :f AND worker_id=:w
                          AND (state IN ('ACTING', 'UNKNOWN') OR (state = 'RECONCILED' AND resolution = 'not_booked' AND :s = 'CONFIRMED'))
-                       RETURNING state"""
+                       RETURNING state,account_id"""
                 ),
                 {**params, "s": new_state, "r": resolution},
             )
         ).one_or_none()
     if row is None:
         return None
+    await extend_account_cooldown(conn, tenant_id, row.account_id)
     await _event(conn, tenant_id, held.claim_id, row.state, worker_id, note)
     return str(row.state)
 

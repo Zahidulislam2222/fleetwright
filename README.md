@@ -19,12 +19,15 @@ Latest deployment: [13 October 2026 release evidence](docs/releases/2026-10-13.m
 - Owner console review, cancellation, failure investigation and paginated evidence export.
 - Warm browser sessions, encrypted account vault, receipt reconciliation and interrupted-worker recovery.
 - Authenticated workflow health/metrics, verified database archives and non-destructive restore tooling.
+- Durable catalogue crawling with pinned HTTP egress, JSON/CSS extraction, quality alerts and private JSONL export.
+- Standalone SQLite/Ollama browser app with exact approvals, receipts, bounded tabs and three owned task templates.
+- Renewable observation-only monitoring, free independent public probes and encrypted off-host recovery tooling.
 
 The public workspace offers read-only inspection and a limited shared login for capped freight
 runs. Owner credentials and approvals are private. The destinations are owned verification systems;
 no commercial freight marketplace or third-party website is operated by this repository.
-The separate `/agent` page is a planned standalone interface with local interaction data; the
-working client integration is the dedicated MCP server.
+The separate `/agent` page links to the app running on your own computer. See the
+[local agent guide](docs/operations/local-agent.md); the hosted console does not control your local browser.
 
 ## Verified behavior and limits
 
@@ -74,6 +77,7 @@ private accounts and the dashboard. For MCP, issue a scoped owner grant, run
 | `packages/fw_browser` | Browser authentication and owned destination adapters |
 | `packages/fw_queue` | Tenant-scoped queues and transactional outbox |
 | `packages/fw_mcp` | Official FastMCP stdio integration |
+| `packages/fw_agent` | Standalone local SQLite/Ollama browser application |
 | `config`, `contracts`, `deploy` | Validated product data, OpenAPI and immutable release templates |
 
 ## Verification and contribution

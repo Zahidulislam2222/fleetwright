@@ -13,6 +13,10 @@ hardcoded in business code (a test enforces this). See [ADR-008](../adr/0008-con
 - [`.env.example`](../../.env.example) lists every variable with safe example values and
   `__PLACEHOLDER__` markers for secrets. A test fails if a settings field and `.env.example` drift
   apart.
+- [`contracts/settings.json`](../../contracts/settings.json) is the generated JSON Schema for every
+  service settings class, including types, defaults, required fields and validation bounds. It is
+  generated from class definitions without loading `.env`; a regression rejects stale schemas.
+  Regenerate with `python -c "import json; from pathlib import Path; from fw_core.settings import SERVICE_SETTINGS; Path('contracts/settings.json').write_text(json.dumps({c.__name__: c.model_json_schema() for c in SERVICE_SETTINGS}, indent=2, sort_keys=True)+chr(10), encoding='utf-8')"`.
 - `FWDEV_` variables are for the local Compose stack only (host ports, local database passwords).
 - The VPS uses the templates in [`deploy/env/`](../../deploy/env/): `fleetwright.env.example` (all
   `FW_` settings, hostnames are Compose service names) and `postgres.env.example` (database role
@@ -37,6 +41,11 @@ hardcoded in business code (a test enforces this). See [ADR-008](../adr/0008-con
 | `FW_API__*`, `FW_GATEWAY__*` | Console API, live-update gateway | Bind host and port (required), proxy hops to trust for the client address, page sizes, worker staleness thresholds; gateway keepalive and client limits |
 | `FW_WORKFLOWS__*`, `FW_MCP__*` | Approved workflows/MCP | Lease/action/approval/grant limits, reconciliation, page bounds, tenant and access token |
 | `FW_BACKUP__*` | Host backup CLI | Directory, Docker executable/container, database list, timeout, interval and retention |
+| `FW_CRAWL__*` | Crawler/API | Cell, allowed origins, explicit owned-origin private access, output directory, request/socket/lease budgets, pacing, retry and extraction limits, retention and quality thresholds |
+| `FW_AGENT__*` | Standalone local app | Loopback bind/provider/model, private SQLite/profile/evidence paths, optional CDP, destination allowlist, approval/time/token/tab/action/request budgets |
+| `FW_MONITOR__*`, `FW_MONITOR_GRANT__*` | Host/external collector | Probes, SQLite and notification files, bounded collection, retention, optional archive-age check and observe-only grant renewal |
+| `FW_RECOVERY__*` | Independent recovery tooling | Protected archive directory, independent encryption key, archive bounds and retention |
+| `FW_RELEASE_SIGNING__*` | Offline release finalization | Ignored private key path, separately trusted public key path and signer identity |
 | `FW_SEED__*` | Seed job | Cell for the public workspace tenant, owner email, password and TOTP secret |
 
 Built-in guards: for example, a worker refuses to start if `FW_CLAIMS__LEASE_TTL_MS` is not larger
@@ -50,6 +59,10 @@ than `FW_WORKER__ACTION_TIMEOUT_MS`, because an action could then outlive its le
 | `browser.yaml` | Browser profiles (locale, time zone, viewport) and which account group uses which profile |
 | `proxy.yaml` | Proxy providers (a local provider ships by default): sticky sessions, rotation, health |
 | `board_catalogue.yaml` | The owned freight board's lanes, equipment and rate ranges |
+| `workflows.yaml` | Versioned workflow inputs, approvals, form actions and receipt contracts |
+| `crawls.yaml`, `crawl_catalogue.yaml` | Crawl scope/extraction schemas and owned paginated catalogue records |
+| `agent.yaml` | Three local task templates, model instructions and approved form/receipt contracts |
+| `uptime.json` | Independent bounded public HTTPS probe configuration |
 
 Everything is validated at start-up; an invalid file stops the service with a clear error.
 
@@ -60,3 +73,6 @@ Dashboard copy is maintained in `apps/dashboard/src/content/*.json`. Workflow co
 rules and operator messages live in validated `config/workflows.yaml`; test database names live in
 `config/testing.yaml`. Client model/provider choices belong to the client configuration, never a
 hardcoded backend model or automatic paid fallback.
+`FW_CLAIMS__DETECTION_RETRY_S` controls redelivery of durable raw detections until their dispatch
+decision commits. A tenant move resets pending delivery under the same directory transaction;
+Redis delivery and retained stream history do not replace the PostgreSQL mailbox authority.

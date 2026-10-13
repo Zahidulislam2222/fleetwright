@@ -3,6 +3,7 @@ FW_ variable is read by some service, and business code holds no hardcoded endpo
 
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
@@ -68,6 +69,13 @@ def test_example_holds_no_real_secrets() -> None:
         if line.lstrip().startswith("#") or "=" not in line:
             continue
         key, value = line.split("=", 1)
-        if re.search(r"PASSWORD|TOKEN|KEY_B64|SECRET", key):
+        if re.search(r"(?:^|_)(?:PASSWORD|TOKEN|KEY_B64|SECRET)(?:_|$)", key):
             assert re.fullmatch(r"__[A-Z0-9_]+__", value), f"{key} must be a generated placeholder"
         assert "__" in value or not re.search(r"://[^:/]+:[^@_]{8,}@", value), f"{key} embeds a password"
+
+
+def test_published_settings_schema_matches_typed_configuration() -> None:
+    """The public reference describes model definitions, never loaded environment values."""
+    expected = {cls.__name__: cls.model_json_schema() for cls in SERVICE_SETTINGS}
+    actual = json.loads((ROOT / "contracts/settings.json").read_text(encoding="utf-8"))
+    assert actual == expected, "regenerate contracts/settings.json from SERVICE_SETTINGS model_json_schema"

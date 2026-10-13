@@ -1112,6 +1112,17 @@ components:
       - signed_out
       title: SignedOut
       type: object
+    SubmitIn:
+      additionalProperties: false
+      properties:
+        definition:
+          pattern: ^[a-z][a-z0-9-]{0,63}$
+          title: Definition
+          type: string
+      required:
+      - definition
+      title: SubmitIn
+      type: object
     Tenant:
       additionalProperties: false
       properties:
@@ -1562,6 +1573,133 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
           description: Validation Error
       summary: Claim Detail
+  /v1/crawls/contracts:
+    get:
+      operationId: contracts_v1_crawls_contracts_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Contracts V1 Crawls Contracts Get
+                type: object
+          description: Successful Response
+      summary: Contracts
+  /v1/crawls/jobs:
+    get:
+      operationId: listing_v1_crawls_jobs_get
+      parameters:
+      - in: query
+        name: cursor
+        required: false
+        schema:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Cursor
+      - in: query
+        name: limit
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Limit
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Listing V1 Crawls Jobs Get
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Listing
+    post:
+      operationId: create_v1_crawls_jobs_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitIn'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                title: Response Create V1 Crawls Jobs Post
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Create
+  /v1/crawls/jobs/{job_id}/cancel:
+    post:
+      operationId: cancel_v1_crawls_jobs__job_id__cancel_post
+      parameters:
+      - in: path
+        name: job_id
+        required: true
+        schema:
+          format: uuid
+          title: Job Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: boolean
+                title: Response Cancel V1 Crawls Jobs  Job Id  Cancel Post
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Cancel
+  /v1/crawls/jobs/{job_id}/export:
+    get:
+      operationId: export_v1_crawls_jobs__job_id__export_get
+      parameters:
+      - in: path
+        name: job_id
+        required: true
+        schema:
+          format: uuid
+          title: Job Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Export
   /v1/demo:
     get:
       operationId: demo_status_v1_demo_get

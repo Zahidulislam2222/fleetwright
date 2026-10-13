@@ -1,0 +1,14 @@
+{
+  "api_url": "http://127.0.0.1:8010/v1/overview",
+  "sse_url": "http://127.0.0.1:8011/v1/stream",
+  "api_clients": 16,
+  "sse_clients": 32,
+  "slow_clients": 2,
+  "duration_s": 30,
+  "request_interval_s": 0.1,
+  "request_timeout_s": 10,
+  "reconnect_interval_s": 5,
+  "slow_read_s": 0.1,
+  "max_samples": 50000,
+  "report": "var/security-scale/http/report.json"
+}

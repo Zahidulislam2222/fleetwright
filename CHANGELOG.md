@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased — free/local completion
+
+- Durable tenant-scoped catalogue crawling, pinned HTTP/TLS destination checks, bounded physical
+  request deadlines, JSON/CSS field contracts, quality alarms, retention and private console export.
+- Standalone SQLite/Ollama browser application with three owned templates, exact human approvals,
+  receipt reconciliation, isolated CDP support, HTTP/WebSocket guards and private POSIX state.
+- Renewable observe-only monitoring, free public-repository independent uptime workflow and
+  authenticated encrypted off-host archive recovery.
+- Account-group and actual action cooldown enforcement, bounded cell-scoped workflow turns,
+  graceful draining, static inline-script hashes and configurable offline-tested AWS reference.
+- Container hardening, CycloneDX inventory and independently verifiable offline release provenance.
+
+Local verification and independent review are recorded separately from deployed release evidence.
+
 ## 2026-10-13 — reliable browser operations
 
 Deployed as `20261013-reliable-browser-rc5`; [release evidence and boundaries](docs/releases/2026-10-13.md).

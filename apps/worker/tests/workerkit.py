@@ -89,8 +89,8 @@ async def board_tenant(db: Db, board: Board, count: int, wrong_password: set[int
             await conn.execute(
                 text(
                     """INSERT INTO accounts (tenant_id, id, label, target, username, email,
-                                           cred_key_id, cred_wrapped, cred_nonce, cred_sealed)
-                       VALUES (:t, :i, :l, 'demo-board', :u, :e, :k, :w, :n, :s)"""
+                                           cred_key_id, cred_wrapped, cred_nonce, cred_sealed,rate_limit_per_min)
+                       VALUES (:t, :i, :l, 'demo-board', :u, :e, :k, :w, :n, :s,1000000000)"""
                 ),
                 {
                     "t": tenant_id,

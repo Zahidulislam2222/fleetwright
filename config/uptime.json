@@ -1,0 +1,17 @@
+{
+  "environment": "test",
+  "config_dir": "config",
+  "monitor": {
+    "database": "var/monitor/uptime.sqlite",
+    "notification_file": "var/monitor/uptime-notifications.json",
+    "probes": [
+      {"name": "public_health", "url": "https://fleetwright.zahidul-islam.com/healthz"},
+      {"name": "public_session", "url": "https://fleetwright.zahidul-islam.com/v1/session"}
+    ],
+    "interval_s": 60,
+    "timeout_s": 10,
+    "failures_before_alert": 3,
+    "response_max_bytes": 65536,
+    "retention_days": 30
+  }
+}

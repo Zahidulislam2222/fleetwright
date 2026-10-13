@@ -16,11 +16,11 @@ source tests are separate; see [testing](../testing.md) and [maintenance](../mai
 | Execution integrity | DB-clock leases, monotonic fences, atomic transitions and account holds | Arbitrary destinations do not validate Fleetwright fences; receipt contracts remain essential |
 | Audit | Database mutations and audit commit together; external intent/outcome records | External acceptance can remain uncertain; hashes are not digital signatures |
 | Data exposure | Bounded redacted JSON evidence, masked public views, log filtering | Raw browser artifacts/archives need private access and retention; complete DSR automation pending |
-| Input/network | Parameterized SQL, validated contracts, action/body limits, owned-origin browser restrictions | Arbitrary crawl SSRF/egress guard required before crawler release |
+| Input/network | Parameterized SQL, validated contracts, action/body limits, crawler DNS/IP pinning, redirect rejection and bounded fetch processes | Public crawl origins need explicit onboarding/egress review; local agent supports controlled form/receipt destinations with HTTP/WS guards |
 | Deployment | Private backend network, loopback edge binding, non-root/read-only app containers, limits and dropped capabilities | PostgreSQL init has explicitly required capabilities; host/Docker administrators remain trusted |
-| Web security | CSP, nosniff, frame/referrer/permissions policies, production TLS | Static CSP still permits inline scripts/styles; nonce/hash migration planned |
-| Supply chain | Lockfiles, pinned container digests, registry validation, Gitleaks/Bandit/Semgrep gates | SBOM/provenance signing, image scanning and broader dynamic assessment planned |
-| Recovery | Verified archives, hash refusal, fresh non-destructive restore tests and scheduled loop | Off-host encrypted copy/full-host/key recovery need operational proof |
+| Web security | CSP, nosniff, frame/referrer/permissions policies, production TLS; new static releases hash exact inline script bytes | Runtime inline styles remain allowed; stronger script policy requires exact-release browser verification |
+| Supply chain | Lockfiles, pinned container digests, registry validation, source/image scans, CycloneDX inventory and offline Ed25519 provenance tooling | Final exact release must be signed/scanned; local signer identity is not third-party certification |
+| Recovery | Verified archives, hash refusal, fresh restore tests, independent encrypted copy and local table-row parity | Full-host/key/application disaster recovery remains distinct from data-only restoration |
 
 ## Dependency finding
 

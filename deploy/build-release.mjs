@@ -7,6 +7,7 @@ import { createHash } from "node:crypto";
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, posix } from "node:path";
 import { fileURLToPath } from "node:url";
+import { staticPolicy } from "./csp.mjs";
 
 const deployDir = dirname(fileURLToPath(import.meta.url));
 const root = join(deployDir, "..");
@@ -26,8 +27,8 @@ if (existsSync(out)) {
 }
 
 // 0. Every release input must be committed: static files and templates belong to the same commit.
-const BACKEND_PATHS = ["pyproject.toml", "uv.lock", ".dockerignore", "config", "packages", "apps/coordinator", "apps/gateway", "apps/mockboard", "apps/worker", "deploy/docker"];
-const RELEASE_PATHS = [...BACKEND_PATHS, "apps/dashboard", "deploy/templates", "deploy/deploy.config.json", "deploy/security-headers.json", "deploy/build-release.mjs", "infra/compose/local.yaml", "infra/postgres"];
+const BACKEND_PATHS = ["pyproject.toml", "uv.lock", ".dockerignore", "config", "packages", "apps/coordinator", "apps/gateway", "apps/mockboard", "apps/worker", "deploy/docker", "tools/security"];
+const RELEASE_PATHS = [...BACKEND_PATHS, "apps/dashboard", "deploy/templates", "deploy/deploy.config.json", "deploy/security-headers.json", "deploy/build-release.mjs", "deploy/csp.mjs", "infra/compose/local.yaml", "infra/postgres"];
 const git = (args) => spawnSync("git", args, { cwd: root, encoding: "utf8" });
 const dirty = git(["status", "--porcelain", "--", ...RELEASE_PATHS]);
 if (dirty.status !== 0 || dirty.stdout.trim()) {
@@ -95,7 +96,9 @@ if (missing.length) {
 mkdirSync(out, { recursive: true });
 cpSync(exportDir, join(out, "dist"), { recursive: true });
 
-const csp = [...Object.entries(security.csp).map(([k, v]) => `${k} ${v.join(" ")}`), ...security.productionOnlyDirectives].join("; ");
+const staticSecurity = staticPolicy(join(out, "dist"), security);
+const csp = staticSecurity.policy;
+writeFileSync(join(out, "csp-hashes.json"), JSON.stringify(staticSecurity.pages, null, 2) + "\n");
 const headerLines = Object.entries({ "Content-Security-Policy": csp, ...security.headers, ...security.productionHeaders })
   .map(([k, v]) => `        add_header ${k} "${v.replaceAll('"', '\\"')}" always;`)
   .join("\n");
@@ -105,6 +108,7 @@ const values = {
   ...config.cache,
   ...config.backend,
   ...config.backup,
+  ...config.monitor,
   backupDatabases: JSON.stringify(config.backup.backupDatabases),
   buildDirectory: posix.join(posix.dirname(config.releaseRoot), "build", releaseId),
   releaseId,
@@ -125,6 +129,8 @@ writeFileSync(join(out, "nginx.conf"), render("nginx.conf"));
 writeFileSync(join(out, "compose.yaml"), render("compose.yaml"));
 writeFileSync(join(out, "backup.service"), render("backup.service"));
 writeFileSync(join(out, "backup.env"), render("backup.env"));
+writeFileSync(join(out, "monitor.service"), render("monitor.service"));
+writeFileSync(join(out, "monitor.env"), render("monitor.env"));
 writeFileSync(join(out, `${config.slug}.caddy`), render("site.caddy"));
 mkdirSync(join(out, "infra"));
 cpSync(join(root, "infra", "postgres", "10-roles.sh"), join(out, "infra", "10-roles.sh"));

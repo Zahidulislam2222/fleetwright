@@ -43,9 +43,14 @@ KMS rotation is future work; do not discard a key needed to restore encrypted da
 ## Cell outage
 
 Pause affected dispatch, inspect PostgreSQL claims/outbox and Redis health, then restore the cell
-or perform the supported tenant handover. Queued claims have handover coverage; in-flight detections
-can be lost. Acknowledge that boundary and reconcile destination outcomes. Verify isolation and
-queue recovery before resuming. General workflow cell assignment remains planned.
+or perform the supported tenant handover. New raw detections are persisted before delivery;
+current-cell routing and the decision/consume transaction preserve unread and in-flight detections
+across a move. Queued claims are re-dispatched atomically. Previously admitted actions may finish;
+reconcile their destination outcomes. The workflow scheduler also checks current cell authority
+before admission. Legacy pre-upgrade Redis-only backlog needs the explicit upgrade drain described
+in [deployment](deployment.md#rollback-and-data-safety). Verify isolation and queue recovery before
+resuming. The old rc5 backend is incompatible with new mailbox topics; use the documented
+static-only rollback or a reviewed forward fix.
 
 ## Incident response
 

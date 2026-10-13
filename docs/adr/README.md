@@ -15,3 +15,5 @@ a changed decision gets a new record that supersedes the old one.
 | 008 | [One typed configuration boundary; product data in YAML](0008-config-boundary.md) | Accepted |
 | 009 | [What "1M users" and "99% uptime" mean here](0009-scale-targets.md) | Accepted |
 | 010 | [Approved workflows, reserved accounts and release verification](0010-approved-workflows-and-release-account-pools.md) | Accepted; clarifies 009 |
+| 011 | [One durable crawl frontier and pinned HTTP egress](0011-durable-crawl-frontier.md) | Accepted |
+| 012 | [Persist raw detections before cell delivery](0012-durable-raw-detections.md) | Accepted; extends 003 |

@@ -49,6 +49,13 @@ class Catalogue(BaseModel):
     competitors: Competitors
 
 
+class CrawlCatalogue(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    page_size: int = Field(ge=1, le=100)
+    robots: str
+    items: list[dict[str, str | int]] = Field(max_length=1000)
+
+
 class Adversity(BaseModel):
     """Live switches for testing a fleet against a hostile target. All off by default."""
 

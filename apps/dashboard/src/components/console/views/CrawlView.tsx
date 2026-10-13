@@ -1,6 +1,7 @@
 "use client";
 
-import { Hammer, TriangleAlert, UserRound } from "lucide-react";
+import { TriangleAlert, UserRound } from "lucide-react";
+import { LiveCrawlView } from "./LiveCrawlView";
 import { crawlJobs, fmtAgo } from "@/mocks/data";
 import copy from "@/content/console.json";
 import { useSource } from "@/lib/live/useData";
@@ -12,22 +13,10 @@ import { fill } from "@/lib/fill";
 const p = copy.pages.crawl;
 
 export function CrawlView() {
-  // The crawler is designed but not built: there is no live endpoint, so live mode says so plainly.
   const source = useSource();
   const proto = usePrototype();
   if (source.live)
-    return (
-      <>
-        <PageHeader title={p.title} description={p.description} />
-        <div className="grid place-items-center rounded-2xl border border-dashed border-c-border-strong bg-c-surface px-6 py-16 text-center">
-          <span className="grid size-11 place-items-center rounded-full bg-c-surface-3 text-c-text-2">
-            <Hammer aria-hidden className="size-5" />
-          </span>
-          <h2 className="mt-4 text-[16px] font-semibold text-c-text">{copy.live.notBuilt.title}</h2>
-          <p className="mt-1.5 max-w-[46ch] text-[14px] leading-relaxed text-c-text-2">{copy.live.notBuilt.body}</p>
-        </div>
-      </>
-    );
+    return <LiveCrawlView />;
 
   const jobs = crawlJobs(source.tenant);
   return (

@@ -5,6 +5,17 @@
 FROM ghcr.io/astral-sh/uv:0.12.10@sha256:2bb3ebca0a796a155094a27773d290c4b074572e6107f171d88d086682fd2500 AS uv
 
 FROM mcr.microsoft.com/playwright/python:v1.63.0-noble@sha256:72bd171a9ffc2b4b59532aaa6210e21014d07093120dc25528870c0b840da1f0
+
+# Reviewed Chromium-only runtime hardening. Versions/package lists are maintained data;
+# no broad unpinned upgrade. WebKit's unused vulnerable media plugins are excluded. Global
+# pip/virtualenv (and pip's vendored libraries) are build conveniences, not runtime dependencies:
+# uv installs the frozen workspace independently into /app/.venv.
+COPY config/container-security-*.txt /tmp/fw-container-security/
+RUN apt-get update -qq \
+    && xargs -r apt-get install -y --no-install-recommends < /tmp/fw-container-security/container-security-apt.txt \
+    && xargs -r apt-get purge -y < /tmp/fw-container-security/container-security-purge.txt \
+    && xargs -r /usr/bin/python3.12 -m pip uninstall -y --break-system-packages < /tmp/fw-container-security/container-security-python-remove.txt \
+    && rm -rf /var/lib/apt/lists/* /tmp/fw-container-security /root/.cache/virtualenv
 COPY --from=uv /uv /usr/local/bin/uv
 
 ENV UV_COMPILE_BYTECODE=1 \

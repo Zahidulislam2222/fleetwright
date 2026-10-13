@@ -16,11 +16,18 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 
 from fw_core.claims import DISPATCH_TOPIC
 from fw_core.db import tenant_tx
+from fw_core.detections import DETECTED_TOPIC
 from fw_queue import keys, streams
 
 
 async def drain_tenant(
-    engine: AsyncEngine, redis: Redis, tenant_id: UUID, batch: int, maxlen: int, cell_id: str | None = None
+    engine: AsyncEngine,
+    redis: Redis,
+    tenant_id: UUID,
+    batch: int,
+    maxlen: int,
+    cell_id: str | None = None,
+    detection_retry_s: float | None = None,
 ) -> int:
     """Publishes pending rows. With cell_id, only while the tenant still belongs to that cell: the
     check holds a share lock on the tenant's cell row, so a move waits for this drain and every
@@ -38,21 +45,29 @@ async def drain_tenant(
         rows = (
             await conn.execute(
                 text(
-                    """SELECT id, topic, payload FROM outbox WHERE tenant_id = :t AND published_at IS NULL
+                    """SELECT id, topic, payload FROM outbox WHERE tenant_id = :t AND consumed_at IS NULL
+                       AND (published_at IS NULL OR (topic=:det AND CAST(:retry AS double precision) IS NOT NULL
+                         AND published_at<clock_timestamp()-make_interval(secs=>CAST(:retry AS double precision))))
                        ORDER BY id LIMIT :n FOR UPDATE SKIP LOCKED"""
                 ),
-                {"t": tenant_id, "n": batch},
+                {"t": tenant_id, "n": batch, "det": DETECTED_TOPIC, "retry": detection_retry_s},
             )
         ).all()
         if not rows:
             return 0
         for row in rows:
-            if row.topic != DISPATCH_TOPIC:
+            if row.topic == DETECTED_TOPIC:
+                destination = keys.detected_stream(tenant_id)
+                payload = {**row.payload, "outbox_id": str(row.id)}
+            elif row.topic == DISPATCH_TOPIC:
+                destination = keys.act_stream(tenant_id)
+                payload = {"claim_id": row.payload["claim_id"], "tenant_id": str(tenant_id), "outbox_id": str(row.id)}
+            else:
                 raise ValueError(f"unknown outbox topic {row.topic!r}")
             await streams.add(
                 redis,
-                keys.act_stream(tenant_id),
-                {"claim_id": row.payload["claim_id"], "tenant_id": str(tenant_id), "outbox_id": str(row.id)},
+                destination,
+                payload,
                 maxlen,
             )
         await conn.execute(
@@ -69,8 +84,9 @@ async def prune(engine: AsyncEngine, tenant_id: UUID, keep_s: int, batch: int) -
             text(
                 """DELETE FROM outbox WHERE (tenant_id, id) IN (
                      SELECT tenant_id, id FROM outbox WHERE tenant_id = :t AND published_at IS NOT NULL
-                       AND published_at < clock_timestamp() - make_interval(secs => :keep) LIMIT :n)"""
+                     AND (topic<>:det OR consumed_at IS NOT NULL)
+                     AND published_at < clock_timestamp() - make_interval(secs => :keep) LIMIT :n)"""
             ),
-            {"t": tenant_id, "keep": keep_s, "n": batch},
+            {"t": tenant_id, "keep": keep_s, "n": batch, "det": DETECTED_TOPIC},
         )
         return int(result.rowcount)

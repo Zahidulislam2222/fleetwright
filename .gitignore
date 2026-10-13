@@ -4,6 +4,7 @@
 !.env.example
 *.local
 *.pem
+!config/release-signing-public.pem
 *.key
 *.p12
 *.pfx
@@ -30,6 +31,7 @@ CLAUDE.md
 _live_before/
 _live_server/
 playwright-report/
+/.playwright-mcp/
 test-results/
 coverage/
 .nyc_output/

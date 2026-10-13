@@ -25,7 +25,7 @@ from uuid import UUID
 from playwright.async_api import APIResponse, Locator, Response
 from playwright.async_api import Error as PlaywrightError
 
-from fw_core import claims
+from fw_core import claims, detections
 from fw_core.db import tenant_tx
 from fw_core.targets import TargetSpec
 from fw_queue import keys, streams
@@ -55,7 +55,6 @@ async def watch(slot: Slot) -> None:
     assert slot.page is not None
     spec, base = _spec(slot)
     feed_path = urlsplit(base + spec.api.loads).path
-    stream = keys.detected_stream(slot.tenant_id)
     arrived: asyncio.Queue[tuple[Response, datetime]] = asyncio.Queue(maxsize=1000)
     sent: OrderedDict[str, None] = OrderedDict()
     page = slot.page
@@ -87,27 +86,29 @@ async def watch(slot: Slot) -> None:
             body = await bounded_json(response, slot.cfg.action_timeout_ms)
             if body is None:  # body unreadable (page moved on) or never delivered
                 continue
+            pending: dict[str, dict[str, str]] = {}
             for job in body.get("loads", []):
                 ref = str(job.get("ref", ""))
-                if not ref or job.get("status") != "open" or ref in sent:
+                if not ref or job.get("status") != "open" or ref in sent or ref in pending:
                     continue
-                sent[ref] = None
-                if len(sent) > RECENT_JOBS:
-                    sent.popitem(last=False)
-                await streams.add(
-                    slot.fleet.stream,
-                    stream,
-                    {
-                        "key": ref,
-                        "job": json.dumps(job, separators=(",", ":")),
-                        "published_at": str(job.get("published_at") or ""),
-                        "seen_at": seen.isoformat(),
-                        "offset_ms": "" if slot.fleet.clock_offset_ms is None else f"{slot.fleet.clock_offset_ms:.3f}",
-                        "watcher": slot.id,
-                    },
-                    slot.fleet.claims_cfg.stream_maxlen,
-                )
-                slot.actions += 1
+                pending[ref] = {
+                    "key": ref,
+                    "job": json.dumps(job, separators=(",", ":")),
+                    "published_at": str(job.get("published_at") or ""),
+                    "seen_at": seen.isoformat(),
+                    "offset_ms": "" if slot.fleet.clock_offset_ms is None else f"{slot.fleet.clock_offset_ms:.3f}",
+                    "watcher": slot.id,
+                }
+            batch = list(pending.values())
+            for start in range(0, len(batch), slot.cfg.detection_batch):
+                chunk = batch[start : start + slot.cfg.detection_batch]
+                async with tenant_tx(slot.fleet.engine, slot.tenant_id) as conn:
+                    await detections.persist_many(conn, slot.tenant_id, chunk)
+                for fields in chunk:  # The local deduplication cache must never outrun a failed commit.
+                    sent[fields["key"]] = None
+                    if len(sent) > RECENT_JOBS:
+                        sent.popitem(last=False)
+                slot.actions += len(chunk)
     finally:
         page.remove_listener("response", on_response)
 
@@ -160,6 +161,7 @@ async def act_on(slot: Slot, claim_id: UUID) -> bool:
                 account_id=account.id,
                 ttl_ms=cc.lease_ttl_ms,
                 max_age_s=cc.queued_max_age_s,
+                cell_id=slot.cfg.cell,
             )
     except claims.AccountBusy:
         return False

@@ -1,0 +1,10 @@
+page_size: 2
+robots: |
+  User-agent: *
+  Allow: /catalogue.json
+  Disallow: /admin
+items:
+  - {ref: CATALOGUE-001, origin: 'Dallas, TX', destination: 'Houston, TX', equipment: Van, rate_usd: 1200}
+  - {ref: CATALOGUE-002, origin: 'Atlanta, GA', destination: 'Chicago, IL', equipment: Reefer, rate_usd: 2400}
+  - {ref: CATALOGUE-003, origin: 'Denver, CO', destination: 'Phoenix, AZ', equipment: Flatbed, rate_usd: 1800}
+  - {ref: CATALOGUE-004, origin: 'Memphis, TN', destination: 'Columbus, OH', equipment: Van, rate_usd: 1600}

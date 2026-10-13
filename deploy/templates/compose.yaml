@@ -152,6 +152,10 @@ services:
   api:
     <<: *app
     command: ["python", "-m", "fw_coordinator.api"]
+    environment:
+      FW_CRAWL__OUTPUT_DIRECTORY: "{{crawlOutputDirectory}}"
+    volumes:
+      - evidence:/data/evidence
     mem_limit: 320m
     cpus: 1.0
     pids_limit: 128
@@ -211,6 +215,21 @@ services:
     shm_size: 256m
     tmpfs:
       - /tmp:rw,nosuid,size=256m,mode=1777
+    depends_on:
+      api: { condition: service_healthy }
+      board: { condition: service_healthy }
+
+  crawler:
+    <<: *app
+    command: ["python", "-m", "fw_coordinator.crawls"]
+    stop_grace_period: {{workerStopGraceS}}s
+    environment:
+      FW_CRAWL__OUTPUT_DIRECTORY: "{{crawlOutputDirectory}}"
+    volumes:
+      - evidence:/data/evidence
+    mem_limit: {{crawlerMemory}}
+    cpus: {{crawlerCpus}}
+    pids_limit: 64
     depends_on:
       api: { condition: service_healthy }
       board: { condition: service_healthy }

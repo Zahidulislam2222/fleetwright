@@ -11,7 +11,8 @@ offline mode is labelled reference data and retains local interactions only.
 | `/console/*` | Overview, workers/accounts/claims, filters/schedules, latency, audit and settings |
 | `/console/workflows` | Exact-action owner review, job investigation, cancellation and evidence download |
 | `/board` | Local freight interaction view; the browser worker uses the separately running destination |
-| `/agent` | Planned standalone interface with local interaction data; real execution uses MCP |
+| `/console/crawl-jobs` | Durable catalogue cycles, quality alerts and operator JSONL exports |
+| `/agent` | Setup and launch links for the separate local SQLite/Ollama browser app |
 
 Run `npm ci` and `npm run dev` from this directory. Generate route types with `npx next typegen`
 before a standalone type check. Verify with `npm run lint`, `npm run typecheck`,

@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Literal
+from uuid import UUID
 
 from pydantic import BaseModel, Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -92,6 +93,7 @@ class ClaimSettings(BaseModel):
     max_deliveries: int = Field(default=5, ge=1)  # then the message goes to the dead-letter stream
     autoclaim_idle_ms: int = Field(default=5000, ge=100)
     outbox_poll_ms: int = Field(default=250, ge=10)
+    detection_retry_s: float = Field(default=5.0, ge=0.1)
     outbox_batch: int = Field(default=200, ge=1, le=5000)
     reconcile_interval_s: float = Field(default=2.0, gt=0)
     filter_reload_s: float = Field(default=30.0, gt=0)  # safety net; pub/sub reload is immediate
@@ -113,6 +115,7 @@ class WorkerSettings(BaseModel):
     reserved_account_groups: tuple[str, ...] = ()  # named pools dedicated to approved workflows
     contexts: int = Field(default=4, ge=1, le=200)
     watchers: int = Field(default=1, ge=0, le=50)
+    detection_batch: int = Field(default=100, ge=1, le=1000)
     headless: bool = True
     action_mode: Literal["http", "click"] = "http"
     heartbeat_s: float = Field(default=2.0, gt=0)
@@ -203,6 +206,9 @@ class WorkflowSettings(BaseModel):
     alert_unknown_after_s: float = Field(default=300.0, gt=0)
     response_max_bytes: int = Field(default=65536, ge=1024)
     lease_margin_s: float = Field(default=5.0, gt=0)
+    tenant_batch: int = Field(default=32, ge=1, le=256)
+    jobs_per_tenant: int = Field(default=1, ge=1, le=16)
+    drain_timeout_s: float = Field(default=20, gt=0)
 
     @model_validator(mode="after")
     def execution_fits_lease(self) -> WorkflowSettings:
@@ -234,6 +240,122 @@ class BackupSettings(BaseModel):
         return values
 
 
+class ProbeSettings(BaseModel):
+    model_config = {"extra": "forbid"}
+    name: str = Field(pattern="^[a-z][a-z0-9_-]{0,63}$")
+    url: str
+    expected_status: int = Field(default=200, ge=100, le=599)
+    bearer_token: SecretStr | None = None
+    tenant_id: str | None = None
+
+
+class MonitorSettings(BaseModel):
+    database: Path
+    probes: list[ProbeSettings] = Field(min_length=1, max_length=20)
+    interval_s: float = Field(default=60, ge=1)
+    timeout_s: float = Field(default=10, gt=0, le=60)
+    failures_before_alert: int = Field(default=3, ge=1)
+    response_max_bytes: int = Field(default=65536, ge=1024)
+    retention_days: int = Field(default=30, ge=1)
+    backup_directory: Path | None = None
+    backup_max_age_s: float = Field(default=172800, gt=0)
+    notification_file: Path
+    notification_limit: int = Field(default=200, ge=1, le=10000)
+
+    @model_validator(mode="after")
+    def unique_probes(self) -> MonitorSettings:
+        if len({p.name for p in self.probes}) != len(self.probes):
+            raise ValueError("monitor probe names must be unique")
+        return self
+
+
+class MonitorGrantSettings(BaseModel):
+    tenant_id: UUID
+    user_id: UUID
+    token_file: Path
+    authority_command: list[str] | None = None
+    ttl_s: int = Field(default=3600, ge=60)
+    renewal_margin_s: float = Field(default=300, gt=0)
+
+    @model_validator(mode="after")
+    def bounded_renewal(self) -> MonitorGrantSettings:
+        if self.renewal_margin_s >= self.ttl_s:
+            raise ValueError("grant renewal margin must be below its lifetime")
+        return self
+
+
+class RecoverySettings(BaseModel):
+    directory: Path
+    master_key_b64: SecretStr
+    key_id: str
+    max_archive_bytes: int = Field(default=268435456, ge=1024)
+    retention_count: int = Field(default=7, ge=2)
+
+
+class ReleaseSigningSettings(BaseModel):
+    private_key_file: Path
+    public_key_file: Path
+    key_id: str
+
+
+class CrawlSettings(BaseModel):
+    output_directory: Path
+    cell: str
+    timeout_s: float = Field(default=5, gt=0)
+    request_budget_s: float = Field(default=10, gt=0)
+    lease_s: float = Field(default=60, gt=0)
+    poll_s: float = Field(default=2, gt=0)
+    domain_delay_s: float = Field(default=1, ge=0)
+    max_pages: int = Field(default=100, ge=1, le=10000)
+    max_items_per_page: int = Field(default=1000, ge=1, le=10000)
+    max_response_bytes: int = Field(default=2097152, ge=1024)
+    max_attempts: int = Field(default=3, ge=1, le=10)
+    retry_base_s: float = Field(default=2, gt=0)
+    retry_jitter_s: float = Field(default=1, ge=0)
+    tenant_batch: int = Field(default=100, ge=1, le=10000)
+    retention_batch: int = Field(default=100, ge=1, le=10000)
+    retention_days: int = Field(default=7, ge=1)
+    drop_alert_share: float = Field(default=0.5, gt=0, lt=1)
+    user_agent: str = "FleetwrightCrawler"
+    owned_origin_private_access: bool = False
+    origins: dict[str, str] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def request_fits_lease(self) -> CrawlSettings:
+        if self.timeout_s > self.request_budget_s:
+            raise ValueError("socket timeout must fit the total request budget")
+        if self.lease_s <= self.request_budget_s * 2 + self.poll_s:
+            raise ValueError("crawl lease must exceed both bounded requests plus polling margin")
+        return self
+
+
+class AgentSettings(BaseModel):
+    database: Path
+    profile_directory: Path
+    evidence_directory: Path
+    model_url: str
+    model_id: str
+    host: str
+    port: int = Field(ge=1, le=65535)
+    allowed_origins: list[str] = Field(min_length=1, max_length=20)
+    cdp_url: str | None = None
+    headless: bool = True
+    model_timeout_s: float = Field(default=120, gt=0)
+    model_max_bytes: int = Field(default=65536, ge=1024)
+    model_max_tokens: int = Field(default=512, ge=1, le=8192)
+    model_keep_alive_s: int = Field(default=0, ge=0, le=3600)
+    task_timeout_s: float = Field(default=180, gt=0)
+    action_timeout_ms: int = Field(default=10000, ge=100)
+    max_tabs: int = Field(default=3, ge=1, le=20)
+    max_actions: int = Field(default=12, ge=1, le=100)
+    approval_ttl_s: int = Field(default=300, ge=1)
+    max_content_chars: int = Field(default=2000, ge=1, le=20000)
+    max_request_bytes: int = Field(default=16384, ge=1024)
+    max_requests: int = Field(default=100, ge=1, le=10000)
+    history_limit: int = Field(default=100, ge=1, le=10000)
+    lab_enabled: bool = True
+
+
 class _Base(BaseSettings):
     # extra="ignore": one local .env serves every service; each service reads only its groups.
     # tests/test_settings.py checks .env.example against all service classes, so typos still fail.
@@ -262,6 +384,7 @@ class CoordinatorSettings(_Base):
     demo: DemoSettings = DemoSettings()
     api: ApiSettings
     workflows: WorkflowSettings = WorkflowSettings()
+    crawl: CrawlSettings
 
 
 class SeedSettings(BaseModel):
@@ -338,6 +461,40 @@ class BackupAppSettings(_Base):
     backup: BackupSettings
 
 
+class MonitorAppSettings(_Base):
+    monitor: MonitorSettings
+    app_db: DatabaseSettings | None = None
+    monitor_grant: MonitorGrantSettings | None = None
+
+    @model_validator(mode="after")
+    def paired_authority(self) -> MonitorAppSettings:
+        if self.monitor_grant is not None and self.app_db is None and not self.monitor_grant.authority_command:
+            raise ValueError("monitor grant renewal requires database authority")
+        return self
+
+
+class MonitorAuthorityAppSettings(_Base):
+    app_db: DatabaseSettings
+
+
+class RecoveryAppSettings(_Base):
+    recovery: RecoverySettings
+
+
+class ReleaseSigningAppSettings(_Base):
+    release_signing: ReleaseSigningSettings
+
+
+class CrawlAppSettings(_Base):
+    app_db: DatabaseSettings
+    board_client: BoardClientSettings
+    crawl: CrawlSettings
+
+
+class AgentAppSettings(_Base):
+    agent: AgentSettings
+
+
 SERVICE_SETTINGS: tuple[type[_Base], ...] = (
     BoardAppSettings,
     CoordinatorSettings,
@@ -349,6 +506,12 @@ SERVICE_SETTINGS: tuple[type[_Base], ...] = (
     WorkflowAppSettings,
     McpAppSettings,
     BackupAppSettings,
+    MonitorAppSettings,
+    MonitorAuthorityAppSettings,
+    RecoveryAppSettings,
+    ReleaseSigningAppSettings,
+    CrawlAppSettings,
+    AgentAppSettings,
 )
 
 

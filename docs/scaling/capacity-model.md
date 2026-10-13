@@ -38,6 +38,37 @@ normal aggregate utilization must be at most about 46.7%. The 50-instance ideali
 therefore suggest at least 108 provisioned equivalents, rounded up with deployment/maintenance
 headroom. This is arithmetic, not an infrastructure quote or a claim that 108 instances suffice.
 
+## Extrapolated tier budgets
+
+All rows below are planning arithmetic, not measured capacity or an offer. The session calculation
+uses the preceding unmeasured 20,000 sockets per gateway and 46.7% normal utilization, rounded up,
+with at least three instances to span three zones. It excludes API/database/WAF/CDN capacity.
+Let **G** be a verified monthly gateway-instance quote and **B** the monthly price of the supporting
+services at that tier; gateway/reference cost is `instances × G + B`. Enter current region-specific
+quotes before a commercial estimate or any provisioning. No paid resources were created.
+
+| Concurrent sessions | Gateway equivalents, extrapolated | Monthly formula, extrapolated |
+|---|---|---|
+| 1,000 | 3 | `3G + B₁ₖ` |
+| 10,000 | 3 | `3G + B₁₀ₖ` |
+| 100,000 | 11 | `11G + B₁₀₀ₖ` |
+| 1,000,000 | 108 | `108G + B₁ₘ` |
+
+The browser scenario assumes an independently benchmarked worker-only node can sustain 50
+representative contexts. That assumption still needs the exact real-site workload even after a
+simple owned-page density run. Let **W** be its current monthly node quote. Reserve and test
+replacement/failure headroom separately; these rows describe active nodes only.
+
+| Browser contexts | Active nodes at assumed 50/node | Monthly worker formula, extrapolated |
+|---|---|---|
+| 50 | 1 | `W` |
+| 500 | 10 | `10W` |
+| 5,000 | 100 | `100W` |
+| 10,000 | 200 | `200W` |
+
+The existing demonstration adds no newly provisioned node cost. Its resource caps and measured
+simple-page test windows do not establish the quoted cloud-node assumptions above.
+
 ## Database and queue budgets
 
 Budget connections as sum(replicas × pool size) plus migration/monitoring/operational reserve,

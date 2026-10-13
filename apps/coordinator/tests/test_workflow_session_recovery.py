@@ -70,7 +70,14 @@ async def test_execution_refreshes_unusable_cached_session(api: Api, board: Boar
                 await invalidate(api, board, UUID(first["account_id"]), mode)
                 _access, second, _owner, _token = await proposal(api)
                 key = await configure(api, second)
-                assert await runner.run_one(api.tenant_id, key)
+                # Completion now starts a fresh account cooldown; a paced QUEUED job is
+                # retried by the durable dispatcher instead of being lost or acted early.
+                for _ in range(100):
+                    if await runner.run_one(api.tenant_id, key):
+                        break
+                    await asyncio.sleep(0.05)
+                else:
+                    pytest.fail("second workflow never passed bounded account admission")
                 async with tenant_tx(runner.engine, api.tenant_id) as conn:
                     assert (await jobs.inspect(conn, api.tenant_id, key))["state"] == "CONFIRMED"
                     assert (
