@@ -58,6 +58,11 @@ mailbox-preserving rollback passed separately from source tests.
 
 ## Operator responsibilities
 
+Use [data lifecycle](data-lifecycle.md) to map identity, credentials, approvals, raw evidence,
+exports and archives to access/retention decisions. [Service ownership](../operations/service-ownership.md)
+assigns release/incident/recovery duties, and [customer readiness](../legal/commercial-readiness.md)
+records the permission, privacy and support handoff before customer processing.
+
 Protect the signing and encryption keys separately from public verification keys. Verify the
 signature and complete manifest before extraction or activation; preserve the prior release and
 compatible rollback boundary. A valid local signature authenticates approved bytes under that

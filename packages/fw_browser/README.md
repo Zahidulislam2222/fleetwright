@@ -12,7 +12,7 @@ Browser-side building blocks for workers (Playwright).
 | `evidence.py` | Failure evidence (trace chunk + screenshot) with retention pruning |
 | `workflows.py` | Owned-origin form actions and bounded, read-only receipt matching; generic authentication independent of freight fields |
 
-Tests: `uv run pytest packages/fw_browser`.
+Tests: `uv run python -m pytest packages/fw_browser`.
 
 Workflow pages restrict destination origin, block service workers and close WebSockets. Receipt
 checks bind the exact account and payload; missing evidence remains inconclusive. Real browser
@@ -31,3 +31,15 @@ Missing receipt data must remain inconclusive unless the destination contract pr
 The built-in challenge solver is confined to the owned arithmetic fixture. Additional proxy or
 challenge services are not enabled merely by changing a URL; review destination policy, credentials,
 privacy and cost before integration. See [target onboarding](../../docs/legal/acceptable-use.md).
+
+## Runtime and evidence acceptance
+
+Verify real password/OTP sessions, expired state, exact receipt matching and bounded physical
+browser/network cleanup. Navigation, action and cleanup deadlines belong to typed settings; a
+missing receipt keeps an outcome uncertain. Any adapter must define how account identity and
+permitted destination origin are checked before acting.
+
+Raw traces/screenshots may contain page records even when an exported JSON summary is redacted.
+Assign private storage, access, retention and archive handling through
+[data lifecycle](../../docs/security/data-lifecycle.md). Browser connectivity is an operational
+readiness dependency, covered by the worker's real child-loss and strict-drain release checks.

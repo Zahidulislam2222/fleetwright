@@ -33,6 +33,6 @@ producers, draining old deliveries and preserving uncertainty/evidence. Do not d
 volume as a routine move. For upgrades involving legacy Redis-only raw detections or older
 incompatible backends, follow the explicit [deployment compatibility procedure](../operations/deployment.md).
 
-The reference Terraform describes a configurable cloud topology; offline mock plans do not
+The reference Terraform describes a configurable cloud topology; offline provider-substituted plans do not
 provision cells or prove zone-loss recovery. See [capacity arithmetic](capacity-model.md),
 [measurements](verification-2026-10-13.md) and [availability objectives](slo.md).

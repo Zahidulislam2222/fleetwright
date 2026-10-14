@@ -41,6 +41,11 @@ measurement establish that the service and operating team can support the object
 
 ## Measurement and response plan
 
+The [tier validation plan](validation-plan.md) defines the mixed workload and failure exercises.
+[Service ownership](../operations/service-ownership.md) assigns who watches the indicators,
+pauses risky releases when the budget is exhausted and coordinates recovery. Maintain the same
+eligible-event denominator across normal operation, overload and failure exercises.
+
 Collect independent synthetic probes, request latency/error histograms, queue/outbox age, workflow
 unknown counts, session health, database saturation, backup age and restore evidence. Keep metrics
 free of payloads/tokens and avoid tenant/job identifiers as unbounded metric labels. Configure

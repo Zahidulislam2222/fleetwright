@@ -41,3 +41,15 @@ Retain findings and failed attempts. A zero HIGH/CRITICAL vulnerability scan is 
 scanner result, not proof of complete security or ASVS certification. Separate production images,
 source dependencies and development-tool advisories. See [security controls](../../docs/security/controls.md),
 [maintenance](../../docs/maintenance.md) and [release procedure](../../docs/operations/deployment.md).
+
+## Release evidence handoff
+
+Record source/dependency findings, exact native image IDs, scanner/database time, SBOM hashes,
+trusted signature verification and complete artifact parity together. Check required app/web
+attestations before signing; a failed dependent step blocks the candidate. Rejected immutable
+candidates remain distinct from accepted releases.
+
+Preserve secret redaction and private raw reports. Operational acceptance also exercises the
+real HTTP/browser/MCP flows, account release, archive restoration and monitor recovery. Use
+[data lifecycle](../../docs/security/data-lifecycle.md) for report retention and
+[service ownership](../../docs/operations/service-ownership.md) for release responsibility.

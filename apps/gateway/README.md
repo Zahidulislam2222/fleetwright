@@ -22,3 +22,15 @@ For failures, inspect Redis connectivity, current authorization and reconnect be
 increasing limits. Measure fan-out, reconnect storms, slow clients and database refetch separately.
 See [API integration](../../docs/integrations.md), [runbooks](../../docs/operations/runbooks.md)
 and [verification](../../docs/testing.md).
+
+## Capacity promotion and incident evidence
+
+Before increasing connection caps, record authorized tenant/session population, active request
+rate, delivered invalidations, outbound queue memory and reconnect/refetch amplification. Measure
+p95/p99 delivery and revocation latency with slow readers and a skewed tenant. Include a cold
+cache and loss of a gateway replica in each proposed tier's acceptance run.
+
+Keep private API snapshots outside public caches. PostgreSQL remains the source for resynchronizing
+state after a lost hint; notification delivery does not authorize an action. The
+[validation plan](../../docs/scaling/validation-plan.md) and
+[service ownership matrix](../../docs/operations/service-ownership.md) define promotion and recovery.

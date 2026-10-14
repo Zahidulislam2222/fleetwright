@@ -4,18 +4,18 @@ Validated YAML product data, loaded at start-up. Environment settings (URLs, sec
 are **not** here; they come from environment variables (see
 [configuration](../docs/operations/configuration.md)).
 
-| File | Contents |
+| Data set or file | Contents |
 |---|---|
 | `targets.yaml` | Authentication selectors and identity API; freight-capable targets additionally define feed/booking paths |
 | `browser.yaml` | Browser profiles and which account group uses which |
 | `proxy.yaml` | Proxy providers (local provider by default) |
-| `board_catalogue.yaml` | Invented lanes, equipment and rates for the owned freight board |
+| `board_catalogue.yaml` | Maintained lanes, equipment and rates for the owned freight board |
 | `workflows.yaml` | Validated workflow inputs, action identity, browser forms, receipts and operator messages |
 | `testing.yaml` | Isolated local test database names |
 | `crawls.yaml` | Same-origin crawl seeds, extraction selectors, field/type limits and robots policy |
-| `crawl_catalogue.yaml` | Invented records for the owned paginated crawler destination |
+| `crawl_catalogue.yaml` | Maintained records for the owned paginated crawler destination |
 | `agent.yaml` | Maintained local-model templates, prompts, source/form/receipt contracts |
-| `demo.yaml` | Seed groups, filters/schedules, capped workspace controls and owned fault presets; filename is a stable compatibility identifier |
+| Workspace seed and preset policy | Account groups, filters/schedules, capped workspace controls and owned fault presets |
 | `uptime.json` | Independent public HTTPS checks and bounded collector settings |
 | `container-security-*.txt`, `web-security-apk.txt` | Reviewed exact image package patch/removal inputs |
 | `release-signing-public.pem` | Public verification key; private signing material remains ignored |
@@ -37,3 +37,15 @@ Environment URLs/model IDs/storage paths/limits and secrets belong to typed sett
 into control-flow modules. Public signing keys may be committed; private keys and actual credentials
 must remain outside this directory. Keep local/VPS environment templates and the generated settings
 schema synchronized. See [configuration ownership](../docs/operations/configuration.md).
+
+## Data review and publication
+
+Every maintained data change has a loader/schema owner and an affected behavior check. Workflow
+inputs, account groups and receipt rules must remain aligned across seed, API, MCP and workers.
+A changed contract fingerprint requires fresh human approval. Crawler extraction/robots policies
+and local-agent prompts follow their own bounded validation paths.
+
+Keep records used for owned verification identifiable as operator-controlled data. Actual customer
+records and credentials belong in approved private storage. Review legal/data obligations with
+[commercial readiness](../docs/legal/commercial-readiness.md) and
+[data lifecycle](../docs/security/data-lifecycle.md); publish only scrubbed configuration examples.

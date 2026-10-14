@@ -25,3 +25,16 @@ not a public HTTP MCP endpoint. A separate `fw_worker.workflows` process perform
 After an uncertain submission, inspect the stable job identity before retrying. Follow pagination
 cursors for lists/evidence and handle revoked/expired grants as authorization failures. See the
 [API/tool contract](../../docs/integrations.md) and [configuration](../../docs/operations/configuration.md).
+
+## Client integration acceptance
+
+Exercise both owned workflow contracts through an actual stdio client, with the execution worker
+running alongside the freight fleet. Require private owner approval, CONFIRMED destination evidence,
+bounded export, observe-only metrics and denial on the next call after grant revocation.
+Idempotent submission and receipt inspection resolve uncertain transport responses.
+
+Keep tenant/grant values in the approved private environment and revoke temporary verification
+authority after the check. Published examples contain safe placeholders only. Review
+[component operation](../../docs/operations/service-ownership.md),
+[data lifecycle](../../docs/security/data-lifecycle.md) and the
+[onboarding scope](../../docs/legal/commercial-readiness.md) before adding clients or destinations.

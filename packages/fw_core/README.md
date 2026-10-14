@@ -18,7 +18,7 @@ Shared core used by every service.
 | `latency.py` | Per-stage p50/p95/p99 from claim timestamps |
 | `logs.py`, `timeutil.py`, `data.py` | Structured logging, time helpers, YAML data loading |
 
-Tests: `uv run pytest packages/fw_core` (row-level security, claims including the 200 x 10,000 load
+Tests: `uv run python -m pytest packages/fw_core` (row-level security, claims including the 200 x 10,000 load
 test, filters, settings, configuration boundary).
 
 General workflows keep uncertain outcomes UNKNOWN until matching destination evidence resolves
@@ -38,3 +38,16 @@ The generated [settings schema](../../contracts/settings.json) and [environment 
 are checked for drift. Schema changes require migrations, tenant isolation tests and a reviewed
 compatibility plan; see [architecture](../../docs/architecture/overview.md) and
 [release safety](../../docs/operations/deployment.md).
+
+## Changes that require coordinated release review
+
+A state, tenant predicate, approval fingerprint, pacing rule or encrypted record format affects
+multiple processes. Review every caller and migration, then exercise contention, stale fences,
+revoked grants and interrupted acceptance against authoritative destination receipts. Preserve
+historical uncertain work rather than rewriting it into success.
+
+Configuration changes must update typed settings, safe environment templates and generated
+contracts together. Secrets and operational account values stay outside public source. Use
+[data lifecycle](../../docs/security/data-lifecycle.md),
+[component ownership](../../docs/operations/service-ownership.md) and
+[scale promotion](../../docs/scaling/validation-plan.md) when expanding the shared core.

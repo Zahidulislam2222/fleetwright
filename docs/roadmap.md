@@ -30,6 +30,12 @@ alone is not publication.
 
 ## Expansion milestones
 
+Every tier uses the [validation plan](scaling/validation-plan.md), an assigned
+[service/recovery owner](operations/service-ownership.md) and the
+[customer-readiness decision](legal/commercial-readiness.md). Legal/data scope, budgets and failure
+acceptance are reviewed with the technical milestone. The next public release records completed
+deployment/publication gates separately from this forward engineering sequence.
+
 | Priority | Deliverable | Required promotion evidence |
 |---|---|---|
 | 1 | Periodic operational revalidation | Repeat exact all-worker drain, immutable image/signature parity, live authorization/receipts, supervised backup/monitor and independent fresh encrypted restore after relevant changes |

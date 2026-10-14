@@ -24,3 +24,16 @@ tabs without inheriting their login. HTTP/WebSocket controls do not constitute a
 sandbox. POSIX state is restricted to private permissions; Windows privacy depends on directory ACLs.
 After interruption, keep SQLite/profile data and reconcile UNKNOWN receipts without repeating the
 save. Native UI edits survive blur/refresh/polling and require a fresh hash before approval.
+
+## Local ownership and acceptance record
+
+The device owner controls the installed model, task database, profile and destination allowlist.
+Verify model inventory locally and inspect the exact proposed form fields before approving one
+save. A changed draft requires a fresh approval fingerprint; cancellation preserves any accepted
+or uncertain outcome and its receipt history.
+
+The operational check uses the native local interface, edited text surviving blur/refresh,
+proposal approval, exact destination receipt, bounded stop and retained SQLite/profile state.
+Document the actual model and workload in a dated private verification record. Follow
+[data handling](../../docs/security/data-lifecycle.md) and
+[customer readiness](../../docs/legal/commercial-readiness.md) for additional integrations.

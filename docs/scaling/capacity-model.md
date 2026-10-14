@@ -17,7 +17,7 @@ were 1,535,565,824 and 2,082,316,288 bytes, respectively. These are aggregate si
 process charges, not interchangeable with historical per-context unique-memory estimates.
 See [the complete measurements](verification-2026-10-13.md), including retained failed attempts.
 
-For an illustrative worker-node scenario, assume 100 MB/context and reserve 30% of RAM for the
+For a planning worker-node scenario, assume 100 MB/context and reserve 30% of RAM for the
 OS, browser overhead, peaks and service processes. An 8 GB worker-only node then budgets about
 56 contexts by memory. This arithmetic still needs representative page, login, trace, CPU and
 network measurements before selecting a real node density. A shared database reduces that budget.

@@ -16,7 +16,7 @@ A worker process runs **one Chromium with many isolated contexts** ("slots"). Ea
 | `behaviours.py` | The watcher and claimer behaviours; bounded response reading |
 | `accounts.py` | Account holder lease: one worker per account, renewed every heartbeat |
 | `otp_manual.py` | One-time codes typed in by an operator |
-| `__main__.py` | Entry point; evidence pruning |
+| `__main__.py` | Bounded browser/driver supervision, signal-aware resource cleanup and evidence pruning |
 | `workflows.py` | Separately supervised approved-workflow runner: fenced account/job holds, authorization recheck, bounded browser action and read-only reconciliation |
 
 ## Run
@@ -24,7 +24,7 @@ A worker process runs **one Chromium with many isolated contexts** ("slots"). Ea
 ```bash
 uv run playwright install chromium
 uv run python -m fw_worker          # FW_WORKER__CELL, FW_WORKER__CONTEXTS, FW_WORKER__WATCHERS ...
-uv run pytest apps/worker           # real Chromium against a real board
+uv run python -m pytest apps/worker           # real Chromium against a real board
 ```
 
 Durable state remains in PostgreSQL and the encrypted session vault. A process death before action
@@ -55,3 +55,17 @@ browser endurance under the recorded resource limits, not 50/70 authenticated cu
 For destination capacity, measure login renewal, pacing, tenant skew, sustained receipts and drain
 on representative accounts. Keep the [capacity evidence](../../docs/scaling/verification-2026-10-13.md)
 with every proposed worker count.
+
+## Browser readiness and supervisor recovery
+
+The freight entrypoint supervises its browser connection with a bounded read-only Chromium
+roundtrip and a disconnect callback. The typed heartbeat interval and action timeout own cadence
+and deadline; protocol failure drains resources and exits for the existing container supervisor.
+Only connected, ready slots report running. Deliberate stopped/draining states remain explicit.
+
+Release acceptance terminates the actual driver and browser child separately, verifies one
+supervisor restart and ready slots, then performs an ordinary SIGTERM drain with stopped rows,
+zero account holds and a successful non-OOM exit. Cleanup attempts continue if another resource
+fails. Preserve uncertain action evidence through restart. See
+[operating ownership](../../docs/operations/service-ownership.md) and
+[the dated recovery evidence](../../docs/releases/2026-10-14.md).

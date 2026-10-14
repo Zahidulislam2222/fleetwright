@@ -68,6 +68,10 @@ Everything is validated at start-up; an invalid file stops the service with a cl
 
 ## Deployment and client boundaries
 
+For operating and data responsibilities, use [service ownership](service-ownership.md) and
+[data lifecycle](../security/data-lifecycle.md). A configuration change that expands destinations,
+providers, storage or permissions requires the [customer-readiness review](../legal/commercial-readiness.md).
+
 `deploy/deploy.config.json` owns release hostnames, paths, resource/network limits and backup unit settings.
 Dashboard copy is maintained in `apps/dashboard/src/content/*.json`. Workflow contracts, input/receipt
 rules and operator messages live in validated `config/workflows.yaml`; test database names live in

@@ -14,7 +14,7 @@ Tailor the destination, authorization, acceptance criteria and delivery scope be
 proposal. The fleet document contains eight reusable engineering topics; match them to the exact
 questions in a client's brief. These files are drafts only and do not record any external submission.
 
-The [release record](../releases/2026-10-13.md), [changelog](../../CHANGELOG.md) and
+The [release record](../releases/2026-10-14.md), [changelog](../../CHANGELOG.md) and
 [measurement notes](../scaling/verification-2026-10-13.md) distinguish deployed releases from local
 engineering evidence. No document here promises monthly availability, cloud deployment, arbitrary-site
 exactly-once execution or an unmeasured fleet size. Pricing and delivery dates are intentionally absent.
@@ -31,3 +31,15 @@ receipt behavior, and define acceptance before estimating. Keep future scale/ava
 separate from recorded fixture results. Exact job-post question matching is optional; the eight
 technical topics are reusable explanations. Pricing, contractual support and delivery dates require
 an independently agreed scope. No proposal here has been sent externally.
+
+## Scope and delivery handoff
+
+Use [commercial readiness](../legal/commercial-readiness.md) to turn a capability discussion into
+a destination-authorized delivery scope. Include exact acceptance, data categories, deployment
+ownership, support boundaries and relevant dated evidence. Keep estimates tied to the agreed
+workload, integrations and validation gates.
+
+For growth planning, attach the [future architecture](../scaling/future-architecture.md),
+[capacity assumptions](../scaling/capacity-model.md) and
+[validation plan](../scaling/validation-plan.md). A proposed concurrency or reliability tier carries
+its own representative workload, failure/recovery tests and operating budget review.

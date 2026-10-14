@@ -22,6 +22,8 @@ and deployed artifact parity passed. Use the [release record](releases/2026-10-1
 | Law and privacy | [Legal register](legal/README.md) · [Acceptable use](legal/acceptable-use.md) · [Privacy and retention](legal/privacy.md) |
 | Future scale and availability | [1M+ simultaneous users](scaling/README.md) · [Capacity arithmetic](scaling/capacity-model.md) · [Add an execution cell](scaling/adding-a-cell.md) · [99% / 99.9% SLOs and recovery](scaling/slo.md) |
 | Assurance and maintenance | [Testing and measurements](testing.md) · [Maintenance and accessibility](maintenance.md) · [Roadmap](roadmap.md) · [Changelog](../CHANGELOG.md) |
+| Operating ownership | [Service dependencies and release handoff](operations/service-ownership.md) · [Data lifecycle](security/data-lifecycle.md) |
+| Customer and expansion readiness | [Commercial/legal handoff](legal/commercial-readiness.md) · [Tiered scale/availability validation](scaling/validation-plan.md) |
 
 Measured results include their workload and date. Estimates explain assumptions. Targets have
 acceptance gates before becoming capacity commitments or contractual service levels.
@@ -40,3 +42,16 @@ acceptance gates before becoming capacity commitments or contractual service lev
 Documentation describes implemented contracts and explicit limits. A passed fixture test, an image
 scan, a signed artifact and a successful deployment establish different things; none substitutes for
 representative customer load or measured monthly availability.
+
+## Complete operating and expansion package
+
+Use [service ownership](operations/service-ownership.md) for process dependencies, health and
+shutdown responsibilities; [data lifecycle](security/data-lifecycle.md) for records/evidence/
+export/archive controls; and [commercial readiness](legal/commercial-readiness.md) for permission,
+license, privacy and support decisions. The [scale validation plan](scaling/validation-plan.md)
+connects the future 1M+ session architecture and 99%/99.9% objectives to repeatable promotion gates.
+
+Each component README describes its public contract and operating checks. Dated release records
+bind actual measurements to source, signed artifacts and deployment verification. Update those
+records after the relevant gates complete, and keep customer data and private access details out
+of public issues, documentation and release bundles.

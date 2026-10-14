@@ -39,3 +39,16 @@ The hosted `/agent` route is a launch/setup guide. Its local app connection is e
 the dashboard does not install a model or obtain access to the user's browser. Maintain copy in the
 content files, preserve established wire identifiers and distinguish runtime data from offline
 reference views. Final edge-image scans and exact static-file hashes are separate release gates.
+
+## Public presentation and release evidence
+
+Use professional product language in maintained content values. Preserve established role and
+API identifiers when revising labels, and use the publication-copy regression to keep internal
+names out of visible presentation. Describe future capacity through the architecture/roadmap;
+show measured operational state with its actual observation window.
+
+A dashboard release requires native owner/TOTP/approval interaction, public mutation denial,
+complete crawler download, SPA navigation and desktop/mobile checks. Observe script-policy errors
+and hydration on every public route. Pair the static manifest with the exact native web image;
+verify the backend independently. See [release ownership](../../docs/operations/service-ownership.md)
+and [scale validation](../../docs/scaling/validation-plan.md).

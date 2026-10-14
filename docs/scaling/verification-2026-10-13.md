@@ -134,11 +134,11 @@ readers; they are not isolated service capacity, an SLO, or a representative mul
 
 ## AWS reference
 
-Terraform 1.16.5 and signed hashicorp/aws 6.68.0 provider passed `validate`; all **3 mock-plan tests
+Terraform 1.16.5 and signed hashicorp/aws 6.68.0 provider passed `validate`; all **3 provider-substituted plan tests
 passed**. Inputs cover regions/zones, private subnets, immutable image, encrypted multi-zone data,
 Redis ACL/TLS, replicas, secrets references and private archives. No AWS credentials, paid API calls,
 provisioning or actual zone-loss test were used. The reference documents deployment prerequisites;
-mock validation does not prove the full production topology can be applied successfully.
+provider-substituted validation does not prove the full production topology can be applied successfully.
 
 ## Exact-image assurance and remaining scale limits
 

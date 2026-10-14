@@ -111,3 +111,19 @@ for release gates and incident handling. Contribution guidance is in [CONTRIBUTI
 report sensitive findings privately through [SECURITY.md](SECURITY.md). Future work and promotion
 criteria are in the [roadmap](docs/roadmap.md). Dependency and scanner findings remain disclosed
 rather than suppressed.
+
+## Product delivery and operating ownership
+
+Public documentation is maintained across the complete workspace. Start with the
+[documentation index](docs/README.md), then use [service ownership](docs/operations/service-ownership.md)
+to map each process to its startup, authority, health and recovery responsibilities.
+[Data lifecycle](docs/security/data-lifecycle.md) covers records, evidence, exports and archives;
+[commercial readiness](docs/legal/commercial-readiness.md) defines destination permission,
+licensing, privacy, support and release acceptance before customer onboarding.
+
+The future design targets **1M+ simultaneous authorized console users**, with a **99% initial
+operating objective** and **99.9% multi-zone objective**. The
+[validation plan](docs/scaling/validation-plan.md) specifies tiered workload, resource, failure,
+recovery and error-budget gates. Execution cells retain separate destination/account budgets.
+Current measurements stay in dated release records. Source, signed artifacts, runtime behavior,
+operational recovery and public publication are verified as separate delivery gates.

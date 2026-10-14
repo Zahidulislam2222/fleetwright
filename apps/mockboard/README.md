@@ -39,3 +39,14 @@ website or establish its idempotency behavior.
 The paginated catalogue feeds the separately supervised crawler. Its configured alternate layout
 exercises extraction/quality failure; it is independent of the live freight feed. See the
 [crawler guide](../../docs/operations/crawler.md) and [test evidence](../../docs/testing.md).
+
+## Verification ownership and data handling
+
+The operator controls these destinations and their maintained catalogue. Keep verification account
+pools separate from execution slots and compare receipts against the exact approved account/input
+fingerprint. Exercise expiry, changed layout and lost acknowledgement without contacting an
+unapproved external service. Resetting a destination never resolves an uncertain accepted action.
+
+Account credentials, raw administrative results and database archives remain private. Apply the
+[data lifecycle](../../docs/security/data-lifecycle.md) to exports and retention, and the
+[onboarding checklist](../../docs/legal/commercial-readiness.md) before introducing a customer target.

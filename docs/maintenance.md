@@ -27,6 +27,12 @@ pattern configuration is unused. Reassess on each tooling update; no finding is 
 
 ## Routine operations
 
+Assign process and incident duties using [service ownership](operations/service-ownership.md).
+Review retention/access decisions through [data lifecycle](security/data-lifecycle.md), and use
+[commercial readiness](legal/commercial-readiness.md) when destinations, customers, jurisdictions
+or support commitments change. Larger capacity tiers follow the
+[scale validation plan](scaling/validation-plan.md).
+
 | Frequency | Action | Evidence |
 |---|---|---|
 | Continuous | Watch service health, queue age, UNKNOWN age, outbox backlog and authorization failures | Monitoring history and actionable incident |

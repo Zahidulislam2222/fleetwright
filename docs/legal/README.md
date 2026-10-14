@@ -4,7 +4,7 @@ Fleetwright currently operates owned freight and maintenance workflows. A softwa
 authorized account and website permission are separate requirements. Before onboarding another
 destination, the operator must establish all three and record jurisdiction-specific obligations.
 This register is an engineering checklist for legal review, not a legal opinion or certification.
-Sources were checked on 2026-10-13; recheck before a commercial deployment or material use change.
+Primary-source links and the implementation register were rechecked on 2026-10-15; recheck before a commercial deployment or material use change.
 
 ## Authorization and use
 
@@ -106,3 +106,14 @@ who receives requests, approves subprocessors, rotates keys, handles account rev
 decides retention/legal holds. Recheck after new jurisdictions, destinations, regulated uses,
 providers or material law changes; retain the dated assessment privately. Operational approval
 does not replace required legal advice.
+
+## Evidence and review ownership
+
+For a customer deployment, maintain the decisions in a scoped onboarding record: destination and
+account permission, permitted actions/fields, license, controller/processor roles, notices,
+subprocessors/transfers, retention, incident contacts and support responsibilities. Revisit the
+record when the workflow, provider, jurisdiction or processing purpose changes.
+
+The [commercial readiness checklist](commercial-readiness.md) provides the handoff structure.
+[Data lifecycle](../security/data-lifecycle.md) maps technical stores to retention/access duties;
+[availability objectives](../scaling/slo.md) supplies the measurement contract for any later SLA.

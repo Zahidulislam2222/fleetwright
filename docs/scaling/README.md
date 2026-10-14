@@ -76,3 +76,15 @@ The [product roadmap](../roadmap.md) owns delivery sequencing.
 No cloud resources are created by these documents or the offline Terraform tests. Multi-zone
 spare capacity, managed data services, regional traffic and evidence storage require a separately
 reviewed operational budget; free-tier limits are not a capacity guarantee.
+
+## Reproducible tier acceptance
+
+The [scale validation plan](validation-plan.md) is the execution checklist for each future tier.
+It defines preparation, steady traffic, tenant skew, reconnect/slow-reader pressure, zone loss,
+restore and evidence publication. Tie the 99% operating objective and later 99.9% multi-zone objective
+to a declared SLI window and owned error-budget policy.
+
+Use measured bottlenecks to select the next infrastructure change. Record resource/cost scenarios
+before approval, then verify the resulting topology against the same workload and failure gates.
+Customer onboarding and data residency remain part of promotion, with responsibility assigned in
+[commercial readiness](../legal/commercial-readiness.md).

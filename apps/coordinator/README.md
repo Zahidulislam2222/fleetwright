@@ -32,3 +32,16 @@ A restart does not reset approval consumption, claim fences, pending detections 
 outcomes. Never restore an older backend across the durable-mailbox compatibility boundary.
 Review [crawler operations](../../docs/operations/crawler.md), [monitoring](../../docs/operations/monitoring.md)
 and [recovery](../../docs/operations/recovery.md) before changing retention or authority.
+
+## Operational acceptance
+
+API readiness, owner authentication and approval authority are separate checks. Validate password/
+TOTP, CSRF, role boundaries, bounded audit/evidence reads and revocation over real HTTP. A healthy
+API must also report worker readiness truthfully: starting/browserless freight slots stay stale.
+Run control, crawler and approved-workflow execution as separate supervised processes.
+
+Before release replacement, stop admission and drain all execution actors while PostgreSQL and the
+API remain reachable; account holds and uncertain outcomes stay inspectable. Verify zero legacy
+backlog, stop control, and take a validated archive before migration. Repeat owner/MCP/crawler/
+export flows after activation. [Service ownership](../../docs/operations/service-ownership.md) and
+[data lifecycle](../../docs/security/data-lifecycle.md) assign the corresponding responsibilities.

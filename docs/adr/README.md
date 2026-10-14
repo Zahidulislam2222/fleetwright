@@ -19,6 +19,7 @@ original context and consequences. Editorial terminology changes do not create a
 | 012 | [Persist raw detections before cell delivery](0012-durable-raw-detections.md) | Accepted; extends 003 |
 | 013 | [Local drafting and exact approval have separate authority](0013-local-drafting-and-approval-authority.md) | Accepted |
 | 014 | [Bind release identity and stop all actors before replacement](0014-release-identity-and-worker-shutdown.md) | Accepted |
+| 015 | [Browser readiness and child-process supervision](0015-browser-supervision-and-readiness.md) | Accepted; extends 006 and 014 |
 
 ## Reading the decisions
 
@@ -31,3 +32,14 @@ operational boundaries used by the current implementation.
 An accepted decision describes the chosen design, not a certification or measured capacity.
 Use [current architecture](../architecture/overview.md), [test evidence](../testing.md) and
 [release operations](../operations/deployment.md) for implementation status and promotion gates.
+
+## Decision ownership during expansion
+
+Record the authority boundary, affected services, compatibility consequences, data handling and
+rollback path for each substantial architectural change. Link its acceptance tests and dated
+release evidence. Future capacity decisions also need workload assumptions and a promotion gate;
+use [scale validation](../scaling/validation-plan.md).
+
+Operational decisions must identify who drains actors, verifies uncertain outcomes and restores
+service. [Service ownership](../operations/service-ownership.md) maps these duties; security/legal
+changes require the corresponding data and customer-readiness review before adoption.

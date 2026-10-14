@@ -34,3 +34,14 @@ installation or evidence of 1M-user capacity. Acceptance requires representative
 pooling, durable queues, zone-loss, restore and operational cost measurements before any promotion.
 See [future scale](../../docs/scaling/README.md), [availability objectives](../../docs/scaling/slo.md)
 and [deployment](../../docs/operations/deployment.md).
+
+## Promotion from reference to managed service
+
+Before any separately approved apply, produce a complete region-specific dependency and access
+inventory, cost model, IAM/data-residency review, release/migration plan and operator handoff. Test
+zone failure at the proposed traffic tier with existing spare capacity and bounded reconnects.
+Keep database writer ownership, RLS and uncertain-action reconciliation intact through failover.
+
+The [validation plan](../../docs/scaling/validation-plan.md) specifies the 1k→10k→100k→1M+ workload
+ladder; [customer readiness](../../docs/legal/commercial-readiness.md) covers legal, privacy, support
+and SLA decisions. The present task uses the existing server and local tools only.
