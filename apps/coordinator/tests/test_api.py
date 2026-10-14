@@ -353,3 +353,24 @@ async def test_slots_stopped_on_purpose_do_not_count_as_missing(api: Api, viewer
     async with tenant_tx(engine, api.tenant_id) as conn:
         await conn.execute(insert, {"t": api.tenant_id, "w": f"w-{uuid4().hex[:8]}", "s": "running"})
     assert await total() == before + 1
+
+
+async def test_starting_worker_is_not_healthy_over_authenticated_http(api: Api, viewer: httpx.AsyncClient) -> None:
+    before = (await viewer.get("/v1/overview")).json()["workers"]
+    worker_id = "test-readiness-" + uuid4().hex
+    async with tenant_tx(api.app.state.services.engine, api.tenant_id) as conn:
+        await conn.execute(
+            text(
+                """INSERT INTO workers (tenant_id,id,process_id,cell_id,mode,version,state)
+                   VALUES (:t,:i,'test-readiness','cell-a','watcher','test','starting')"""
+            ),
+            {"t": api.tenant_id, "i": worker_id},
+        )
+    reply = await viewer.get("/v1/workers")
+    assert reply.status_code == 200
+    worker = next(row for row in reply.json()["items"] if row["id"] == worker_id)
+    assert worker["status"] == "stale"
+    response = await viewer.get("/v1/overview")
+    assert response.status_code == 200
+    after = response.json()["workers"]
+    assert after == {"total": before["total"] + 1, "healthy": before["healthy"]}

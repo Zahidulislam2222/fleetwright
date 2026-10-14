@@ -162,7 +162,7 @@ async def workers(conn: AsyncConnection, tenant_id: UUID, cfg: ApiSettings) -> d
             status = "dead"
         elif r.state == "draining":
             status = "draining"
-        elif age >= cfg.worker_stale_after_s:
+        elif r.state == "starting" or age >= cfg.worker_stale_after_s:
             status = "stale"
         else:
             status = "healthy"

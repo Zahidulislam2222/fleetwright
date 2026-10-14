@@ -120,6 +120,7 @@ async def test_deleted_retired_tenant_cannot_abort_current_account_and_context_d
     fleet.cfg = WorkerSettings(cell=cell, drain_timeout_s=0.01)
     fleet.engine = db.worker
     fleet.process_id = "test-drain-" + uuid4().hex
+    fleet.browser = SimpleNamespace(is_connected=lambda: True)
     fleet.stopping = asyncio.Event()
     fleet.meter = SimpleNamespace(sample=lambda: (1, 0.0))
     current = Slot(fleet, fleet.process_id + "-g2-s0", current_tenant, "claimer", state="ready")

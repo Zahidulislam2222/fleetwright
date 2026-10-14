@@ -6,6 +6,7 @@ import asyncio
 import contextlib
 import logging
 import signal
+from collections.abc import Awaitable, Callable
 from datetime import date
 
 from playwright.async_api import Browser, async_playwright
@@ -58,18 +59,73 @@ async def main() -> None:
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=cfg.worker.headless)
         fleet = build_fleet(cfg, browser, {"watcher": watch, "claimer": claim})
-        await fleet.start()
+        disconnected = asyncio.Event()
+
+        def on_disconnect(_browser: Browser) -> None:
+            if not stop.is_set():
+                disconnected.set()
+                stop.set()
+
+        browser.on("disconnected", on_disconnect)
+        failure: BaseException | None = None
         try:
+            await fleet.start()
+            next_prune = loop.time()
             while not stop.is_set():
-                fleet.evidence.prune(date.today())
+                # Driver EOF does not necessarily emit Browser.disconnected. A bounded,
+                # read-only Chromium round trip also detects a dead driver transport.
+                try:
+                    async with asyncio.timeout(cfg.worker.action_timeout_ms / 1000):
+                        session = await browser.new_browser_cdp_session()
+                        await session.send("Browser.getVersion")
+                        await session.detach()
+                        # On failure the whole browser is disposed below. Do not await detach
+                        # in a finally block after this deadline has already cancelled send.
+                except Exception:
+                    disconnected.set()
+                    stop.set()
+                    break
+                if loop.time() >= next_prune:
+                    fleet.evidence.prune(date.today())
+                    next_prune = loop.time() + EVIDENCE_PRUNE_S
                 with contextlib.suppress(TimeoutError):
-                    await asyncio.wait_for(stop.wait(), EVIDENCE_PRUNE_S)
+                    await asyncio.wait_for(stop.wait(), cfg.worker.heartbeat_s)
+        except BaseException as error:
+            failure = error
         finally:
-            await fleet.drain()
-            await fleet.engine.dispose()
-            await fleet.events.aclose()
-            await fleet.stream.aclose()
-            await browser.close()
+            stop.set()
+            browser.remove_listener("disconnected", on_disconnect)
+            if failure is None and disconnected.is_set():
+                failure = RuntimeError("browser disconnected; exiting for supervised recovery")
+            cleanups: list[Callable[[], Awaitable[object]]] = [
+                fleet.drain,
+                fleet.engine.dispose,
+                fleet.events.aclose,
+                fleet.stream.aclose,
+            ]
+            close_otp = getattr(fleet.email_otp, "aclose", None)
+            if close_otp is not None:
+                cleanups.append(close_otp)
+            if browser.is_connected():
+
+                async def close_browser() -> None:
+                    await asyncio.wait_for(browser.close(), cfg.worker.action_timeout_ms / 1000)
+
+                cleanups.append(close_browser)
+            failures: list[Exception] = []
+            for cleanup in cleanups:
+                try:
+                    await cleanup()
+                except Exception as error:
+                    failures.append(error)
+            if failure is not None:
+                if failures:
+                    raise failure from ExceptionGroup("worker cleanup failures", failures)
+                raise failure
+            if failures:
+                raise failures[0] from (
+                    ExceptionGroup("worker cleanup failures", failures[1:]) if len(failures) > 1 else None
+                )
 
 
 if __name__ == "__main__":

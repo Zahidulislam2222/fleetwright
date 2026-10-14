@@ -245,7 +245,14 @@ class Fleet:
                         "c": self.cfg.cell,
                         "m": slot.role,
                         "a": None if slot.account is None else slot.account.id,
-                        "s": state_override or ("running" if slot.state != "stopped" else "stopped"),
+                        "s": state_override
+                        or (
+                            "stopped"
+                            if slot.state == "stopped"
+                            else "running"
+                            if slot.state == "ready" and self.browser.is_connected()
+                            else "starting"
+                        ),
                         "v": version("fw-worker"),
                         "mem": per_slot if slot.context is not None else None,
                         "cpu": cpu,
