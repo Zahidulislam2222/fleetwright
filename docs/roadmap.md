@@ -19,13 +19,14 @@ no AWS infrastructure has been provisioned by that evidence.
 
 ## Current verification boundary
 
-The current browser-recovery release is deployed from `41f5f16`. Runtime source `59c1cc0` passed
-289 tests with six expected skips and 435 unchanged hashes; the config-only tag delta passed 14
-configuration/two CSP cases with identical backend bytes. Actual driver/browser loss recovered under
-one existing supervisor restart, followed by strict drain. Exact owner/MCP/crawler/HTTP/CSP flows,
-static rollback, signed native-image/artifact parity, fresh backup restore and monitor recovery passed.
+The current publication release is deployed from `cd64e6b`; business runtime is unchanged from the
+14 October browser-recovery correction. Its final isolated complete suite passed 289 tests with six
+accounted skips, native exit0 and 363 unchanged runtime/configuration/build-prerequisite hashes.
+Actual driver/browser loss recovered under one existing supervisor restart, followed by strict drain.
+Exact owner/MCP/crawler/HTTP/CSP flows, static rollback, all-actor clean quiescence, signed native-image/
+artifact/host-source parity, fresh two-database restore and scheduler/monitor recovery passed.
 The installed-model templates, 50/70-context hours and independent encrypted recovery remain dated
-13 October evidence. See the [current release record](releases/2026-10-14.md); implementation evidence
+13 October evidence. See the [current release record](releases/2026-10-15.md); implementation evidence
 alone is not publication.
 
 ## Expansion milestones

@@ -1,6 +1,6 @@
 # Security control status
 
-Current release: [14 October browser recovery](../releases/2026-10-14.md). Its native app/web
+Current release: [15 October verified publication](../releases/2026-10-15.md). Its native app/web
 scans each reported zero HIGH/CRITICAL at the signed identities; source gates, real public flows,
 image/artifact parity and fresh operational checks passed. Earlier rc4 measurements below retain
 their 13 October boundary; the passive ZAP/dev-dependency exceptions are not new scan results.
@@ -24,8 +24,8 @@ source tests are separate; see [testing](../testing.md) and [maintenance](../mai
 | Data exposure | Bounded redacted JSON evidence, masked public views, log filtering | Raw browser artifacts/archives need private access and retention; complete DSR automation pending |
 | Input/network | Parameterized SQL, validated contracts, action/body limits, crawler DNS/IP pinning, redirect rejection and bounded fetch processes | Public crawl origins need explicit onboarding/egress review; local agent supports controlled form/receipt destinations with HTTP/WS guards |
 | Deployment | Private backend network, loopback edge binding, non-root/read-only app containers, limits and dropped capabilities | PostgreSQL init has explicitly required capabilities; host/Docker administrators remain trusted |
-| Web security | CSP, nosniff, frame/referrer/permissions policies, production TLS and exact inline-script hashes | Fifteen exact rc4 rehearsal routes passed full ten-second browser checks; inline styles and absent COEP remain explicit ZAP exceptions |
-| Supply chain | Lockfiles, pinned upstream images and patch packages, source/native-image scans, CycloneDX inventories and offline Ed25519 release signatures | Verified rc4 native app/web scans each have zero HIGH/CRITICAL; every subsequent release repeats identity/signature/scan gates; no external certification |
+| Web security | CSP, nosniff, frame/referrer/permissions policies, production TLS and exact inline-script hashes | Fifteen current local/public routes passed complete browser observation windows; inline styles and absent COEP remain explicit dated ZAP exceptions |
+| Supply chain | Lockfiles, pinned upstream images and patch packages, source/native-image scans, CycloneDX inventories and offline Ed25519 release signatures | Current exact native app/web scans each have zero HIGH/CRITICAL; every subsequent release repeats identity/signature/scan gates; no external certification |
 | Recovery | Verified archives, hash refusal, fresh restore tests, independent encrypted copy and local table-row parity | Full-host/key/application disaster recovery remains distinct from data-only restoration |
 
 ## Verified release boundary and exceptions

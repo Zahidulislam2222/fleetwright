@@ -1,4 +1,8 @@
-# Phase 1 — Frontend design spec (landing + clickable console prototype)
+# Phase 1 — Frontend design spec (landing + interactive console)
+
+This records the initial frontend design brief from 5 October 2026. Current implemented behavior
+and release evidence are maintained in the [documentation index](../docs/README.md) and
+[verification guide](../docs/testing.md).
 
 Written 2026-10-05, before implementation (gate workflow phase 1). Source of the workflow: the user's
 video instructions — Motion for React, the UI UX Pro Max skill, a MotionSites prompt as visual reference.
@@ -8,9 +12,9 @@ video instructions — Motion for React, the UI UX Pro Max skill, a MotionSites 
 | Decision | Value |
 |---|---|
 | Audience | Freelance-platform clients evaluating a bid (Post 1 crawling, Post 2 distributed Playwright claiming, Post 3 local AI agent); technical buyers |
-| Primary task | Understand in under a minute what Fleetwright guarantees (one claim per job, auditable latency, crash-safe), then open the console prototype |
+| Primary task | Understand in under a minute the intended claim ownership, auditable latency and crash recovery, then open the interactive console |
 | Subject | A fleet of browser workers coordinated by one control plane; claims; cells; latency stages |
-| Promise and proof | Promise = design guarantees from BUILD_PLAN. Proof today = the clickable console on mock data. Measured numbers do not exist yet and must not be shown as measured |
+| Promise and proof | The initial design brief specified claim/recovery invariants and console interactions using maintained fixture data. Backend measurements were not yet available at that stage; later evidence belongs to dated release records |
 | Creative proposition | A fleet at night converging on one beacon: many vessels, exactly one lands. The motion explains the claim guarantee |
 | Constraints | No fake customers, logos or metrics. No real third-party target. WCAG 2.2 AA. Smooth scroll. Paid media within the OpenRouter key cap |
 
@@ -25,7 +29,7 @@ Principle adopted: single full-bleed video viewport; white nav pill + dark sign-
 Deliberately NOT adopted:
   - hot-linked third-party CloudFront video (no licence) -> own Seedance 2.5 video
   - "Trusted by 2000+ Enterprises" + Microsoft/Amazon/Google marks (fabricated proof, trademark risk)
-    -> honest "worker types" ring row + "design prototype, mock data" pill
+    -> worker types ring row + clear initial fixture-data boundary
   - invented stats (120ms, 99.99%, 2.4M) -> BUILD_PLAN design targets, labelled as targets
   - BubbledotICG font from an unlicensed CDN -> Geist Pixel Circle (OFL, npm `geist`)
   - single viewport only -> the hero is viewport one of a smooth-scrolled story
@@ -51,20 +55,21 @@ signal accent (beacon amber) and functional status colours. Tokens live in `apps
 7. Guardrails — security + law commitments.
 8. Closing CTA + honest footer.
 
-## 5. Console prototype (`/console/*`, `/login`, `/agent`, `/board`)
+## 5. Interactive console (`/console/*`, `/login`, `/agent`, `/board`)
 
 Screens from BUILD_PLAN Phase 1: login + MFA; fleet overview; workers; accounts & sessions; filters;
 schedules; claims timeline; latency; crawl jobs; audit log; settings; agent window (task chat, step
-log, approval queue); mock load board (login, OTP, jobs feed, booking, captcha). Every data screen
-supports ready / loading / empty / error / permission-denied via a prototype state switcher. Data is
-typed mock data with `tenant_id` and cursor fields, clearly labelled "mock data".
+log, approval queue); owned freight exchange interface (login, OTP, jobs feed, booking, captcha).
+Every data screen supports ready / loading / empty / error / permission-denied via configured UI
+states. Initial frontend fixture data is typed with `tenant_id` and cursor fields; its provenance
+is distinct from later authenticated backend and destination receipts.
 
 ## 6. Acceptance criteria
 
 | # | Criterion | How verified |
 |---|---|---|
 | A1 | Hero reproduces the reference composition (nav pill, rings row, 2-line dot-matrix headline, subhead, glowing CTA, 4 stats with count-up) at 1440 and 390 widths | Screenshots at both widths |
-| A2 | No fabricated customers, logos or measured-looking metrics; every number is labelled a design target or mock | Text review of rendered page |
+| A2 | No fabricated customers, logos or measured-looking metrics; every number is labelled a design target or fixture input | Text review of rendered page |
 | A3 | Smooth scroll (Lenis) on wheel; native scroll on touch; anchors and keyboard scrolling still work | Browser test: wheel, anchor click, Space/PageDown |
 | A4 | `prefers-reduced-motion` shows final states: no smooth-scroll inertia, no scrubbed 3D, video paused to poster | Emulated reduced motion |
 | A5 | Claim-race section is scroll-scrubbed both directions and its explanation is readable in DOM without WebGL | Scroll up/down; WebGL disabled path |

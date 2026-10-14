@@ -1,5 +1,25 @@
 # Testing and verification evidence
 
+## Current release — 15 October 2026
+
+Release `20261015-publication-rc1`, owner source `cd64e6b`, passed **289 tests with six accounted
+skips in 714.96 seconds**: 295 collected cases, zero failures/errors and native wrapper exit0.
+All 362 Git-visible runtime/build/configuration hashes plus the generated dashboard BUILD_ID
+remained unchanged. Business runtime is unchanged from the 14 October correction.
+
+Complete the normal dashboard build before the full suite. Static export shares `.next`; run release
+export, image preparation and real-flow rehearsal outside the complete regression run. Earlier
+missing-prerequisite and timing failures remain recorded; the accepted isolated run changed no
+assertion or timeout. See [contributor order](../CONTRIBUTING.md) and
+[current release evidence](releases/2026-10-15.md).
+
+The skips are one installed-model opt-in, four POSIX-permission cases on Windows and one unavailable
+Windows symlink privilege. Existing installed-model and platform-specific proof retains its dated
+boundary. Exact current local/public owner, MCP, browser-recovery, crawler/export, HTTP/CSP,
+static rollback, signed parity, fresh restore and operational supervision gates passed separately.
+
+## Historical runtime and agent evidence
+
 The 14 October runtime regression passed **289 tests with six expected skips in 831.04 seconds**:
 295 collected cases, zero failures/errors and 435 source/tool hashes unchanged throughout.
 This frozen run used `59c1cc0`; release source `41f5f16` adds only the central unique web-image tag.
@@ -18,7 +38,7 @@ installed-model evidence covers all three templates.
 
 | Gate | Recorded result and scope |
 |---|---|
-| Python | Ruff passed; 236 files passed formatting; strict types passed on 87 source files; nine workspace wheel/sdist builds passed, including repeated affected-package builds |
+| Python | Ruff passed; 242 files passed formatting; strict types passed on 87 source files; all nine workspace wheel/sdist builds passed |
 | Dashboard | ESLint, generated route types, TypeScript, static 18-page build and configured contrast checks passed |
 | Source security | Gitleaks, Bandit and Semgrep passed without suppressions; retained dependency findings are documented separately |
 | Native images | Final application and web images: zero HIGH/CRITICAL findings with native SBOM/identity binding |
@@ -29,8 +49,8 @@ installed-model evidence covers all three templates.
 | Durable restart / rollback | Separate crawler processes resumed after natural lease expiry with higher fencing and identical four-record export; static rollback preserved a pending mailbox record and backend identities |
 | Browser endurance | 50 contexts: 3601.986s / 25,800 fixture clicks; 70 contexts: 3602.632s / 32,760 fixture clicks; zero errors |
 | Historical independent recovery | Final rc4 independent encrypted archive restored into two fresh local databases: 24+8 public tables / 32,941+83,766 rows; every source COPY-row count matched |
-| Current deployed backup | Post-activity archive restored into two fresh verification databases with 11 jobs/11 approvals/55 events/35 grants matched; one scheduler process-death recovery in 66.76 seconds produced a fresh archive |
-| Current supervision | Actual local rc3 driver/browser loss each recovered with one container restart in 7.703/8.031 seconds; four ready slots, strict exit0 drain/zero holds and unchanged other containers. Live monitor recovered in 33.37 seconds with renewed observe-only access/four healthy probes |
+| Current deployed backup | Post-activity archive restored into two fresh verification databases with snapshot counts: 13 jobs, 13 approvals, 65 events and 38 grants matched; one scheduler process-death recovery in 66.74 seconds produced a fresh archive |
+| Current supervision | Exact local publication rc1 driver/browser loss each recovered with one container restart in 10.235/10.047 seconds; four ready slots, strict exit0 drain/zero holds and unchanged other containers. Live monitor recovered in 26.65 seconds with renewed observe-only access/four fresh healthy probes |
 | Passive dynamic scan | Exact rc4: 78.450 seconds, zero HIGH / one MEDIUM / one LOW / six informational alerts; raw exit 2, retained inline-style CSP and COEP warnings |
 
 These are scoped results. Image findings depend on the recorded database/time and exact identity.
@@ -146,7 +166,8 @@ These tests supplement the unchanged contention workload rather than replacing i
 Lifecycle regressions also cover a removed retired tenant during fleet drain, failure reporting
 after cleanup and Linux crawler SIGTERM cancellation. The physical crawler control changed a
 forced exit 137 into exit 0 with fetch-child termination/reaping, socket closure and engine cleanup.
-Exact rc4 rehearsal independently verified successful stops and restoration using the final image.
+The historical 13 October rc4 rehearsal independently verified successful stops and restoration
+using its final image; current release lifecycle evidence is recorded above.
 
 ## Publication regression coverage
 

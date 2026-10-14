@@ -1,7 +1,7 @@
 # Scale verification — 13 October 2026
 
 This is dated capacity/assurance evidence. Current deployment is the
-[14 October browser-recovery release](../releases/2026-10-14.md); no new 50/70-context endurance,
+[15 October publication release](../releases/2026-10-15.md); no new 50/70-context endurance,
 installed-model or encrypted off-host run is claimed by that revalidation.
 
 

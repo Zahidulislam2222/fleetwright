@@ -14,11 +14,20 @@ Security problems: **do not** open an issue. Follow [SECURITY.md](SECURITY.md).
    `fw_core.settings` and `.env.example`; product data goes in `config/` YAML.
 4. **Gates, all green:**
    ```bash
+   cd apps/dashboard
+   npx next typegen
+   npm run lint
+   npm run typecheck
+   npm run build
+   cd ../..
    uv run ruff check . && uv run ruff format --check .
    uv run mypy
    uv run python tools/dev/run_tests.py -q
-   cd apps/dashboard && npx next typegen && npm run lint && npm run typecheck && npm run build
    ```
+   Finish the normal dashboard build before running the complete suite: the real login test starts
+   that server build. Run static release export and local image preparation after the suite finishes;
+   export shares the generated `.next` directory. Keep large competing local workloads outside
+   timing-sensitive database verification. Preserve failed results and diagnose them before rerunning.
    Security scanners (gitleaks, bandit, semgrep) must pass. Fix findings; never suppress them.
 5. **Real behaviour.** Exercise the actual flow (HTTP, CLI or browser), not only unit tests.
 6. **Review.** Every change is reviewed against its acceptance criteria before merge.

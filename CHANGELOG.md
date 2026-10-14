@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-10-15 — public operating documentation and verified deployment
+
+Deployed frontend/backend `20261015-publication-rc1`, owner source `cd64e6b`.
+
+- Updated all 20 READMEs and expanded ownership, data lifecycle, legal/commercial readiness,
+  tiered scale validation and the architecture decision record. Future 1M+ sessions and 99%/99.9%
+  objectives retain workload, failure, observation and promotion gates.
+- Final complete regression: 289 passed / six accounted skips, zero failures/errors, native exit0
+  and 363 unchanged source/configuration/generated-prerequisite hashes. Corrected contributor build order.
+- Exact native scans/SBOM/signature checks, all-actor clean shutdown, fresh quiescent archive,
+  eight-role image / 146-artifact / 224-host-source parity and actual public flows passed.
+- Fresh two-database restore and scheduler/monitor supervised recovery passed. Failed verification
+  attempts, the development advisory, dated passive findings and single-host boundaries remain recorded.
+
+[Release evidence](docs/releases/2026-10-15.md) separates current results from earlier model,
+endurance and independent encrypted recovery measurements.
+
 ## 2026-10-14 — browser-driver recovery and live revalidation
 
 Deployed `20261014-browser-recovery-rc3`, source `41f5f16`.

@@ -28,26 +28,28 @@ computer; it does not control your browser remotely.
 
 ## Evidence and current boundary
 
-The deployed frontend/backend release is `20261014-browser-recovery-rc3`, built from source `41f5f16`.
+The deployed frontend/backend release is `20261015-publication-rc1`, built from source `cd64e6b`.
 Exact rehearsal, native server image checks, independent artifact review, public workflows,
 operator UI and HTTP checks passed. All 146 deployed manifest entries and eight application/web
 service-role image identities matched the signed release. Verification is maintained in the
-[release record](docs/releases/2026-10-14.md).
+[release record](docs/releases/2026-10-15.md).
 
 | Evidence | Verified result and scope |
 |---|---|
-| Full backend regression | 289 passed / 6 expected skips in 831.04 seconds; zero failures/errors and 435 source/tool hashes unchanged |
+| Full backend regression | 289 passed / 6 accounted skips in 714.96 seconds; native exit0, zero failures/errors and 363 runtime/configuration/build-prerequisite hashes unchanged |
 | Browser/model flows | Current public MCP workflows confirmed with matching receipts; three installed-model local-agent templates retain their 13 October proof |
 | Exact release UI | Native owner login, fleet confirmation, crawler completion/export, public authorization denial, SPA navigation and responsive layouts passed with zero observed CSP violations/page errors |
 | Browser endurance | Separate 50- and 70-context owned-fixture runs exceeded one hour with zero errors; these are fixture endurance results |
 | Contention | 200 coordination competitors and 10,000 jobs with zero duplicate action attempts; competitors are not 200 browsers |
 | Image assurance | Final native application and web image scans reported zero HIGH/CRITICAL findings at the recorded scan |
-| Browser recovery | Actual driver and browser loss each caused one supervisor restart; four ready slots returned within 8.1 seconds; strict drain released all holds and exited 0 |
+| Browser recovery | Exact local driver and browser loss each caused one supervisor restart; four ready slots returned within 10.3 seconds; strict drain released all holds and exited 0 |
 | Recovery | Current post-activity archive restored into two new verification databases; backup/monitor supervisor recovery passed. Independent encrypted recovery remains the separately dated 13 October proof |
 
-The frozen regression used runtime source `59c1cc0`. Release source `41f5f16` adds only the central
-unique web-image tag; 14 configuration and two CSP regressions passed, with identical backend archive
-bytes. Driver-loss supervision and readiness now prevent a browserless process appearing healthy.
+Release source `cd64e6b` updates public documentation and the central distinct web-image tag;
+business runtime behavior is unchanged from the 14 October browser-supervision correction.
+The final complete suite ran after local builds/rehearsal finished, with its generated dashboard
+prerequisite frozen alongside runtime/configuration. Driver-loss supervision and readiness prevent
+a browserless process appearing healthy. Earlier failed verification attempts remain in the release record.
 
 Historical owned-board latency was approximately 365 ms p50 / 540 ms p95 from detection to
 confirmation. Workload, hardware and limits belong with every measurement:

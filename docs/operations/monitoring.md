@@ -66,11 +66,13 @@ boundary. Do not expose its recovery file or turn the authority adapter into a n
 
 ## Independent availability and proof limits
 
-The deployed `20261014-browser-recovery-rc3` collector passed protected unit/environment/source
-parity and current-release process-directory checks. An actual process death recovered in 33.37
+The deployed `20261015-publication-rc1` collector passed protected unit/environment/source
+parity and current-release process-directory checks. An actual process death recovered in 26.65
 seconds, renewed observe-only authority, revoked its predecessor and produced four fresh healthy
-probes with zero recorded failures. This is collector recovery, not whole-service availability.
-Notifications remain a local file/journal sink. See [current release evidence](../releases/2026-10-14.md).
+probes with zero active alerts. The retained history snapshot includes one earlier unhealthy
+workflow-metrics sample (1,608 of 1,609 healthy); its cause is not established by this proof.
+The four latest post-restart checks are healthy. This is collector recovery, not whole-service availability.
+Notifications remain a local file/journal sink. See [current release evidence](../releases/2026-10-15.md).
 
 Historically, the `20261013-free-local-rc4` host collector passed active service/source/unit/environment
 parity checks. Its four configured probes—archive freshness, observation grant, origin health and

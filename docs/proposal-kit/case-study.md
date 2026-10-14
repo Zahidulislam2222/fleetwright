@@ -1,7 +1,9 @@
 # Fleetwright: making browser automation inspectable and recoverable
 
-The [14 October release](../releases/2026-10-14.md) adds verified driver/browser-loss supervision
-and truthful slot readiness, with fresh public booking/workflow/crawler and operational proof.
+The [15 October release](../releases/2026-10-15.md) verifies the current driver/browser-loss
+supervision and slot readiness through exact rehearsal, fresh public booking/workflow/crawler,
+signed parity and operational recovery. Public ownership, legal/security and scale-promotion guides
+accompany the deployed source; business runtime is unchanged from the 14 October correction.
 The capacity/model/recovery figures below retain their original dated workload boundaries.
 
 

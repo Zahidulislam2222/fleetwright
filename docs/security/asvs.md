@@ -1,6 +1,6 @@
 # ASVS 5.0 assurance map — 13 October 2026
 
-Current release: [14 October browser recovery](../releases/2026-10-14.md). Its native app/web
+Current release: [15 October verified publication](../releases/2026-10-15.md). Its native app/web
 scans each reported zero HIGH/CRITICAL at the signed identities; source gates, real public flows,
 image/artifact parity and fresh operational checks passed. Earlier rc4 measurements below retain
 their 13 October boundary; the passive ZAP/dev-dependency exceptions are not new scan results.
@@ -48,7 +48,7 @@ artifact/running-image parity checks passed; see the release record for remainin
 | V12 transport | Public TLS and private backend network; pinned crawl HTTP destination | Internal database/Redis TLS is not established on current single-host network |
 | V13 configuration | Typed environment boundary, lockfiles, private credential recovery inventory | Full-tree source/config checks passed; repeat after relevant changes and for release staging |
 | V14 data protection | Redacted evidence, bounded artifacts, retention, private archives | Full data-subject request automation and independent retention assessment absent |
-| V15 supply chain/design | Native image SBOMs, source hashes, offline Ed25519 release signatures and source scans | Verified rc4 app/web each 0 HIGH/CRITICAL; 1094/72-component native SBOMs; Python 52 external distributions, 0 findings; dev-only npm HIGH retained; no SLSA claim |
+| V15 supply chain/design | Native image SBOMs, source hashes, offline Ed25519 release signatures and source scans | Current exact app/web each 0 HIGH/CRITICAL; 1094/72-component native SBOMs; Python audit of 52 external distributions retains its 13 October date; dev-only npm HIGH retained; no SLSA claim |
 | V16 audit/errors | Transactional DB audit, redaction, intent/outcome records | External uncertainty retained as UNKNOWN; no automatic replay |
 | V17 WebRTC | No WebRTC feature | Not applicable to present application |
 

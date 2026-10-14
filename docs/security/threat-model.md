@@ -1,6 +1,6 @@
 # Threat model
 
-Current release: [14 October browser recovery](../releases/2026-10-14.md). Its native app/web
+Current release: [15 October verified publication](../releases/2026-10-15.md). Its native app/web
 scans each reported zero HIGH/CRITICAL at the signed identities; source gates, real public flows,
 image/artifact parity and fresh operational checks passed. Earlier rc4 measurements below retain
 their 13 October boundary; the passive ZAP/dev-dependency exceptions are not new scan results.
