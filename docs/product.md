@@ -83,9 +83,9 @@ See [acceptable use](legal/acceptable-use.md), [privacy](legal/privacy.md) and
 | Approved structured data collection | Catalogue cycle | Durable frontier, extraction allowlist and private export |
 | Local content drafting and form save | Standalone local agent | Installed model drafts; SQLite binds human approval and receipt |
 
-Current verification includes 274 passing regression cases with six expected skips, exact rc4
-MCP/browser/crawler/lifecycle rehearsal, real installed-model browser flows and 50/70-context
-fixture endurance hours. The deployed rc4 public workflows/UI/HTTP and signed parity are recorded
-separately in the release record. These do not establish a
+Current verification includes 289 passing runtime regression cases with six expected skips, actual
+driver/browser-loss recovery, exact release MCP/browser/crawler rehearsal and public workflows/UI/HTTP
+with signed parity. Earlier installed-model flows and 50/70-context fixture hours retain their dated
+boundaries. The [current release record](releases/2026-10-14.md) separates these results. These do not establish a
 customer workload or availability SLA. [Testing](testing.md) records their scope;
 [future scale and availability](scaling/README.md) has explicit promotion gates.

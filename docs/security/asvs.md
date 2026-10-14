@@ -1,5 +1,11 @@
 # ASVS 5.0 assurance map — 13 October 2026
 
+Current release: [14 October browser recovery](../releases/2026-10-14.md). Its native app/web
+scans each reported zero HIGH/CRITICAL at the signed identities; source gates, real public flows,
+image/artifact parity and fresh operational checks passed. Earlier rc4 measurements below retain
+their 13 October boundary; the passive ZAP/dev-dependency exceptions are not new scan results.
+
+
 This is an engineering evidence map, **not ASVS Level 2 compliance, certification, or an independent
 penetration test**. L2 requires every applicable L1 and L2 requirement; selected passing controls
 cannot establish that claim. Unlisted requirements remain unassessed. The application, owned

@@ -48,7 +48,17 @@ Prefer restoring directly from `open_bundle` bytes to avoid plaintext archive fi
 
 ## Current release recovery status
 
-The deployed rc4 post-activity archive passed restoration into two fresh databases. Nine workflow
+The 14 October browser-recovery release has a fresh post-activity archive restored into two new
+verification databases. Workflow counts matched: 11 jobs, 11 approvals, 55 events and 35 grants.
+One injected backup-process death recovered in 66.76 seconds and produced a fresh archive.
+The active/enabled unit, protected inputs, process directory and all 224 host source hashes match
+the immutable release. Production databases were not overwritten. No new off-host export was
+performed in this revalidation; the independent encrypted restoration below remains dated
+13 October. Neither proof establishes whole-host/key recovery or a measured RPO/RTO.
+
+## Historical independent encrypted recovery — 13 October 2026
+
+The then-deployed rc4 post-activity archive passed restoration into two fresh databases. Nine workflow
 jobs, nine approvals, 45 events and six grants matched the source archive. One injected backup
 process death recovered under supervision in 70.13 seconds and produced another valid archive.
 This verifies the server backup/restore boundary separately from independent encrypted recovery.

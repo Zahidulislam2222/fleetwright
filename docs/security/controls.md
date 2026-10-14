@@ -1,5 +1,11 @@
 # Security control status
 
+Current release: [14 October browser recovery](../releases/2026-10-14.md). Its native app/web
+scans each reported zero HIGH/CRITICAL at the signed identities; source gates, real public flows,
+image/artifact parity and fresh operational checks passed. Earlier rc4 measurements below retain
+their 13 October boundary; the passive ZAP/dev-dependency exceptions are not new scan results.
+
+
 Status below describes implemented source and verification boundaries. It is not an independent
 penetration test, ASVS certification or a claim of universal security. Deployment evidence and
 source tests are separate; see [testing](../testing.md) and [maintenance](../maintenance.md).

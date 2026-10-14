@@ -19,14 +19,14 @@ no AWS infrastructure has been provisioned by that evidence.
 
 ## Current verification boundary
 
-The final full backend suite passed 274 tests with six expected skips in 762.41 seconds, with
-435 source/tool hashes unchanged. Actual three-template installed-model recording and separate
-50/70-browser-context fixture hours passed. Exact completion rc4 rehearsal passed real owner/MCP/
-browser/crawler/CSP flows, all-worker lifecycle checks, natural-lease crawler restart and
-mailbox-preserving static rollback. Final native image scans reported zero HIGH/CRITICAL findings.
-The signed rc4 release is deployed; public MCP/browser/HTTP, running-image and artifact parity
-passed. Final operational and publication evidence belongs in the
-[release record](releases/2026-10-13.md); implementation evidence alone is not publication.
+The current browser-recovery release is deployed from `41f5f16`. Runtime source `59c1cc0` passed
+289 tests with six expected skips and 435 unchanged hashes; the config-only tag delta passed 14
+configuration/two CSP cases with identical backend bytes. Actual driver/browser loss recovered under
+one existing supervisor restart, followed by strict drain. Exact owner/MCP/crawler/HTTP/CSP flows,
+static rollback, signed native-image/artifact parity, fresh backup restore and monitor recovery passed.
+The installed-model templates, 50/70-context hours and independent encrypted recovery remain dated
+13 October evidence. See the [current release record](releases/2026-10-14.md); implementation evidence
+alone is not publication.
 
 ## Expansion milestones
 

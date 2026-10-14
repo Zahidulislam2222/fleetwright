@@ -5,10 +5,10 @@ configuration and destination authorization before enabling actions. Integrators
 API/MCP reference and exact-approval contract; service owners should use deployment, monitoring,
 recovery and incident runbooks.
 
-Deployed frontend/backend release: `20261013-free-local-rc4`, source `bee3ebfc`.
-Its full regression passed 274 cases with six expected skips; exact rehearsal, native image scans,
+Deployed frontend/backend release: `20261014-browser-recovery-rc3`, source `41f5f16`.
+Its runtime regression passed 289 cases with six expected skips; exact rehearsal, native image scans,
 signatures and lifecycle checks passed. Public workflows/UI/HTTP, signed service-image identities
-and deployed artifact parity passed. Use the [release record](releases/2026-10-13.md) for status.
+and deployed artifact parity passed. Use the [release record](releases/2026-10-14.md) for status.
 
 | Area | Documents |
 |---|---|

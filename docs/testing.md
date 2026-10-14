@@ -1,7 +1,10 @@
 # Testing and verification evidence
 
-The final completion regression passed **274 tests with six expected skips in 762.41 seconds**:
-280 collected cases, zero failures/errors and 435 source/tool hashes unchanged throughout.
+The 14 October runtime regression passed **289 tests with six expected skips in 831.04 seconds**:
+295 collected cases, zero failures/errors and 435 source/tool hashes unchanged throughout.
+This frozen run used `59c1cc0`; release source `41f5f16` adds only the central unique web-image tag.
+Its 14 configuration and two CSP regressions passed; all 224 backend archive file bytes are identical.
+Actual driver/browser-loss recovery, bounded stalled-protocol/SIGTERM and readiness regressions passed.
 Four POSIX privacy checks and a POSIX release-symlink check passed separately; the installed-model
 opt-in was exercised through three actual local-model/browser receipts.
 
@@ -15,23 +18,24 @@ installed-model evidence covers all three templates.
 
 | Gate | Recorded result and scope |
 |---|---|
-| Python | Ruff passed; 234 files passed formatting; strict types passed on 87 source files; nine workspace wheel/sdist builds passed, including repeated affected-package builds |
+| Python | Ruff passed; 236 files passed formatting; strict types passed on 87 source files; nine workspace wheel/sdist builds passed, including repeated affected-package builds |
 | Dashboard | ESLint, generated route types, TypeScript, static 18-page build and configured contrast checks passed |
 | Source security | Gitleaks, Bandit and Semgrep passed without suppressions; retained dependency findings are documented separately |
 | Native images | Final application and web images: zero HIGH/CRITICAL findings with native SBOM/identity binding |
 | Exact local release | Both MCP workflows, grant revocation, owner UI, crawler/export, public authorization, SPA navigation and responsive checks passed |
 | Static CSP | Fifteen real routes observed after navigation; no recorded script-policy violations/page errors in the accepted run |
 | Deployed behavior | Public MCP workflows/receipts/revocation, owner console/crawler export and HTTP/audit/SSE passed; all 15 public routes hydrated with zero recorded CSP/page errors over full ten-second observations |
-| Exact rc4 lifecycle | Freight four slots/zero held accounts/exit 0; controlled 12-second workflow drain; crawler exit 0/non-OOM and exact restart; all used the configured 60-second grace |
+| Historical 13 October rc4 lifecycle | Freight four slots/zero held accounts/exit 0; controlled 12-second workflow drain; crawler exit 0/non-OOM and exact restart; all used the configured 60-second grace |
 | Durable restart / rollback | Separate crawler processes resumed after natural lease expiry with higher fencing and identical four-record export; static rollback preserved a pending mailbox record and backend identities |
 | Browser endurance | 50 contexts: 3601.986s / 25,800 fixture clicks; 70 contexts: 3602.632s / 32,760 fixture clicks; zero errors |
-| Recovery | Final rc4 independent encrypted archive restored into two fresh local databases: 24+8 public tables / 32,941+83,766 rows; every source COPY-row count matched |
-| Deployed backup | Final post-activity archive restored into two fresh databases with nine jobs/nine approvals/45 events/six grants matched; one scheduler process-death recovery in 70.13 seconds produced a fresh archive |
+| Historical independent recovery | Final rc4 independent encrypted archive restored into two fresh local databases: 24+8 public tables / 32,941+83,766 rows; every source COPY-row count matched |
+| Current deployed backup | Post-activity archive restored into two fresh verification databases with 11 jobs/11 approvals/55 events/35 grants matched; one scheduler process-death recovery in 66.76 seconds produced a fresh archive |
+| Current supervision | Actual local rc3 driver/browser loss each recovered with one container restart in 7.703/8.031 seconds; four ready slots, strict exit0 drain/zero holds and unchanged other containers. Live monitor recovered in 33.37 seconds with renewed observe-only access/four healthy probes |
 | Passive dynamic scan | Exact rc4: 78.450 seconds, zero HIGH / one MEDIUM / one LOW / six informational alerts; raw exit 2, retained inline-style CSP and COEP warnings |
 
 These are scoped results. Image findings depend on the recorded database/time and exact identity.
 Fixture contexts are not authenticated freight workers; source gates, signed artifacts and live
-deployment are separate proofs. See [release evidence](releases/2026-10-13.md) and
+deployment are separate proofs. See [current release evidence](releases/2026-10-14.md) and [historical evidence](releases/2026-10-13.md) and
 [capacity observations](scaling/verification-2026-10-13.md).
 
 ## Run reproducibly

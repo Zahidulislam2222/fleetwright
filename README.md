@@ -28,22 +28,26 @@ computer; it does not control your browser remotely.
 
 ## Evidence and current boundary
 
-The deployed frontend/backend release is `20261013-free-local-rc4`, built from source `bee3ebfc`.
+The deployed frontend/backend release is `20261014-browser-recovery-rc3`, built from source `41f5f16`.
 Exact rehearsal, native server image checks, independent artifact review, public workflows,
 operator UI and HTTP checks passed. All 146 deployed manifest entries and eight application/web
 service-role image identities matched the signed release. Verification is maintained in the
-[release record](docs/releases/2026-10-13.md).
+[release record](docs/releases/2026-10-14.md).
 
 | Evidence | Verified result and scope |
 |---|---|
-| Full backend regression | 274 passed / 6 expected skips in 762.41 seconds; zero failures/errors and 435 source/tool hashes unchanged |
-| Actual browser/model flows | Both approved MCP workflows and three installed-model local-agent templates confirmed with matching receipts |
+| Full backend regression | 289 passed / 6 expected skips in 831.04 seconds; zero failures/errors and 435 source/tool hashes unchanged |
+| Browser/model flows | Current public MCP workflows confirmed with matching receipts; three installed-model local-agent templates retain their 13 October proof |
 | Exact release UI | Native owner login, fleet confirmation, crawler completion/export, public authorization denial, SPA navigation and responsive layouts passed with zero observed CSP violations/page errors |
 | Browser endurance | Separate 50- and 70-context owned-fixture runs exceeded one hour with zero errors; these are fixture endurance results |
 | Contention | 200 coordination competitors and 10,000 jobs with zero duplicate action attempts; competitors are not 200 browsers |
 | Image assurance | Final native application and web image scans reported zero HIGH/CRITICAL findings at the recorded scan |
-| Release lifecycle | Exact rc4 freight, workflow and crawler stops exited successfully; natural-lease crawler restart and mailbox-preserving static rollback passed |
-| Recovery | Final rc4 archive encrypted off-host and restored into two fresh local databases; all 24+8 public tables matched source COPY-row counts |
+| Browser recovery | Actual driver and browser loss each caused one supervisor restart; four ready slots returned within 8.1 seconds; strict drain released all holds and exited 0 |
+| Recovery | Current post-activity archive restored into two new verification databases; backup/monitor supervisor recovery passed. Independent encrypted recovery remains the separately dated 13 October proof |
+
+The frozen regression used runtime source `59c1cc0`. Release source `41f5f16` adds only the central
+unique web-image tag; 14 configuration and two CSP regressions passed, with identical backend archive
+bytes. Driver-loss supervision and readiness now prevent a browserless process appearing healthy.
 
 Historical owned-board latency was approximately 365 ms p50 / 540 ms p95 from detection to
 confirmation. Workload, hardware and limits belong with every measurement:

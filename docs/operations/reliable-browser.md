@@ -211,7 +211,17 @@ Choose the approved-workflow account when submitting jobs; accounts occupied by 
 unavailable until released. This prevents the two supervised workers from monopolizing each other's
 capacity. Keep reserved groups aligned with the seed configuration.
 
-## Current completion verification and lifecycle
+## Current browser recovery and readiness
+
+The 14 October release supervises the Chromium connection with a bounded read-only protocol
+roundtrip and disconnect callback. Driver/browser loss triggers resource drain and process exit
+for the existing supervisor. Only connected, ready slots report running; starting slots remain stale.
+The typed heartbeat interval and action timeout own the probe cadence/deadline. The CDP method
+name is fixed protocol syntax. Actual child termination recovered four ready slots in one restart;
+strict normal SIGTERM still exits 0 with all holds released. Public bookings and both approved
+workflows passed. See the [current release record](../releases/2026-10-14.md).
+
+## Historical 13 October completion verification and lifecycle
 
 The final completion regression passed 274 tests with six expected skips in 762.41 seconds;
 all 435 source/tool hashes remained unchanged. Exact rc4 release rehearsal

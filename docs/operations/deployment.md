@@ -112,7 +112,18 @@ service correctness, secret hygiene or vulnerability absence. See
 
 ## Acceptance and operational handoff
 
-The deployed release is completion rc4 from source `bee3ebfc`. Exact signature/native
+The deployed release is `20261014-browser-recovery-rc3`, source `41f5f16`. Its runtime regression,
+actual driver/browser-loss recovery, strict freight drain, public MCP/UI/HTTP/CSP and native-image/
+146-artifact parity passed. All 224 host backup source files, protected units and current-release
+working directories match. Fresh two-database restore and backup/monitor recovery passed; see the
+[current release record](../releases/2026-10-14.md).
+
+The old running web container's image object was unavailable after a preparatory shared-tag
+collision. Do not claim full native-image rollback: retain the old static assets and use the new
+trusted web image with the compatible backend. This static-only path passed the mailbox-preserving
+rehearsal. Never reuse a mutable web tag or activate an incompletely attested/signed candidate.
+
+Historical 13 October completion rc4, source `bee3ebfc`: Exact signature/native
 image checks, local MCP/browser/crawler/HTTP/CSP flows and all-worker lifecycle checks passed.
 Its configured 60-second grace was exercised for freight, approved-workflow and crawler stops.
 The crawler resumed across separate processes after natural lease expiry with a higher fence.

@@ -1,5 +1,11 @@
 # Threat model
 
+Current release: [14 October browser recovery](../releases/2026-10-14.md). Its native app/web
+scans each reported zero HIGH/CRITICAL at the signed identities; source gates, real public flows,
+image/artifact parity and fresh operational checks passed. Earlier rc4 measurements below retain
+their 13 October boundary; the passive ZAP/dev-dependency exceptions are not new scan results.
+
+
 Assets: destination credentials/sessions, human authority, action integrity, tenant records,
 execution evidence, encryption keys and recoverable backups. Trust boundaries include the public
 edge, operator browser, MCP client process, coordinator/database, queue, worker, destination and

@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-10-14 — browser-driver recovery and live revalidation
+
+Deployed `20261014-browser-recovery-rc3`, source `41f5f16`.
+
+- Bounded Chromium protocol supervision detects driver/browser loss, drains resources and exits
+  for the existing container supervisor. Failed or unready slots no longer appear healthy.
+- Actual driver/browser termination, stalled protocol/SIGTERM, cleanup and authenticated readiness
+  regressions accompany the correction. A distinct central web-image tag avoids tag reuse.
+- Full runtime regression: 289 passed / six expected skips; types, lint, builds, source/native-image
+  security and independent reviews passed. Config-only tag delta passed 14 configuration/two CSP cases.
+- Public booking, both approved MCP workflows, crawler/export, role denial, HTTP and all 15 route
+  observations passed. Signed eight-role identity, 146 artifact hashes and 224 host source hashes match.
+- Fresh two-database restore and backup/monitor supervised recovery passed. The earlier encrypted
+  off-host recovery proof remains dated 13 October; no new export or whole-host recovery is claimed.
+
+[Release evidence](docs/releases/2026-10-14.md) records the retained failed drain, reviewed recovery,
+static-only rollback boundary and remaining advisory/hosting limits.
+
+
 ## 2026-10-13 — crawler, local agent and operational recovery
 
 Deployed as `20261013-free-local-rc4`, runtime source `bee3ebfc`.
