@@ -3,9 +3,9 @@
   "hostname": "fleetwright.zahidul-islam.com",
   "loopbackPort": 18090,
   "containerPort": 8080,
-  "webImage": "fleetwright-web:publication-20261015-01",
+  "webImage": "fleetwright-web:assistant-20261125-01",
   "webBuild": {
-    "baseImage": "nginx:stable-alpine@sha256:0985e772fb9f729e6fa0980da05fca5d9c468e870eed43071545afa9d2e27d94",
+    "baseImage": "nginx:stable-alpine@sha256:8eb2b5540eae779603cc3db84b3986a15ecb5308b54303146eee9837c137b51a",
     "dockerfile": "deploy/docker/web.Dockerfile"
   },
   "limits": {
