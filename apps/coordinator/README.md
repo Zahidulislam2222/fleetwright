@@ -4,7 +4,7 @@ Fleetwright's authenticated control plane: FastAPI `/v1`, password/TOTP sessions
 workflow approvals/grants, audit, freight dispatch/recovery, the console help assistant and
 operational tooling.
 
-Current release: `20261125-assistant-rc5` (source `26ebe46`), recorded in the
+Current release: `20261125-publication-rc1` (application code from the assistant release `20261125-assistant-rc5`, source `26ebe46`), recorded in the
 [25 November 2026 release record](../../docs/releases/2026-11-25.md).
 
 | Module | Responsibility |

@@ -112,7 +112,8 @@ service correctness, secret hygiene or vulnerability absence. See
 
 ## Acceptance and operational handoff
 
-The deployed release is `20261125-assistant-rc5`, source `26ebe46`: live files were checked before
+The deployed release is `20261125-publication-rc1`, source `d8b1d19` (documentation and assistant
+knowledge on the assistant release `20261125-assistant-rc5`, source `26ebe46`): live files were checked before
 cutover, workers quiesced with a verified archive, eight role identities and 147/147 deployed files
 matched the signed release, 25/25 origin checks and the public assistant flow passed, and backup and
 monitor services moved to the release; see the [current release record](../releases/2026-11-25.md).

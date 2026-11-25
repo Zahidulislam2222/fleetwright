@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-25 — public documentation refresh
+
+Deployed frontend/backend `20261125-publication-rc1`, owner source `d8b1d19`. All 20 component READMEs
+and the public docs updated for the help assistant: product, architecture, 1M+ scale and assistant
+cost model, service objectives, staged roadmap gates, security controls, data lifecycle, legal,
+testing, runbooks and API reference. Assistant knowledge index rebuilt; application code unchanged.
+
 ## 2026-11-25 — console help assistant and patched images
 
 Deployed frontend/backend `20261125-assistant-rc5`, owner source `26ebe46`.

@@ -5,7 +5,7 @@ freight exchange and the owned maintenance portal. They provide independent dest
 for authorized browser verification. The configured catalogue is owned test data; no commercial
 freight is offered and no real carrier is involved.
 
-Current release: `20261125-assistant-rc5` ([25 November 2026 record](../../docs/releases/2026-11-25.md)).
+Current release: `20261125-publication-rc1` (application code from the assistant release `20261125-assistant-rc5`) ([25 November 2026 record](../../docs/releases/2026-11-25.md)).
 That release added the collapsed visitor guide described below; booking, receipts and fault
 behaviour are unchanged.
 

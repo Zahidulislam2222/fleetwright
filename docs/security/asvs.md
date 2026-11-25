@@ -1,6 +1,7 @@
 # ASVS 5.0 assurance map — 13 October 2026, help assistant rows 25 November 2026
 
-Current release: [25 November 2026, `20261125-assistant-rc5`](../releases/2026-11-25.md), which added
+Current release: [25 November 2026, `20261125-publication-rc1`](../releases/2026-11-25.md), whose
+application code comes from `20261125-assistant-rc5`, which added
 the console help assistant. Native Trivy scans reported zero HIGH/CRITICAL in the application image
 and zero HIGH/CRITICAL with one MEDIUM in the web image; Ed25519 provenance verified; Gitleaks, Bandit
 and Semgrep passed (Semgrep blocked one commit, fixed rather than suppressed). Earlier results are

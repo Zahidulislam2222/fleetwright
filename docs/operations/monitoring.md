@@ -84,7 +84,8 @@ boundary. Do not expose its recovery file or turn the authority adapter into a n
 
 ## Independent availability and proof limits
 
-For the current `20261125-assistant-rc5` release the monitor was reinstalled with unit/environment
+For the `20261125-assistant-rc5` release and again for the current `20261125-publication-rc1`
+release, the monitor was reinstalled with unit/environment
 parity and is active ([release record](../releases/2026-11-25.md)); no new collector recovery test
 was recorded for it. Historically, the deployed `20261015-publication-rc1` collector passed
 protected unit/environment/source parity and current-release process-directory checks. An actual

@@ -29,8 +29,9 @@ computer; it does not control your browser remotely.
 
 ## Evidence and current boundary
 
-The deployed frontend/backend release is `20261125-assistant-rc5`, built from source `26ebe46`; it
-adds the console help assistant (16/16 live evaluation cases) and patched images (zero HIGH/CRITICAL
+The deployed frontend/backend release is `20261125-publication-rc1` (source `d8b1d19`), which publishes
+this documentation on the assistant release `20261125-assistant-rc5` (source `26ebe46`). That release
+added the console help assistant (16/16 live evaluation cases) and patched images (zero HIGH/CRITICAL
 native findings). All 147 deployed files and eight application/web service-role image identities
 matched the signed release, and public UI/HTTP checks passed. Verification is maintained in the
 [release record](docs/releases/2026-11-25.md); the [previous record](docs/releases/2026-10-15.md)

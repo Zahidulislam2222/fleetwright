@@ -13,7 +13,7 @@ Tests: `uv run python -m pytest packages/fw_queue`.
 
 Release operation and limits: [deployment](../../docs/operations/deployment.md) · [maintenance](../../docs/maintenance.md).
 
-Current release: `20261125-assistant-rc5` ([25 November 2026 record](../../docs/releases/2026-11-25.md)).
+Current release: `20261125-publication-rc1` (application code from the assistant release `20261125-assistant-rc5`) ([25 November 2026 record](../../docs/releases/2026-11-25.md)).
 That release added only the help assistant's keys; stream, outbox and delivery behaviour is
 unchanged. The assistant's keys hold amounts and counters, never question text, and expire
 on their own.

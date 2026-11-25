@@ -24,7 +24,8 @@ documentation search. Only the API joins a separate egress network for the model
 
 ## Current verification boundary
 
-The current release is `20261125-assistant-rc5`, deployed on 25 November 2026 from `26ebe46`; see the
+The current release is `20261125-publication-rc1` (source `d8b1d19`), which publishes this documentation
+on the assistant release `20261125-assistant-rc5` (source `26ebe46`), both deployed on 25 November 2026; see the
 [current release record](releases/2026-11-25.md). It added the help assistant and patched images;
 claims, workers, workflows and crawls are unchanged. Quality, source-security and GitHub CI gates
 passed; the assistant passed 18 API tests, 8 unit tests, a real-browser drawer test and a 16/16

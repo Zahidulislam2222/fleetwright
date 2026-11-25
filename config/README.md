@@ -4,7 +4,7 @@ Validated YAML/JSON product data, loaded at start-up. Environment settings (URLs
 timeouts, model ids, prices, budgets) are **not** here; they come from environment variables (see
 [configuration](../docs/operations/configuration.md)). An invalid file stops its service with a clear error.
 
-Current release: `20261125-assistant-rc5` ([25 November 2026 record](../docs/releases/2026-11-25.md)).
+Current release: `20261125-publication-rc1` (application code from the assistant release `20261125-assistant-rc5`) ([25 November 2026 record](../docs/releases/2026-11-25.md)).
 
 | Data set or file | Contents |
 |---|---|

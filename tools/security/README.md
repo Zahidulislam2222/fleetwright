@@ -3,7 +3,7 @@
 Local tools that produce dependency inventories, vulnerability reports and signed provenance for a
 release. No paid service or cloud account is used.
 
-Current release: `20261125-assistant-rc5`. Its scan, SBOM and signature results are in the
+Current release: `20261125-publication-rc1` (application code from the assistant release `20261125-assistant-rc5`). Its scan, SBOM and signature results are in the
 [25 November 2026 release record](../../docs/releases/2026-11-25.md); older records keep their dated
 results as history.
 

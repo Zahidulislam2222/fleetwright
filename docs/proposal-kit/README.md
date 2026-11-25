@@ -17,7 +17,7 @@ questions in a client's brief. These files are drafts only and do not record any
 
 ## Evidence to cite
 
-The current deployed release is `20261125-assistant-rc5`; its
+The current deployed release is `20261125-publication-rc1` (application code from the assistant release `20261125-assistant-rc5`); its
 [25 November 2026 release record](../releases/2026-11-25.md) covers the console help assistant,
 patched container images, the assistant's live evaluation and the failures found during the
 release. Earlier records, such as the [14 October 2026 release record](../releases/2026-10-14.md)

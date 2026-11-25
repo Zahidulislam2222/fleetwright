@@ -5,8 +5,9 @@ configuration and destination authorization before enabling actions. Integrators
 API/MCP reference and exact-approval contract; service owners should use deployment, monitoring,
 recovery and incident runbooks.
 
-Deployed frontend/backend release: `20261125-assistant-rc5`, source `26ebe46`. It adds the console
-help assistant and patched images; signed artifacts, service-image identities and 147/147 deployed
+Deployed frontend/backend release: `20261125-publication-rc1`, source `d8b1d19`: this documentation
+and the rebuilt assistant knowledge index on top of the assistant release (`20261125-assistant-rc5`,
+source `26ebe46`), which added the console help assistant and patched images; signed artifacts, service-image identities and 147/147 deployed
 files matched, public UI/HTTP and assistant flows passed, and GitHub quality/security checks passed.
 Use the [current release record](releases/2026-11-25.md) and the [October record](releases/2026-10-15.md) for status and retained verification boundaries.
 

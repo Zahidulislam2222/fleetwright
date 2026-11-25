@@ -5,7 +5,7 @@ production release is a static export behind the same-origin API/update proxy. T
 live authenticated data when available, including guest access to the public workspace; offline
 mode is labelled reference data and retains local interactions only.
 
-Current release: `20261125-assistant-rc5` (source `26ebe46`), recorded in the
+Current release: `20261125-publication-rc1` (application code from the assistant release `20261125-assistant-rc5`, source `26ebe46`), recorded in the
 [25 November 2026 release record](../../docs/releases/2026-11-25.md).
 
 | Route | Behavior |

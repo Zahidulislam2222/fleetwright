@@ -2,7 +2,7 @@
  "version": "2026-11-25.3",
  "sources": {
   "docs/console-guide.md": "3325af2dd02d834d1281d33cb9465b78030a353c6e3862d4e7428cb81e129111",
-  "README.md": "c72f8fee4af789115d51253b4434a32ee4e19bdfbac007657dd94ac90a5ae718",
+  "README.md": "3d13d55a39bacb1912d099636fbea15e7a30f1c0c15038bdd14d4979f70f8156",
   "docs/product.md": "6fc6b44d35cf5a94ea01d0d47d4a6da2554794c750ed443a8f13d65d1eb062f3",
   "docs/architecture/overview.md": "fc97d3e7aaf2a7093a74d31d3c578a0ceffd26b6ce7a06df07e858e03c088262",
   "docs/architecture/claim-lifecycle.md": "97db93a6f399b6df8acb8d7c00ae88d1e142d2e76be281ce69123f6a10b3f495",
@@ -11,7 +11,7 @@
   "docs/adr/0005-cells.md": "0fc3ffcb7ab581120c6034c1f2ec04d0d685e5fd9e42637204fce5f3121c8f84",
   "docs/adr/0009-scale-targets.md": "8dddc127278d62cd6aa251b1a8359ae3f1fde34ca13ac2efd7109bd2d683f3f8",
   "docs/scaling/README.md": "83a2e65f42c05b9f74d6309a0e63c97186795dfe637cd1b7abd4e81a8adc6ad6",
-  "docs/security/README.md": "542fd4fea28e81e1949b6314acd76af839b19e3ea625f8b68faf400290850a13",
+  "docs/security/README.md": "ecd9a99361fa04ca89891e9d08ac2daf9cbe32aceec1b90d201ae299cb904c7b",
   "docs/legal/acceptable-use.md": "dd74e20cd7f2c24794ad3abd9a92a098a701eb0c0645e11c40f93809330ed9ca",
   "docs/legal/privacy.md": "5e7c75a156466a00ad96947e89ff93829101d195a94a9c8c72bb0153b2ac622a",
   "docs/operations/crawler.md": "3738c3acc29dffeb05aec9f31af4907fd55bf831115ca982bf92884c269cfef1",
@@ -131,40 +131,46 @@
    "id": "README.md#3-0",
    "source": "README.md",
    "heading": "Fleetwright — Reliable Browser Operations — Evidence and current boundary",
-   "text": "The deployed frontend/backend release is `20261125-assistant-rc5`, built from source `26ebe46`; it\nadds the console help assistant (16/16 live evaluation cases) and patched images (zero HIGH/CRITICAL\nnative findings). All 147 deployed files and eight application/web service-role image identities\nmatched the signed release, and public UI/HTTP checks passed. Verification is maintained in the\nrelease record; the previous record\nkeeps the October workflow, recovery and endurance evidence.\n\n| Current release check (25 November 2026) | Result and scope |\n| Help assistant | 16/16 held-out live cases (prompt injection, key extraction, write attempts, refusals), p95 4.98 s, at most $0.0010 per question; 18 API, 8 unit and one real-browser test |\n| Images | Application and web images: zero HIGH/CRITICAL findings (Trivy 0.75.0) at the recorded scan; signed provenance verified |\n| Deployment | Live files checked before cutover; quiesced with a verified archive; 147/147 file parity, eight role identities, 25/25 origin checks, public TLS and real assistant flow passed |\n| Continuous integration | GitHub quality, security and independent uptime workflows passed on the deployed source |\n\nThe table below is retained October evidence for the fleet, workflows and recovery; it was not\nre-measured in November because that runtime behaviour did not change."
+   "text": "The deployed frontend/backend release is `20261125-publication-rc1` (source `d8b1d19`), which publishes\nthis documentation on the assistant release `20261125-assistant-rc5` (source `26ebe46`). That release\nadded the console help assistant (16/16 live evaluation cases) and patched images (zero HIGH/CRITICAL\nnative findings). All 147 deployed files and eight application/web service-role image identities\nmatched the signed release, and public UI/HTTP checks passed. Verification is maintained in the\nrelease record; the previous record\nkeeps the October workflow, recovery and endurance evidence.\n\n| Current release check (25 November 2026) | Result and scope |\n| Help assistant | 16/16 held-out live cases (prompt injection, key extraction, write attempts, refusals), p95 4.98 s, at most $0.0010 per question; 18 API, 8 unit and one real-browser test |\n| Images | Application and web images: zero HIGH/CRITICAL findings (Trivy 0.75.0) at the recorded scan; signed provenance verified |\n| Deployment | Live files checked before cutover; quiesced with a verified archive; 147/147 file parity, eight role identities, 25/25 origin checks, public TLS and real assistant flow passed |\n| Continuous integration | GitHub quality, security and independent uptime workflows passed on the deployed source |"
   },
   {
    "id": "README.md#4-1",
    "source": "README.md",
    "heading": "Fleetwright — Reliable Browser Operations — Evidence and current boundary",
-   "text": "| October evidence (13–15 October 2026) | Verified result and scope |\n| Full backend regression | 289 passed / 6 accounted skips in 714.96 seconds; native exit0, zero failures/errors and 363 runtime/configuration/build-prerequisite hashes unchanged |\n| Browser/model flows | Current public MCP workflows confirmed with matching receipts; three installed-model local-agent templates retain their 13 October proof |\n| Exact release UI | Native owner login, fleet confirmation, crawler completion/export, public authorization denial, SPA navigation and responsive layouts passed with zero observed CSP violations/page errors |\n| Browser endurance | Separate 50- and 70-context owned-fixture runs exceeded one hour with zero errors; these are fixture endurance results |\n| Contention | 200 coordination competitors and 10,000 jobs with zero duplicate action attempts; competitors are not 200 browsers |\n| Image assurance | Final native application and web image scans reported zero HIGH/CRITICAL findings at the recorded scan |\n| Browser recovery | Exact local driver and browser loss each caused one supervisor restart; four ready slots returned within 10.3 seconds; strict drain released all holds and exited 0 |\n| Recovery | Current post-activity archive restored into two new verification databases; backup/monitor supervisor recovery passed. Independent encrypted recovery remains the separately"
+   "text": "The table below is retained October evidence for the fleet, workflows and recovery; it was not\nre-measured in November because that runtime behaviour did not change."
   },
   {
    "id": "README.md#5-2",
    "source": "README.md",
    "heading": "Fleetwright — Reliable Browser Operations — Evidence and current boundary",
+   "text": "| October evidence (13–15 October 2026) | Verified result and scope |\n| Full backend regression | 289 passed / 6 accounted skips in 714.96 seconds; native exit0, zero failures/errors and 363 runtime/configuration/build-prerequisite hashes unchanged |\n| Browser/model flows | Current public MCP workflows confirmed with matching receipts; three installed-model local-agent templates retain their 13 October proof |\n| Exact release UI | Native owner login, fleet confirmation, crawler completion/export, public authorization denial, SPA navigation and responsive layouts passed with zero observed CSP violations/page errors |\n| Browser endurance | Separate 50- and 70-context owned-fixture runs exceeded one hour with zero errors; these are fixture endurance results |\n| Contention | 200 coordination competitors and 10,000 jobs with zero duplicate action attempts; competitors are not 200 browsers |\n| Image assurance | Final native application and web image scans reported zero HIGH/CRITICAL findings at the recorded scan |\n| Browser recovery | Exact local driver and browser loss each caused one supervisor restart; four ready slots returned within 10.3 seconds; strict drain released all holds and exited 0 |\n| Recovery | Current post-activity archive restored into two new verification databases; backup/monitor supervisor recovery passed. Independent encrypted recovery remains the separately"
+  },
+  {
+   "id": "README.md#6-3",
+   "source": "README.md",
+   "heading": "Fleetwright — Reliable Browser Operations — Evidence and current boundary",
    "text": "dated 13 October proof |\n\nDriver-loss supervision and readiness prevent a browserless process appearing healthy. Failed\nverification attempts, rejected release candidates and a layout defect that briefly reached\nproduction are kept in the release records and the defect log.\n\nHistorical owned-board latency was approximately 365 ms p50 / 540 ms p95 from detection to\nconfirmation. Workload, hardware and limits belong with every measurement:\ntesting and capacity evidence.\nThe deployment has a single-host failure domain. 1M+ simultaneous control-plane users\nand 99% / 99.9% availability objectives are future design and validation\ntargets. Arbitrary-site exactly-once execution and measured monthly availability are not established."
   },
   {
-   "id": "README.md#6-0",
+   "id": "README.md#7-0",
    "source": "README.md",
    "heading": "Fleetwright — Reliable Browser Operations — Install and run",
    "text": "Use Python 3.12, uv, Docker Compose and Node.js 24 for the full workspace:\n\nContinue with local development to start the owned destination,\nseed accounts, then start the API, gateway, control loop and workers. Run the dashboard from\n`apps/dashboard`. Use separate local\ncredentials and preserve existing data volumes.\n\nFor the standalone agent, follow the local-agent guide.\nIt needs SQLite, Playwright Chromium and an installed local Ollama model; PostgreSQL, Redis,\nDocker and paid model APIs are not runtime requirements."
   },
   {
-   "id": "README.md#7-0",
+   "id": "README.md#8-0",
    "source": "README.md",
    "heading": "Fleetwright — Reliable Browser Operations — Integration and operating contract",
    "text": "Environment-specific settings have one typed boundary:\n`fw_core.settings`, documented in\nconfiguration and `.env.example`.\nMaintained destination contracts, prompts and product data live in `config/`; secrets stay private.\n\nMCP clients submit proposals and inspect evidence. They cannot grant themselves authority or approve\ntheir own work. Owners review exact proposals in the console. A changed, expired, revoked or consumed\napproval cannot authorize an action. Interrupted actions remain `UNKNOWN` until matching receipts\nresolve them; redeployment, cancellation and a missing response do not undo a destination action.\n\nBefore onboarding, review product scope, acceptable use,\nprivacy, security controls and the license.\nOperational support, commercial terms and service-level commitments require a separate agreement."
   },
   {
-   "id": "README.md#8-0",
+   "id": "README.md#9-0",
    "source": "README.md",
    "heading": "Fleetwright — Reliable Browser Operations — Repository and maintenance",
    "text": "| Directory | Owner responsibility |\n| `apps/coordinator` | API/authentication, approvals, dispatch/recovery, crawler, migrations and operational CLIs |\n| `apps/worker` | Freight fleet and separately supervised approved-workflow runner |\n| `apps/dashboard`, `apps/gateway` | Operator interface and authorized server-sent updates |\n| `apps/mockboard` | Owned destination applications and independent receipts |\n| `packages/fw_core`, `packages/fw_queue`, `packages/fw_browser` | Durable authority, messaging and browser adapters |\n| `packages/fw_mcp`, `packages/fw_agent` | Scoped MCP supervision and standalone local app |\n| `config`, `contracts`, `deploy` | Validated data, generated schemas and immutable release inputs |\n| `tools/security`, `infra/terraform` | Local assurance tooling and unprovisioned AWS reference |\n\nUse testing, maintenance and runbooks\nfor release gates and incident handling. Contribution guidance is in CONTRIBUTING.md;\nreport sensitive findings privately through SECURITY.md. Future work and promotion\ncriteria are in the roadmap. Dependency and scanner findings remain disclosed\nrather than suppressed."
   },
   {
-   "id": "README.md#9-0",
+   "id": "README.md#10-0",
    "source": "README.md",
    "heading": "Fleetwright — Reliable Browser Operations — Product delivery and operating ownership",
    "text": "Public documentation is maintained across the complete workspace. Start with the\ndocumentation index, then use service ownership\nto map each process to its startup, authority, health and recovery responsibilities.\nData lifecycle covers records, evidence, exports and archives;\ncommercial readiness defines destination permission,\nlicensing, privacy, support and release acceptance before customer onboarding.\n\nThe future design targets **1M+ simultaneous authorized console users**, with a **99% initial\noperating objective** and **99.9% multi-zone objective**. The\nvalidation plan specifies tiered workload, resource, failure,\nrecovery and error-budget gates. Execution cells retain separate destination/account budgets.\nCurrent measurements stay in dated release records. Source, signed artifacts, runtime behavior,\noperational recovery and public publication are verified as separate delivery gates."
@@ -461,7 +467,7 @@
    "id": "docs/security/README.md#1-0",
    "source": "docs/security/README.md",
    "heading": "Security documentation — Current release evidence",
-   "text": "The current deployed release is `20261125-assistant-rc5` (source `26ebe46`). Its\n25 November 2026 release record is the source for current security\nresults. Older release records, and the earlier measurements in the ASVS map, keep their dated\nboundaries as history."
+   "text": "The current deployed release is `20261125-publication-rc1` (application code from the assistant release `20261125-assistant-rc5`, source `26ebe46`). Its\n25 November 2026 release record is the source for current security\nresults. Older release records, and the earlier measurements in the ASVS map, keep their dated\nboundaries as history."
   },
   {
    "id": "docs/security/README.md#2-1",

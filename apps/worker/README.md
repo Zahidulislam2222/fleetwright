@@ -43,7 +43,7 @@ proof. See the [workflow runbook](../../docs/operations/reliable-browser.md).
 
 Release operation and limits: [deployment](../../docs/operations/deployment.md) · [maintenance](../../docs/maintenance.md).
 
-Current release: `20261125-assistant-rc5` ([25 November 2026 record](../../docs/releases/2026-11-25.md)).
+Current release: `20261125-publication-rc1` (application code from the assistant release `20261125-assistant-rc5`) ([25 November 2026 record](../../docs/releases/2026-11-25.md)).
 Worker and workflow runtime behaviour is unchanged in that release; it shipped patched image packages.
 Load-sensitive browser tests (start-up, pacing, timing) can fail intermittently on a busy development
 machine and pass when rerun in isolation; the release record lists this as a known limit.

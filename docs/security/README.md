@@ -17,7 +17,7 @@ the exact account and inputs; database-backed authority governs execution and re
 
 ## Current release evidence
 
-The current deployed release is `20261125-assistant-rc5` (source `26ebe46`). Its
+The current deployed release is `20261125-publication-rc1` (application code from the assistant release `20261125-assistant-rc5`, source `26ebe46`). Its
 [25 November 2026 release record](../releases/2026-11-25.md) is the source for current security
 results. Older release records, and the earlier measurements in the ASVS map, keep their dated
 boundaries as history.
