@@ -39,7 +39,9 @@ async def test_login_waits_for_initial_session_before_accepting_password(api: Ap
     release = asyncio.Event()
     password_requests = []
     try:
-        async with asyncio.timeout(45), httpx.AsyncClient() as probe:
+        # Generous startup budget: a cold first render is slow on a busy machine; this test checks the
+        # API handshake, not server start-up speed.
+        async with asyncio.timeout(120), httpx.AsyncClient(timeout=30) as probe:
             while True:
                 assert process.returncode is None
                 try:

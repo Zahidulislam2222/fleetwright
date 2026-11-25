@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ExternalLink, MessageCircleQuestionMark, RotateCcw, Send, Sparkles, Square, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import copy from "@/content/console.json";
 import config from "@/config/live.json";
@@ -77,7 +78,16 @@ export function AssistantButton() {
         <MessageCircleQuestionMark aria-hidden className="size-4" />
         <span className="hidden sm:inline">{A.open}</span>
       </button>
-      {open && <AssistantPanel onClose={close} entries={entries} setEntries={setEntries} />}
+      {/* Portalled to <body>: the sticky header's backdrop-filter would otherwise become the containing
+          block of this fixed overlay and squash the drawer into the header strip. The wrapper carries the
+          console's colour tokens and light/dark theme, which are scoped to .console-theme. */}
+      {open &&
+        createPortal(
+          <div className="console-theme">
+            <AssistantPanel onClose={close} entries={entries} setEntries={setEntries} />
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

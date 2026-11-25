@@ -245,6 +245,7 @@ class Assistant:
         head: list[dict[str, Any]] = [
             {"role": "system", "content": self.copy.system_prompt},
             {"role": "system", "content": self._context(passages)},
+            {"role": "system", "content": self._escalation()},
         ]
         earlier = self._history(history)
         turn: list[dict[str, Any]] = [{"role": "user", "content": question}]  # question + this turn's tool work
@@ -270,6 +271,11 @@ class Assistant:
                 raise ProviderError("empty answer")
             return content, sorted(set(used)), spent, step + 1
         raise ProviderError("no final answer within the step limit")
+
+    def _escalation(self) -> str:
+        """The human contact route (global Rule 24), always available whatever retrieval found."""
+        contact = self.copy.contact
+        return f"Human help for anything you cannot answer: {contact.label}: {contact.url}. {contact.note}"
 
     def _context(self, passages: list[Section]) -> str:
         if not passages:

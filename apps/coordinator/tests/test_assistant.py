@@ -168,6 +168,7 @@ async def test_an_ai_answer_is_marked_cites_sources_and_settles_spend(api: Api) 
     sent = provider.requests[0]
     expect(sent["model"] == "fake/model" and sent["provider"] == {"data_collection": "deny"})
     expect(sent["messages"][0]["role"] == "system" and "untrusted" in sent["messages"][1]["content"])
+    expect(assistant.copy.contact.url in sent["messages"][2]["content"])  # human escalation always offered
     names = {t["function"]["name"] for t in sent["tools"]}
     expect(names == set(assistant.copy.tools))
     expect(not any(n.startswith(("create", "update", "delete", "set", "run", "approve")) for n in names))
