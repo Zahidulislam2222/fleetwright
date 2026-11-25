@@ -571,5 +571,38 @@
       },
       "max": "max {n}"
     }
+  },
+  "assistant": {
+    "open": "Ask",
+    "openLabel": "Open the help assistant",
+    "title": "Help assistant",
+    "aiBadge": "AI",
+    "close": "Close the help assistant",
+    "intro": "Ask about this console, what a state means, or how the fleet is doing right now.",
+    "suggestionsLabel": "Try asking",
+    "inputLabel": "Your question",
+    "placeholder": "Ask about Fleetwright…",
+    "send": "Ask",
+    "stop": "Stop",
+    "stopped": "Stopped. Nothing was changed.",
+    "newChat": "New conversation",
+    "thinking": "Looking it up…",
+    "you": "You",
+    "assistantName": "Assistant",
+    "aiGenerated": "AI-generated answer",
+    "searchResult": "Documentation search result",
+    "sources": "Sources",
+    "usedData": "Used live data: {tools}",
+    "helpful": "Helpful",
+    "notHelpful": "Not helpful",
+    "thanks": "Thanks for the feedback.",
+    "tooLong": "Questions are limited to {n} characters.",
+    "failed": "The assistant could not answer: {detail}",
+    "retry": "Try again",
+    "unavailable": "The help assistant is not available right now. The console keeps working; see the documentation or ask the project owner.",
+    "prototype": "The help assistant answers on the live console. This reference build shows offline data, so questions are not sent anywhere.",
+    "counter": "{n}/{max}",
+    "today": "Today: {questions} questions · {ai} AI · {search} search · ${cost}",
+    "aiOff": "AI answers are switched off on this deployment, so questions are answered with the most relevant documentation passages."
   }
 }

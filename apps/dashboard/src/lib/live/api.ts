@@ -38,7 +38,7 @@ export async function apiGet<T>(path: string, signal?: AbortSignal): Promise<T> 
   return parse<T>(res);
 }
 
-export async function apiSend<T>(method: "POST" | "PATCH", path: string, body?: unknown): Promise<T> {
+export async function apiSend<T>(method: "POST" | "PATCH", path: string, body?: unknown, signal?: AbortSignal): Promise<T> {
   const headers: Record<string, string> = { Accept: "application/json" };
   if (body !== undefined) headers["Content-Type"] = "application/json";
   if (csrf) headers[csrf.header] = csrf.token;
@@ -48,6 +48,7 @@ export async function apiSend<T>(method: "POST" | "PATCH", path: string, body?: 
     cache: "no-store",
     headers,
     body: body === undefined ? undefined : JSON.stringify(body),
+    signal,
   });
   return parse<T>(res);
 }

@@ -45,6 +45,7 @@
     "crawlerCpus": 0.5,
     "crawlOutputDirectory": "/data/evidence/crawls",
     "edgeSubnet": "172.30.90.0/24",
+    "egressSubnet": "10.203.72.0/28",
     "apiRatePerS": 10,
     "apiBurst": 40,
     "streamsPerIp": 6,

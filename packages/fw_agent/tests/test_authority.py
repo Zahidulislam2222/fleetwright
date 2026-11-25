@@ -23,6 +23,7 @@ def proposal(agent_settings: AgentAppSettings) -> dict:
         "request": "Describe the warning.",
         "source": "Temperature warning observed.",
         "draft": {"title": "Inspection required", "body": "Inspect the temperature warning."},
+        "provenance": {"ai_generated": True, "model": agent_settings.agent.model_id},
     }
 
 
@@ -32,7 +33,7 @@ def ready(store: Store, value: dict) -> tuple[str, str]:
     return task_id, store.get(task_id)["hash"]
 
 
-@pytest.mark.parametrize("component", ["origin", "template", "request", "source", "draft"])
+@pytest.mark.parametrize("component", ["origin", "template", "request", "source", "draft", "provenance"])
 def test_each_proposal_component_is_bound(agent_settings: AgentAppSettings, component: str) -> None:
     store = Store(agent_settings.agent.database)
     value = proposal(agent_settings)

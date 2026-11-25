@@ -69,7 +69,8 @@ require current provider quotes and owner approval before resources are provisio
 
 The [future service design](future-architecture.md) defines the proposed routing, authorization,
 data, fan-out and execution boundaries. [Capacity arithmetic](capacity-model.md) exposes the
-assumptions behind resource and cost scenarios. [Availability and recovery](slo.md) defines the
+assumptions behind resource and cost scenarios; the [500–1,000-user baseline](baseline-workload.md)
+models the first realistic audience. [Availability and recovery](slo.md) defines the
 promotion objectives; [adding a cell](adding-a-cell.md) covers the current migration procedure.
 The [product roadmap](../roadmap.md) owns delivery sequencing.
 

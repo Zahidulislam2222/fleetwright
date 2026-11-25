@@ -48,6 +48,11 @@ function renderTask(task) {
     const titleLabel = el("label", copy.title); titleLabel.append(title);
     const bodyLabel = el("label", copy.body); bodyLabel.append(body);
     card.append(titleLabel, bodyLabel);
+    if (proposal.provenance?.ai_generated) {
+      const mark = el("p", proposal.provenance.human_edited ? `${copy.ai_generated} ${copy.human_edited}` : copy.ai_generated, "ai-mark");
+      mark.dataset.aiGenerated = "true";
+      card.append(mark);
+    }
     if (editable) {
       card.append(el("p", `${copy.expiry}: ${new Date(task.expires * 1000).toLocaleString()}`));
       card.append(el("code", task.hash));

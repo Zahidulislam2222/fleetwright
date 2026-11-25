@@ -10,6 +10,18 @@
 </head>
 <body {% block body_attrs %}{% endblock %}>
   <p class="banner" role="note">{{ branding.banner }}</p>
+  {% if branding.guide %}
+  <details class="guide">
+    <summary>{{ branding.guide.summary }}</summary>
+    <div class="guide-body">
+      <p>{{ branding.guide.intro }}</p>
+      <ul>
+        {% for point in branding.guide.points %}<li>{{ point }}</li>{% endfor %}
+      </ul>
+      {% if console_url %}<p>{{ branding.guide.console_label }} <span class="guide-url">{{ console_url }}</span></p>{% endif %}
+    </div>
+  </details>
+  {% endif %}
   <header class="top">
     <a class="brand" href="/">{{ branding.name }}</a>
     <nav aria-label="Board">{% block nav %}<a href="/watch">Live activity</a>{% endblock %}</nav>

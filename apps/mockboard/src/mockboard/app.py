@@ -104,7 +104,7 @@ def create_app(settings: BoardAppSettings | None = None) -> FastAPI:
     board = cfg.board
     package = resources.files("mockboard")
     templates = Jinja2Templates(directory=str(package.joinpath("templates")))
-    templates.env.globals.update(branding=catalogue.branding)
+    templates.env.globals.update(branding=catalogue.branding, console_url=board.console_url)
     feed = Feed(engine, catalogue)
     cache: dict[str, Any] = {"at": 0.0, "value": None}
 

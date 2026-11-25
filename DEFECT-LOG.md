@@ -10,8 +10,15 @@ MCP1.26.0 to patched1.28.1; an unpatched development-only Next ESLint/braces adv
 explicitly documented, with production dependency audits clean. The full verification record lives in
 the private dossier and workflow runbook. No production incident is implied by this review record.
 
+Pre-release help-assistant review findings (2026-11-25, caught before declaring the feature complete):
+answer deadline vs. the 30 s proxy timeout, Redis-outage and malformed tool-call handling, prompt fitting,
+budget settlement day, owner-only counters, CSRF on feedback, configurable limits and console focus/abort
+behaviour. All were fixed with focused regression tests and confirmed by a second independent review.
+
 | Date | What escaped | Gate that should have caught it | Gate added? |
 |---|---|---|---|
+| 2026-11-25 | During assistant work, an agent shell command printed local development database connection strings (with their local-only passwords) into the session output | Secret handling: inspect secret-bearing files by key name only (global Rules 8/12) | Yes: key-name-only inspection rule applied for the rest of the task; local development passwords to be rotated with `tools/dev/make_env.py`; no production value was involved and history/diff secret scans are clean |
+| 2026-11-25 | A helper syncing new assistant keys copied host-only and placeholder keys from the VPS template into the private application env (caught and reverted before any upload) | Configuration review: compare against the keys the consumer owns, not the whole template | Yes: reverted to the previous key set; the env-template parity test covers template names, and private env changes are reviewed key by key before upload |
 | 2026-10-13 | Crawler container ignored graceful termination and exited137 after the configured60-second Docker grace | Actual SIGTERM lifecycle gate for every long-running process, including idle crawler PID1 | Yes: ten signal/cancellation/cleanup regressions and real Linux PID1 blocked-fetch proof change forced137 to clean0 with physical child reap/socket closure; final immutable artifact lifecycle remains a shipping gate |
 | 2026-10-13 | Removed temporary tenant left a retired fleet slot; its draining heartbeat violated the tenant foreign key and aborted current account cleanup | Real container drain after tenant removal; retired-generation tests mocked heartbeat persistence | Yes: actual database removed/existing-retired-tenant controls and initial telemetry failure/cleanup failure regressions fail before and pass after UPDATE-only retired telemetry and finally cleanup; rc3 rejected before production, final exact-release drain remains a shipping gate |
 | 2026-10-13 | Local-agent HTTP-only egress tests missed an off-origin WebSocket handshake before approval; independent review caught it before deployment | Real browser transport-boundary tests must observe the forbidden server | Yes: dedicated and isolated-CDP Chromium regressions first observed handshakes/messages, then verified zero after context-lifetime WebSocket denial; owner tab preservation retained |

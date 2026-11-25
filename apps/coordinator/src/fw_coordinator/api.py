@@ -29,11 +29,15 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine
 
 from fw_coordinator import schemas, views
+from fw_coordinator.assistant import Assistant, AssistantCopy
+from fw_coordinator.assistant_api import install as install_assistant
+from fw_coordinator.assistant_knowledge import Knowledge
 from fw_coordinator.auth import Auth, BadCredentials, LockedOut, ip_prefix
 from fw_coordinator.crawl_api import install as install_crawls
 from fw_coordinator.demo import Demo, DemoConfig, RunActive, load_demo
 from fw_coordinator.workflow_api import install as install_workflows
 from fw_core.crypto import Envelope
+from fw_core.data import load_yaml
 from fw_core.db import make_engine, system_tx, tenant_tx
 from fw_core.logs import setup_logging
 from fw_core.settings import CoordinatorSettings, load
@@ -52,6 +56,7 @@ class Services:
     redis: Redis
     auth: Auth
     demo: Demo
+    assistant: Assistant | None = None
     demo_tenant: UUID | None = None
 
     async def demo_tenant_id(self) -> UUID | None:
@@ -211,6 +216,8 @@ def create_app(cfg: CoordinatorSettings | None = None, demo_data: DemoConfig | N
         engine = make_engine(cfg.app_db.dsn, cfg.app_db, "fw-api")
         redis = client.core(cfg.redis)
         http = httpx.AsyncClient(timeout=cfg.board_client.timeout_s)
+        # The help assistant's provider client is separate: different host, timeout and lifetime.
+        assistant_http = httpx.AsyncClient(timeout=cfg.assistant.timeout_s)
         envelope = Envelope(cfg.vault.master_key_b64.get_secret_value(), cfg.vault.key_id)
         shared = frozenset({cfg.demo.account_email.lower()}) if cfg.demo.account_password else frozenset()
         svc = Services(
@@ -219,6 +226,13 @@ def create_app(cfg: CoordinatorSettings | None = None, demo_data: DemoConfig | N
             redis=redis,
             auth=Auth(cfg.auth, redis, engine, envelope, shared_emails=shared),
             demo=Demo(cfg.demo, demo_data or load_demo(cfg.config_dir), cfg.board_client, redis, http),
+            assistant=Assistant(
+                cfg.assistant,
+                load_yaml(cfg.config_dir, "assistant.yaml", AssistantCopy),
+                Knowledge.load(cfg.config_dir),
+                redis,
+                assistant_http,
+            ),
         )
         app.state.services = svc
         stopping = asyncio.Event()
@@ -230,6 +244,7 @@ def create_app(cfg: CoordinatorSettings | None = None, demo_data: DemoConfig | N
             with contextlib.suppress(asyncio.CancelledError):
                 await reset
             await http.aclose()
+            await assistant_http.aclose()
             await redis.aclose()
             await engine.dispose()
 
@@ -570,6 +585,7 @@ def create_app(cfg: CoordinatorSettings | None = None, demo_data: DemoConfig | N
 
     install_workflows(app, services, principal, csrf_checked)
     install_crawls(app, services, principal, csrf_checked, audit)
+    install_assistant(app, services, principal, client_ip)
     return app
 
 

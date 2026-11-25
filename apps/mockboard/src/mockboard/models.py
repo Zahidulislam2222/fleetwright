@@ -29,9 +29,19 @@ class Lanes(BaseModel):
     pickup_hours_ahead: Range
 
 
+class Guide(BaseModel):
+    """The visitor explainer shown on every board page (collapsed, so automation is unaffected)."""
+
+    summary: str
+    intro: str
+    points: list[str] = Field(min_length=1, max_length=8)
+    console_label: str
+
+
 class Branding(BaseModel):
     name: str
     banner: str
+    guide: Guide | None = None
 
 
 class CaptchaData(BaseModel):

@@ -296,3 +296,45 @@ export type CrawlJob = {
   robots_policy: "respect" | "ignore-with-authorisation";
   alarm: string | null;
 };
+
+/* ─── Console help assistant ───────────────────────────────────────── */
+
+export type AssistantContact = {
+  label: string;
+  url: string;
+  note: string;
+};
+
+export type AssistantInfo = {
+  enabled: boolean;
+  disclosure: string;
+  contact: AssistantContact;
+  suggestions: string[];
+  max_question_chars: number;
+  max_history_turns: number;
+  max_history_chars: number;
+  knowledge_version: string;
+  today?: Record<string, number> | null;
+};
+
+export type AssistantSource = {
+  title: string;
+  path: string;
+  url: string | null;
+};
+
+export type AssistantAnswer = {
+  id: string;
+  mode: "ai" | "search";
+  ai_generated: boolean;
+  answer: string;
+  notice: string | null;
+  reason: "search_only" | "budget_exhausted" | "rate_limited" | "busy" | "disabled" | "nothing_found" | null;
+  sources: AssistantSource[];
+  used_tools: string[];
+  disclosure: string;
+};
+
+export type FeedbackResult = {
+  recorded: boolean;
+};

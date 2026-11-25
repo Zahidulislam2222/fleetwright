@@ -43,13 +43,15 @@ hardcoded in business code (a test enforces this). See [ADR-008](../adr/0008-con
 | `FW_BACKUP__*` | Host backup CLI | Directory, Docker executable/container, database list, timeout, interval and retention |
 | `FW_CRAWL__*` | Crawler/API | Cell, allowed origins, explicit owned-origin private access, output directory, request/socket/lease budgets, pacing, retry and extraction limits, retention and quality thresholds |
 | `FW_AGENT__*` | Standalone local app | Loopback bind/provider/model, private SQLite/profile/evidence paths, optional CDP, destination allowlist, approval/time/token/tab/action/request budgets and history-list limit |
+| `FW_ASSISTANT__*` | Console API (help assistant) | On/off, provider URL, API key (secret), model id and per-1M-token prices, data-collection opt-out, OpenRouter-only request fields, daily budget in USD, per-call timeout and whole-answer deadline (keep below the 30 s proxy read timeout), steps, tool calls, output tokens, prompt/question/history bounds, retrieval depth, hourly question limits (visitor/signed-in), concurrency, feedback and counter retention, source link base |
 | `FW_MONITOR__*`, `FW_MONITOR_GRANT__*` | Host/external collector | Probes, SQLite and notification files, bounded collection, retention, optional archive-age check and observe-only grant renewal |
 | `FW_RECOVERY__*` | Independent recovery tooling | Protected archive directory, independent encryption key, archive bounds and retention |
 | `FW_RELEASE_SIGNING__*` | Offline release finalization | Ignored private key path, separately trusted public key path and signer identity |
 | `FW_SEED__*` | Seed job | Cell for the public workspace tenant, owner email, password and TOTP secret |
 
 Built-in guards: for example, a worker refuses to start if `FW_CLAIMS__LEASE_TTL_MS` is not larger
-than `FW_WORKER__ACTION_TIMEOUT_MS`, because an action could then outlive its lease.
+than `FW_WORKER__ACTION_TIMEOUT_MS`, because an action could then outlive its lease. The help assistant refuses to start
+enabled without a key, model and prices, or with a per-call timeout longer than its whole-answer deadline.
 
 ## Product data (YAML in `config/`)
 
@@ -62,6 +64,9 @@ than `FW_WORKER__ACTION_TIMEOUT_MS`, because an action could then outlive its le
 | `workflows.yaml` | Versioned workflow inputs, approvals, form actions and receipt contracts |
 | `crawls.yaml`, `crawl_catalogue.yaml` | Crawl scope/extraction schemas and owned paginated catalogue records |
 | `agent.yaml` | Three local task templates, model instructions and approved form/receipt contracts |
+| `assistant.yaml` | Help assistant's disclosure, contact, suggestions, fallback messages, system prompt, tool descriptions and the approved documentation list |
+| `assistant-knowledge.json` | Generated search index of those documents (`uv run python tools/dev/build_assistant_knowledge.py`); a test fails when it is stale |
+| `assistant-eval.yaml` | Held-out evaluation cases and pass thresholds for the paid, opt-in live evaluation |
 | `uptime.json` | Independent bounded public HTTPS probe configuration |
 
 Everything is validated at start-up; an invalid file stops the service with a clear error.

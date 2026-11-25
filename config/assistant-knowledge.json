@@ -1,0 +1,731 @@
+{
+ "version": "2026-11-25.1",
+ "sources": {
+  "docs/console-guide.md": "3325af2dd02d834d1281d33cb9465b78030a353c6e3862d4e7428cb81e129111",
+  "README.md": "50d5bca4f7114ced82cb0a088b6a304ce429e508e96456f1caa96d32e2508abf",
+  "docs/product.md": "f7b800f44984129998a368f42e7c990caf996b6be8f66e3876e3014443d602f7",
+  "docs/architecture/overview.md": "ad9477c429cf9ddd51c6ad295a2add40506a3c9347cd4763bccf74026d3d58c7",
+  "docs/architecture/claim-lifecycle.md": "97db93a6f399b6df8acb8d7c00ae88d1e142d2e76be281ce69123f6a10b3f495",
+  "docs/adr/0001-postgres-is-the-claim-authority.md": "d1b6582e0bcea5695f8ccfed2d4f740978b83d4d76e941d6250177ea1ee7f951",
+  "docs/adr/0002-unknown-is-never-retried.md": "173e8232ab89087f552e926ce5d190cbe369c3a9e79c9b708ab8038158b53e00",
+  "docs/adr/0005-cells.md": "0fc3ffcb7ab581120c6034c1f2ec04d0d685e5fd9e42637204fce5f3121c8f84",
+  "docs/adr/0009-scale-targets.md": "8dddc127278d62cd6aa251b1a8359ae3f1fde34ca13ac2efd7109bd2d683f3f8",
+  "docs/scaling/README.md": "e199232d2c7dae5293f3a412805f35c8348739253508688d6ca16badb4e03c37",
+  "docs/security/README.md": "66549cebc2ed39bf11b4fd9f18501f31b6bb5066dbd2c5c1550132f16c4926c2",
+  "docs/legal/acceptable-use.md": "6971c1e9e3f3f1dc7c0fbf6d0f884f58fad204307c5567cb07700a161f97e1d4",
+  "docs/legal/privacy.md": "5e7c75a156466a00ad96947e89ff93829101d195a94a9c8c72bb0153b2ac622a",
+  "docs/operations/crawler.md": "3738c3acc29dffeb05aec9f31af4907fd55bf831115ca982bf92884c269cfef1",
+  "docs/operations/reliable-browser.md": "9896a6208fac54b6318b6109f7cee85549af27c4f0933ad5a1384a8d75a5bb26",
+  "docs/operations/local-agent.md": "edbd8a7ed259a125a4135b7fd8a8fe923e9df809e5be45c91876800e5553cfbf"
+ },
+ "sections": [
+  {
+   "id": "docs/console-guide.md#0-0",
+   "source": "docs/console-guide.md",
+   "heading": "Console guide",
+   "text": "A plain-language guide to the Fleetwright operator console: what each screen shows, what the states\nmean and what to do when something looks wrong. The console's help assistant answers from this\nguide and the other published documentation."
+  },
+  {
+   "id": "docs/console-guide.md#1-0",
+   "source": "docs/console-guide.md",
+   "heading": "Console guide — What you are looking at",
+   "text": "Fleetwright runs a fleet of browser workers that watch a job board, hold exactly one claim per matching job,\nand crawl catalogues. The public workspace runs against an **owned freight exchange**: a\nload board owned and operated by this project, so nothing commercial is booked and no third-party site is touched.\n\nAnonymous visitors get a **read-only, redacted** view of the public workspace: emails and client addresses\nare masked. The public workspace login (shown on the sign-in page) adds the workspace controls. Staff\naccounts sign in with a password and a one-time code from an authenticator app.\n\nRoles, from least to most access: **Visitor** (anonymous, read-only), **Viewer** and **Guest**\n(signed-in, read-only; Guest can use workspace controls), **Operator** (can change filters and enter\none-time codes), **Owner** (everything, including workflow approvals and access grants). The server\nchecks the role on every request; hiding a button is never the only protection."
+  },
+  {
+   "id": "docs/console-guide.md#2-0",
+   "source": "docs/console-guide.md",
+   "heading": "Console guide — Overview",
+   "text": "Claims by state over the last hour, worker health and alerts. **Healthy** workers sent a heartbeat\nrecently; **stale** ones missed several; **dead** ones stopped answering. Alerts appear for stale\nworkers, sessions that need attention, and claims being reconciled."
+  },
+  {
+   "id": "docs/console-guide.md#3-0",
+   "source": "docs/console-guide.md",
+   "heading": "Console guide — Workers",
+   "text": "Every browser worker slot, its cell, mode (watcher or claimer), account and last heartbeat. Slots\nstopped on purpose during a redeploy are not counted as missing. A worker is killed and replaced\nsafely at any time: it keeps no state of its own."
+  },
+  {
+   "id": "docs/console-guide.md#4-0",
+   "source": "docs/console-guide.md",
+   "heading": "Console guide — Accounts & sessions",
+   "text": "The board accounts the claimers act as. Session states: **fresh** (logged in), **expiring** (will be\nrefreshed before it lapses), **expired**, and **one-time code needed** (the board asked for a code;\nan operator can type it here, it goes straight to the waiting worker and is never stored or logged)."
+  },
+  {
+   "id": "docs/console-guide.md#5-0",
+   "source": "docs/console-guide.md",
+   "heading": "Console guide — Filters",
+   "text": "Which loads the fleet tries to claim: origin, destination, minimum rate, equipment and weight.\nFilters are data. Every edit is versioned, written to the audit log and reloaded by the dispatchers\nimmediately, without a restart."
+  },
+  {
+   "id": "docs/console-guide.md#6-0",
+   "source": "docs/console-guide.md",
+   "heading": "Console guide — Schedules",
+   "text": "Time-zone-aware windows that switch filters and accounts on and off."
+  },
+  {
+   "id": "docs/console-guide.md#7-0",
+   "source": "docs/console-guide.md",
+   "heading": "Console guide — Claims",
+   "text": "Every detected load and what happened to it, with the full state timeline:\n\n- **QUEUED** — a detection matched a filter; exactly one claim exists for that job.\n- **LEASED** — one worker holds the claim with a fencing token until the lease expires.\n- **ACTING** — that worker is sending the booking now.\n- **CONFIRMED** / **FAILED** — the board gave a definite answer.\n- **UNKNOWN** — the booking may have happened but the answer was lost (for example the worker died\n  mid-action). Fleetwright never retries an UNKNOWN claim blindly, because a retry could book twice.\n- **RECONCILED** — the reconciler asked the board what the account really booked and recorded it.\n\nIf you see UNKNOWN claims, that is the system being honest about uncertainty, not a failure. They\nnormally move to RECONCILED within seconds. One that stays UNKNOWN needs a human to check."
+  },
+  {
+   "id": "docs/console-guide.md#8-0",
+   "source": "docs/console-guide.md",
+   "heading": "Console guide — Latency",
+   "text": "Each stage is measured separately: board publish → detection, detection → queued → leased → action\nsent → confirmed. Publish→detect is never averaged into detect→action, so you can see where time goes.\nPercentiles (p50/p95/p99) are over the recent window."
+  },
+  {
+   "id": "docs/console-guide.md#9-0",
+   "source": "docs/console-guide.md",
+   "heading": "Console guide — Crawl jobs",
+   "text": "Crawls are defined as data (seeds, scope rules, extractors). Each cycle reports item counts; a sudden\ndrop or zero results raises an alarm, which catches silent page-layout changes. Exports are private."
+  },
+  {
+   "id": "docs/console-guide.md#10-0",
+   "source": "docs/console-guide.md",
+   "heading": "Console guide — Browser workflows",
+   "text": "Approved, versioned workflows that AI clients can request through the scoped MCP interface. Risky\nactions wait for an exact owner approval; access grants are scoped, expire and can be revoked."
+  },
+  {
+   "id": "docs/console-guide.md#11-0",
+   "source": "docs/console-guide.md",
+   "heading": "Console guide — Audit log",
+   "text": "Append-only. Every change and every claim action is recorded with who, what and when. Visitors see\nit redacted."
+  },
+  {
+   "id": "docs/console-guide.md#12-0",
+   "source": "docs/console-guide.md",
+   "heading": "Console guide — Workspace controls",
+   "text": "Signed in with the public workspace login, you can start a capped load burst (a few minutes, rate\nlimited) and inject faults on the owned board: rate limits, server errors, slow responses, forced\nsession expiry, a layout change and competing bots. Settings reset themselves after a while. Then\nwatch Claims, Latency and the Overview react."
+  },
+  {
+   "id": "docs/console-guide.md#13-0",
+   "source": "docs/console-guide.md",
+   "heading": "Console guide — Common questions",
+   "text": "**Why did a claim fail?** Usually another bot booked the load first, the board returned an error,\nor the lease ran out before acting. The claim's timeline shows the step and the reason.\n\n**Can two workers book the same load?** No. Postgres allows exactly one claim per job, and a fencing\ntoken rejects any worker that lost its lease. See the claim lifecycle and ADR 0001.\n\n**Is the data live?** The header says **Live** with **Live updates** when the event stream is\nconnected, or \"Refreshing every N s\" while it reconnects. The static reference build says it shows offline reference data.\n\n**What is measured and what is a target?** Measured results include 50 and 70 browser contexts sustained\nfor an hour on one PC (fixture pages, not authenticated freight workers) and the recorded test runs. 1M+ console users and 99.9% availability are design\ntargets with a documented path, not measured results; the public workspace runs on one shared server.\n\n**Who do I contact?** Open an issue on the public GitHub repository. Report security problems as\ndescribed in SECURITY.md, not in an issue."
+  },
+  {
+   "id": "docs/console-guide.md#14-0",
+   "source": "docs/console-guide.md",
+   "heading": "Console guide — The help assistant",
+   "text": "The assistant is an AI. It answers from this documentation and from read-only console data your\nrole can already see; it cannot change anything. It can be wrong, so check important answers against\nthe linked sources. When the AI is unavailable or the daily AI budget is used up, it shows the most\nrelevant documentation passages instead. Questions are not stored by Fleetwright; the AI provider\nprocesses them to produce an answer (see the privacy notes)."
+  },
+  {
+   "id": "README.md#0-0",
+   "source": "README.md",
+   "heading": "Fleetwright — Reliable Browser Operations",
+   "text": "Fleetwright coordinates authorized browser work through durable ownership, exact-action approval\nand destination evidence. It combines a warm browser fleet, scoped MCP supervision, catalogue\ncrawling and a separate local model-assisted browser application.\n\n**Open Fleetwright** ·\n**Documentation** · **Installation** ·\n**API and MCP**"
+  },
+  {
+   "id": "README.md#1-0",
+   "source": "README.md",
+   "heading": "Fleetwright — Reliable Browser Operations — Capabilities",
+   "text": "| Capability | Included behavior |\n| Coordinated browser fleet | Watcher/actor separation, warm sessions, fenced claims, database-clock account pacing, filters, schedules and execution cells |\n| Approved workflows | Freight booking and maintenance requests; owner approval binds tenant, account, inputs and the full versioned contract |\n| MCP supervision | Six bounded stdio tools with separate observe/execute grants, expiry and immediate revocation checks |\n| Catalogue crawler | Durable frontier, same-origin definitions, pinned HTTP/TLS egress, JSON/CSS extraction, quality alarms, retention and private JSONL export |\n| Local browser agent | SQLite and installed Ollama model, three maintained form workflows, exact approvals, receipts, cancellation and isolated optional CDP |\n| Console help assistant | AI answers from the published docs and the read-only data the visitor's role can see; disclosed as AI, marked machine-readably, no write tools, per-user limits and a daily budget, documentation-search fallback (console guide) |\n| Operations | Authenticated metrics, renewable observe-only collection, independent public probes, verified archives and encrypted off-host recovery |\n| Release assurance | Immutable source/artifact inventory, final-image SBOM/scans, offline signatures, rehearsal, compatibility-aware rollback and hash parity |"
+  },
+  {
+   "id": "README.md#2-1",
+   "source": "README.md",
+   "heading": "Fleetwright — Reliable Browser Operations — Capabilities",
+   "text": "The console separates private owner authority from public read-only access and capped shared\nworkspace controls. Its freight exchange and maintenance portal are owned destinations with\nindependent receipt records. A new customer destination requires explicit authorization, a reviewed\ncontract and its own behavioral evidence. The hosted agent page links to an application on your\ncomputer; it does not control your browser remotely."
+  },
+  {
+   "id": "README.md#3-0",
+   "source": "README.md",
+   "heading": "Fleetwright — Reliable Browser Operations — Evidence and current boundary",
+   "text": "The deployed frontend/backend release is `20261015-publication-rc1`, built from source `cd64e6b`.\nExact rehearsal, native server image checks, independent artifact review, public workflows,\noperator UI and HTTP checks passed. All 146 deployed manifest entries and eight application/web\nservice-role image identities matched the signed release. Verification is maintained in the\nrelease record."
+  },
+  {
+   "id": "README.md#4-1",
+   "source": "README.md",
+   "heading": "Fleetwright — Reliable Browser Operations — Evidence and current boundary",
+   "text": "| Evidence | Verified result and scope |\n| Full backend regression | 289 passed / 6 accounted skips in 714.96 seconds; native exit0, zero failures/errors and 363 runtime/configuration/build-prerequisite hashes unchanged |\n| Browser/model flows | Current public MCP workflows confirmed with matching receipts; three installed-model local-agent templates retain their 13 October proof |\n| Exact release UI | Native owner login, fleet confirmation, crawler completion/export, public authorization denial, SPA navigation and responsive layouts passed with zero observed CSP violations/page errors |\n| Browser endurance | Separate 50- and 70-context owned-fixture runs exceeded one hour with zero errors; these are fixture endurance results |\n| Contention | 200 coordination competitors and 10,000 jobs with zero duplicate action attempts; competitors are not 200 browsers |\n| Image assurance | Final native application and web image scans reported zero HIGH/CRITICAL findings at the recorded scan |\n| Browser recovery | Exact local driver and browser loss each caused one supervisor restart; four ready slots returned within 10.3 seconds; strict drain released all holds and exited 0 |\n| Recovery | Current post-activity archive restored into two new verification databases; backup/monitor supervisor recovery passed. Independent encrypted recovery remains the separately dated 13 October proof |"
+  },
+  {
+   "id": "README.md#5-2",
+   "source": "README.md",
+   "heading": "Fleetwright — Reliable Browser Operations — Evidence and current boundary",
+   "text": "Release source `cd64e6b` updates public documentation and the central distinct web-image tag;\nbusiness runtime behavior is unchanged from the 14 October browser-supervision correction.\nThe final complete suite ran after local builds/rehearsal finished, with its generated dashboard\nprerequisite frozen alongside runtime/configuration. Driver-loss supervision and readiness prevent\na browserless process appearing healthy. Earlier failed verification attempts remain in the release record.\n\nHistorical owned-board latency was approximately 365 ms p50 / 540 ms p95 from detection to\nconfirmation. Workload, hardware and limits belong with every measurement:\ntesting and capacity evidence.\nThe deployment has a single-host failure domain. 1M+ simultaneous control-plane users\nand 99% / 99.9% availability objectives are future design and validation\ntargets. Arbitrary-site exactly-once execution and measured monthly availability are not established."
+  },
+  {
+   "id": "README.md#6-0",
+   "source": "README.md",
+   "heading": "Fleetwright — Reliable Browser Operations — Install and run",
+   "text": "Use Python 3.12, uv, Docker Compose and Node.js 24 for the full workspace:\n\nContinue with local development to start the owned destination,\nseed accounts, then start the API, gateway, control loop and workers. Run the dashboard from\n`apps/dashboard`. Use separate local\ncredentials and preserve existing data volumes.\n\nFor the standalone agent, follow the local-agent guide.\nIt needs SQLite, Playwright Chromium and an installed local Ollama model; PostgreSQL, Redis,\nDocker and paid model APIs are not runtime requirements."
+  },
+  {
+   "id": "README.md#7-0",
+   "source": "README.md",
+   "heading": "Fleetwright — Reliable Browser Operations — Integration and operating contract",
+   "text": "Environment-specific settings have one typed boundary:\n`fw_core.settings`, documented in\nconfiguration and `.env.example`.\nMaintained destination contracts, prompts and product data live in `config/`; secrets stay private.\n\nMCP clients submit proposals and inspect evidence. They cannot grant themselves authority or approve\ntheir own work. Owners review exact proposals in the console. A changed, expired, revoked or consumed\napproval cannot authorize an action. Interrupted actions remain `UNKNOWN` until matching receipts\nresolve them; redeployment, cancellation and a missing response do not undo a destination action.\n\nBefore onboarding, review product scope, acceptable use,\nprivacy, security controls and the license.\nOperational support, commercial terms and service-level commitments require a separate agreement."
+  },
+  {
+   "id": "README.md#8-0",
+   "source": "README.md",
+   "heading": "Fleetwright — Reliable Browser Operations — Repository and maintenance",
+   "text": "| Directory | Owner responsibility |\n| `apps/coordinator` | API/authentication, approvals, dispatch/recovery, crawler, migrations and operational CLIs |\n| `apps/worker` | Freight fleet and separately supervised approved-workflow runner |\n| `apps/dashboard`, `apps/gateway` | Operator interface and authorized server-sent updates |\n| `apps/mockboard` | Owned destination applications and independent receipts |\n| `packages/fw_core`, `packages/fw_queue`, `packages/fw_browser` | Durable authority, messaging and browser adapters |\n| `packages/fw_mcp`, `packages/fw_agent` | Scoped MCP supervision and standalone local app |\n| `config`, `contracts`, `deploy` | Validated data, generated schemas and immutable release inputs |\n| `tools/security`, `infra/terraform` | Local assurance tooling and unprovisioned AWS reference |\n\nUse testing, maintenance and runbooks\nfor release gates and incident handling. Contribution guidance is in CONTRIBUTING.md;\nreport sensitive findings privately through SECURITY.md. Future work and promotion\ncriteria are in the roadmap. Dependency and scanner findings remain disclosed\nrather than suppressed."
+  },
+  {
+   "id": "README.md#9-0",
+   "source": "README.md",
+   "heading": "Fleetwright — Reliable Browser Operations — Product delivery and operating ownership",
+   "text": "Public documentation is maintained across the complete workspace. Start with the\ndocumentation index, then use service ownership\nto map each process to its startup, authority, health and recovery responsibilities.\nData lifecycle covers records, evidence, exports and archives;\ncommercial readiness defines destination permission,\nlicensing, privacy, support and release acceptance before customer onboarding.\n\nThe future design targets **1M+ simultaneous authorized console users**, with a **99% initial\noperating objective** and **99.9% multi-zone objective**. The\nvalidation plan specifies tiered workload, resource, failure,\nrecovery and error-budget gates. Execution cells retain separate destination/account budgets.\nCurrent measurements stay in dated release records. Source, signed artifacts, runtime behavior,\noperational recovery and public publication are verified as separate delivery gates."
+  },
+  {
+   "id": "docs/product.md#0-0",
+   "source": "docs/product.md",
+   "heading": "Fleetwright product guide",
+   "text": "Fleetwright coordinates authorized browser operations through a durable control plane. Operators\nreview exact proposals; scoped MCP clients submit and investigate work; browser workers execute\napproved actions; destination receipts establish outcomes. An interrupted action remains UNKNOWN\nuntil evidence resolves it. A human review may be required indefinitely when a destination cannot\nprovide authoritative evidence."
+  },
+  {
+   "id": "docs/product.md#1-0",
+   "source": "docs/product.md",
+   "heading": "Fleetwright product guide — Supported workflows",
+   "text": "| Workflow | Contract | Success evidence |\n| Freight booking | Published load reference and permitted destination account | Matching account booking receipt |\n| Maintenance request | Stable reference, title and priority on the owned service portal | Matching account/reference/title/priority receipt |\n\nContracts define input constraints, account targets, preconditions, selectors, action paths,\ndestination statuses and reconciliation. A contract change invalidates the previous approval.\nAdding a third workflow requires a reviewed contract and destination adapter, reconciliation proof,\nauthorization review and acceptance tests; arbitrary URLs/selectors are not accepted by MCP tools."
+  },
+  {
+   "id": "docs/product.md#2-0",
+   "source": "docs/product.md",
+   "heading": "Fleetwright product guide — Operator and integration roles",
+   "text": "Owners issue/revoke grants and approve exact actions. Operators inspect progress, investigate and\nrequest safe cancellation. Viewers observe authorized information. Public access has restricted\ncontrols and masked data; it cannot approve workflows or issue integration grants. MCP observation\nand execution scopes remain separate and current authorization is checked on every invocation.\n\nThe hosted `/agent` page links to the separate local SQLite/Ollama application. Three maintained\nowned templates draft maintenance, handover and inspection records, then require exact human\napproval before a browser form save. Local state, private browser profile and receipts remain on\nthe owner's device. Optional CDP uses an isolated context and preserves existing tabs; it does\nnot inherit their logins. The hosted page does not control the local browser.\n\nThe console's catalogue crawler runs validated same-origin definitions with durable progress,\nbounded HTTP egress, quality guards and private JSONL exports. Public visitors see aggregate state;\noperators can start/cancel/export. See crawler and\nlocal agent for supported behavior and limits."
+  },
+  {
+   "id": "docs/product.md#3-1",
+   "source": "docs/product.md",
+   "heading": "Fleetwright product guide — Operator and integration roles",
+   "text": "The dedicated MCP package supports model-supervised fleet workflows with the owner console.\nCodex integration has end-to-end verification; Claude configuration and transport support are\ndocumented, with account-level verification deferred. Implementation and release verification\nare separate; consult the release record for what is currently deployed."
+  },
+  {
+   "id": "docs/product.md#4-0",
+   "source": "docs/product.md",
+   "heading": "Fleetwright product guide — Delivery boundaries",
+   "text": "Fleetwright includes its own freight board and service portal for controlled destination testing.\nNo relationship with a commercial freight marketplace is implied. Customer integrations require\nwritten authorization and the onboarding checklist.\n\nThis repository is source-available under LICENSE. Public availability of source is\nnot a grant of unrestricted commercial use; review the license before distribution or resale.\nHosted service pricing, support agreements and contractual service levels are separate agreements."
+  },
+  {
+   "id": "docs/product.md#5-0",
+   "source": "docs/product.md",
+   "heading": "Fleetwright product guide — Documentation map",
+   "text": "- Architecture, workflow operations\n  and API/MCP reference.\n- Security, privacy and legal register.\n- Capacity plan, 1M+ user architecture,\n  availability objectives and roadmap.\n- Deployment, testing and maintenance."
+  },
+  {
+   "id": "docs/product.md#6-0",
+   "source": "docs/product.md",
+   "heading": "Fleetwright product guide — Onboard an authorized workload",
+   "text": "1. Establish the customer/tenant owner, destination permission, account scope and data purpose.\n2. Select fleet workflow, catalogue crawler or local agent according to the actual action boundary.\n3. Define allowed origins, fields/selectors, identity, rate budgets, retention and success/uncertainty receipts.\n4. Provision private accounts and least-privilege grants; validate tenant isolation and owner approvals.\n5. Exercise session expiry, rate limits, changed pages, interrupted acknowledgements and recovery.\n6. Agree operating ownership, support, measured capacity and recovery objectives before production use.\n\nThe built-in destinations provide reproducible acceptance environments. New targets require their\nown contract and review; an accessible page or a permissive robots file alone is not authorization.\nSee acceptable use, privacy and\nsecurity onboarding."
+  },
+  {
+   "id": "docs/product.md#7-0",
+   "source": "docs/product.md",
+   "heading": "Fleetwright product guide — Choose the execution path",
+   "text": "| Need | Execution path | Authority and state |\n| Sustained coordinated freight work | Warm fleet actors and watchers | PostgreSQL claims, account pacing and cells |\n| A reviewed business action | MCP proposal plus owner console | Versioned workflow approval and fenced worker |\n| Approved structured data collection | Catalogue cycle | Durable frontier, extraction allowlist and private export |\n| Local content drafting and form save | Standalone local agent | Installed model drafts; SQLite binds human approval and receipt |\n\nCurrent verification includes 289 passing runtime regression cases with six expected skips, actual\ndriver/browser-loss recovery, exact release MCP/browser/crawler rehearsal and public workflows/UI/HTTP\nwith signed parity. Earlier installed-model flows and 50/70-context fixture hours retain their dated\nboundaries. The current release record separates these results. These do not establish a\ncustomer workload or availability SLA. Testing records their scope;\nfuture scale and availability has explicit promotion gates."
+  },
+  {
+   "id": "docs/architecture/overview.md#0-0",
+   "source": "docs/architecture/overview.md",
+   "heading": "Architecture overview",
+   "text": "Fleetwright supervises complete browser workflows. PostgreSQL owns durable intent, authority and\noutcomes; Redis accelerates dispatch and live updates; Playwright performs destination interaction.\nThe MCP server submits and investigates work without granting itself human approval."
+  },
+  {
+   "id": "docs/architecture/overview.md#1-0",
+   "source": "docs/architecture/overview.md",
+   "heading": "Architecture overview — Responsibilities",
+   "text": "| Component | Current responsibility |\n| Core | Typed configuration, row-level tenant transactions, claim/job states, canonical contracts and fencing |\n| Coordinator | Password/TOTP sessions, CSRF and roles, approvals/grants, audit, freight dispatch, workflow investigation/metrics |\n| Freight worker | One Chromium with isolated watcher/claimer contexts, warm sessions and freight-specific action handling |\n| Workflow worker | Separate process for approved freight and maintenance contracts, durable job/account holds and receipt reconciliation |\n| Catalogue crawler | Tenant/cell-scoped PostgreSQL frontier, pinned bounded HTTP requests, extraction/quality guards and private JSONL exports |\n| Standalone local agent | SQLite/WAL, local model drafts, bounded dedicated/isolated-CDP browser contexts and exact approved form saves |\n| Operational tools | Renewable observe-only collection, independent encrypted recovery and offline artifact signing |\n| Browser adapters | Generic authentication separated from freight fields, permitted owned origins, form/receipt validation |\n| MCP server | Six bounded stdio tools; every call checks tenant, user, grant scope, expiry and revocation |\n| Dashboard/gateway | Live operator views, owner workflow review, bounded SSE fan-out and periodic authorization rechecks |\n| Owned destinations | Independent destination database and receipts; freight exchange"
+  },
+  {
+   "id": "docs/architecture/overview.md#2-1",
+   "source": "docs/architecture/overview.md",
+   "heading": "Architecture overview — Responsibilities",
+   "text": "and maintenance portal use different payloads |\n| Backup CLI | Host-side Docker execution of PostgreSQL tools, archive validation, hashes, retention and fresh restore drills |"
+  },
+  {
+   "id": "docs/architecture/overview.md#3-0",
+   "source": "docs/architecture/overview.md",
+   "heading": "Architecture overview — Durable workflow protocol",
+   "text": "Submission binds a stable action identity to tenant, account, exact inputs and the full contract\nrevision/hash. Reusing an identity with different content fails. Owner approval references that\nfingerprint and expires by the database clock. A worker leases a job and account with a new fence,\nthen rechecks authorization immediately before committing `ACTING`. Only current fenced state\ntransitions can record results. The human approval is consumed for that execution.\n\nKnown destination rejection becomes `FAILED`. Response loss, process death or insufficient receipt\nevidence becomes `UNKNOWN`. Expired pre-action leases can return to the ready queue; post-action\nuncertainty cannot. Reconciliation reads destination receipts and checks the account and expected\naction. Missing evidence does not establish failure. Persisted rotation prevents one old unknown\njob from monopolizing reconciliation. Cancellation during uncertainty records intent and does not\nclaim to undo an external action. See the workflow runbook.\n\nFencing protects Fleetwright database authority; an arbitrary website does not consume that fence.\nCorrectness therefore also depends on the adapter's permitted action and receipt contract. Never\ngeneralize controlled destination results into exactly-once delivery on all websites."
+  },
+  {
+   "id": "docs/architecture/overview.md#4-0",
+   "source": "docs/architecture/overview.md",
+   "heading": "Architecture overview — Freight delivery and durable detections",
+   "text": "Watchers capture bounded feed responses and persist raw detections before delivery. Filters/schedules select jobs;\nclaims and outbox rows commit together. The relay publishes to a cell stream. Warm actors lease,\nact and record outcomes. The control reconciler examines uncertain bookings without blind retry.\nRedis consumer groups reclaim interrupted deliveries; PostgreSQL unique constraints and fencing\nremain authoritative. See claim lifecycle.\nRaw detections remain in the PostgreSQL mailbox until their filter/claim decision commits. Tenant\nmoves reset unconsumed delivery under the directory lock, so unread old-cell streams and in-flight\nmessages are replayed using current authority. Legacy Redis-only upgrade data requires an explicit\ndrain; older backends cannot safely consume the new topic. See deployment."
+  },
+  {
+   "id": "docs/architecture/overview.md#5-0",
+   "source": "docs/architecture/overview.md",
+   "heading": "Architecture overview — Isolation and evidence",
+   "text": "Tenant content tables use PostgreSQL `ENABLE` and `FORCE ROW LEVEL SECURITY`. Directory/system\nlookups have narrow roles; shared infrastructure metadata is not represented as tenant content.\nTarget credentials and sessions use per-record envelope encryption and row-bound associated data.\nDatabase mutations and their audit rows share a transaction. External Redis/HTTP operations persist\nintent first and outcome afterward; unresolved intent remains inspectable after a crash.\nEvidence exports are bounded/redacted canonical JSON with page hashes. Hashes detect changes;\nthey do not prove authorship. Browser artifacts may contain sensitive data and stay private."
+  },
+  {
+   "id": "docs/architecture/overview.md#6-0",
+   "source": "docs/architecture/overview.md",
+   "heading": "Architecture overview — Scale boundaries",
+   "text": "The freight engine has tenant-to-cell routing and Redis hash tags. The approved-workflow runner\nuses bounded cell-scoped tenant pages and per-tenant turns, rechecking assignment before admission.\nSSE-triggered refetch is coalesced; database pools and workflow scheduling must be\nmeasured and redesigned at later milestones. A single-server deployment shares its host failure\ndomain. Multi-zone placement, gateway fleets, sharding and regional recovery remain\nfuture architecture, with explicit decision records.\n\nThe stack is Python 3.12, FastAPI, SQLAlchemy/Alembic, PostgreSQL, Redis Streams, Playwright,\nofficial FastMCP and Next.js/React. Lockfiles and deployment image digests define release versions."
+  },
+  {
+   "id": "docs/architecture/overview.md#7-0",
+   "source": "docs/architecture/overview.md",
+   "heading": "Architecture overview — Three separate execution authorities",
+   "text": "The fleet and general workflow runner share PostgreSQL authority, but use distinct process/account\nlifecycles. Catalogue collection uses a fenced durable frontier and an allowlisted HTTP fetch\nprocess; it does not give operators arbitrary browser scripting. The local agent uses SQLite on\nthe user's computer and an installed model for typed drafting; it does not depend on fleet services.\n\nThese boundaries prevent a model response, page instruction, Redis delivery or UI refresh from\nbecoming authority. Local edits survive polling but cannot authorize the old proposal; saving them\ncreates a new hash. Each uncertain action is reconciled against its destination contract."
+  },
+  {
+   "id": "docs/architecture/overview.md#8-0",
+   "source": "docs/architecture/overview.md",
+   "heading": "Architecture overview — Operational failure domains",
+   "text": "The host collector has administrative Docker authority solely for observe-only grant renewal;\nthe independent probe has neither execution nor approval access. Off-host recovery uses a separate\nencryption key and proves data restoration without overwriting source databases. Those are distinct\nfrom full-host/application recovery and measured availability.\n\nRelease identity includes committed source, immutable artifact inventory, final native app/web\nimage IDs and independently trusted signatures. Scan results are bound to those exact images.\nStatic rollback preserves compatible backends and mailbox state; backend recovery requires its\nown tested compatibility procedure. See deployment,\nmonitoring and recovery."
+  },
+  {
+   "id": "docs/architecture/claim-lifecycle.md#0-0",
+   "source": "docs/architecture/claim-lifecycle.md",
+   "heading": "Claim lifecycle",
+   "text": "The claim state machine (`packages/fw_core/src/fw_core/claims.py`) is the part of Fleetwright that\nenforces claim uniqueness, current fenced authority and explicit uncertain outcomes. Database\ntransitions combine with worker/adapter checks; external destinations do not validate database fences.\nThis does not guarantee exactly-once side effects on arbitrary websites."
+  },
+  {
+   "id": "docs/architecture/claim-lifecycle.md#1-0",
+   "source": "docs/architecture/claim-lifecycle.md",
+   "heading": "Claim lifecycle — States",
+   "text": "| State | Meaning | Who moves it |\n| `QUEUED` | A detection matched a filter; one claim exists for the job | Dispatcher |\n| `LEASED` | A claimer holds it with fencing token *n* until the lease expires | Claimer |\n| `ACTING` | The claimer is sending the booking now | Claimer, only while its lease is current |\n| `CONFIRMED` / `FAILED` | The target gave a definite answer | Claimer |\n| `UNKNOWN` | The action may have happened but the answer is missing | Claimer (lost answer) or sweep (expired during `ACTING`) |\n| `RECONCILED` | The reconciler checked the target and recorded what really happened | Reconciler |"
+  },
+  {
+   "id": "docs/architecture/claim-lifecycle.md#2-0",
+   "source": "docs/architecture/claim-lifecycle.md",
+   "heading": "Claim lifecycle — Rules",
+   "text": "1. **One claim per job.** `INSERT … ON CONFLICT (tenant_id, target_job_key) DO NOTHING`. Exactly\n   one detection wins, whatever the number of watchers.\n2. **Fencing tokens.** Leasing takes `nextval('claim_fence')`. Every later step includes the token,\n   and the `UPDATE` matches only if it is still current. A worker that paused (garbage collection,\n   a frozen VM, a network stall) and woke up late is rejected.\n3. **Database clock only.** Lease expiry compares against `clock_timestamp()` in Postgres. Worker\n   clocks are measured (midpoint rule) for latency reporting but never trusted for correctness.\n4. **Only claims that never reached `ACTING` are re-queued.** A claim whose lease expired while\n   `LEASED` goes back to `QUEUED` (or `FAILED` when too old). A claim that expired while `ACTING`\n   becomes `UNKNOWN`.\n5. **`UNKNOWN` is never retried.** Retrying could book the job twice. The reconciler opens the\n   account's sealed session, asks the target what the account has booked, and resolves the claim\n   according to the destination receipt contract. An inconclusive absence remains uncertain for\n   human investigation; a timeout alone is never evidence of rejection.\n6. **A late actor still wins with the truth.** If the reconciler marked a claim `UNKNOWN` and the\n   original actor then returns a definite answer with a still-current fence, that answer is\n   recorded.\n7. **One"
+  },
+  {
+   "id": "docs/architecture/claim-lifecycle.md#3-1",
+   "source": "docs/architecture/claim-lifecycle.md",
+   "heading": "Claim lifecycle — Rules",
+   "text": "active lease per account.** A partial unique index prevents two concurrent actions on\n   one target account.\n8. **History and outbox in the same statement.** Each sweep rule is a single statement that moves\n   the rows, writes `claim_events` and writes the outbox messages, so row locks are held for one\n   round trip."
+  },
+  {
+   "id": "docs/architecture/claim-lifecycle.md#4-0",
+   "source": "docs/architecture/claim-lifecycle.md",
+   "heading": "Claim lifecycle — Admission and detection durability",
+   "text": "Account eligibility and database-clock pacing apply before admission and immediately before action.\nCompletion updates the cooldown; slow browser preparation cannot make the next action eligible early.\nWatchers persist raw detections in a PostgreSQL mailbox before Redis delivery. Delivery alone does\nnot consume a detection: its filter/claim decision must commit. Tenant handover resets pending\nrouting under current directory authority and replays unread/in-flight old-cell work.\n\nThe unpublished-outbox metric does not include every published-but-unconsumed detection. Inspect\nboth durable backlog and stream pending/dead-letter state during a move or upgrade. See\nADR-012 and upgrade safety."
+  },
+  {
+   "id": "docs/architecture/claim-lifecycle.md#5-0",
+   "source": "docs/architecture/claim-lifecycle.md",
+   "heading": "Claim lifecycle — Evidence",
+   "text": "| Test | What it proves |\n| 20-way lease race | Exactly one lease wins |\n| Stale fence | An old token cannot move the claim |\n| Crash while `LEASED` | The claim is re-queued and booked once |\n| Crash while `ACTING` | The claim becomes `UNKNOWN` and is reconciled against the board |\n| Hypothesis interleavings (40 generated schedules) | A terminal state never changes |\n| 200 competitors × 10,000 jobs | 2026-10-13: 9,895 confirmed/reconciled claims and matching destination bookings; zero duplicate attempts |\n| Engine chaos run (5xx errors, slow responses, lost acknowledgements, rival bots) | Every claim ends confirmed, failed or reconciled, and matches the board's ground truth |"
+  },
+  {
+   "id": "docs/adr/0001-postgres-is-the-claim-authority.md#0-0",
+   "source": "docs/adr/0001-postgres-is-the-claim-authority.md",
+   "heading": "ADR-001: Postgres is the claim authority; Redis is a fast path — Context",
+   "text": "Two workers must never book the same job. Redis `SET NX PX` locks are fast, but a lock can expire\nwhile its holder is paused (garbage collection, a frozen VM), and a failover can lose it. A second\nworker then acts too."
+  },
+  {
+   "id": "docs/adr/0001-postgres-is-the-claim-authority.md#1-0",
+   "source": "docs/adr/0001-postgres-is-the-claim-authority.md",
+   "heading": "ADR-001: Postgres is the claim authority; Redis is a fast path — Decision",
+   "text": "Claims live in Postgres. A unique constraint on `(tenant_id, target_job_key)` picks the winner and a\nfencing token from a sequence guards every later step. Redis is used only to drop obvious duplicates\nearly (`SET NX` per job) and to move messages quickly."
+  },
+  {
+   "id": "docs/adr/0001-postgres-is-the-claim-authority.md#2-0",
+   "source": "docs/adr/0001-postgres-is-the-claim-authority.md",
+   "heading": "ADR-001: Postgres is the claim authority; Redis is a fast path — Consequences",
+   "text": "- Correctness never depends on Redis. Losing a Redis cell loses speed, not safety.\n- Each claim costs a few short Postgres transactions; this is the throughput limit to watch\n  (see the capacity model)."
+  },
+  {
+   "id": "docs/adr/0002-unknown-is-never-retried.md#0-0",
+   "source": "docs/adr/0002-unknown-is-never-retried.md",
+   "heading": "ADR-002: A crash during the action is UNKNOWN, never a blind retry — Context",
+   "text": "If a worker dies after sending a booking, nobody knows whether the booking happened. Retrying\ncould book twice; dropping could lose a job that was in fact booked."
+  },
+  {
+   "id": "docs/adr/0002-unknown-is-never-retried.md#1-0",
+   "source": "docs/adr/0002-unknown-is-never-retried.md",
+   "heading": "ADR-002: A crash during the action is UNKNOWN, never a blind retry — Decision",
+   "text": "A claim that expires in `ACTING` becomes `UNKNOWN`. The reconciler checks the target (\"what has this\naccount booked?\") with the account's own sealed session and records the truth as `RECONCILED`."
+  },
+  {
+   "id": "docs/adr/0002-unknown-is-never-retried.md#2-0",
+   "source": "docs/adr/0002-unknown-is-never-retried.md",
+   "heading": "ADR-002: A crash during the action is UNKNOWN, never a blind retry — Consequences",
+   "text": "- No duplicate bookings from retries.\n- Needs a way to read back the account's bookings on every supported target. A target without one\n  must be onboarded with an operator review step."
+  },
+  {
+   "id": "docs/adr/0005-cells.md#0-0",
+   "source": "docs/adr/0005-cells.md",
+   "heading": "ADR-005: Cells: scale workers by adding independent units — Context",
+   "text": "One Redis and one dispatcher cannot serve an unlimited number of workers, and one failure should\nnot stop every customer."
+  },
+  {
+   "id": "docs/adr/0005-cells.md#1-0",
+   "source": "docs/adr/0005-cells.md",
+   "heading": "ADR-005: Cells: scale workers by adding independent units — Decision",
+   "text": "A cell is one Redis plus its workers and control process. Each tenant is mapped to one cell in\n`tenant_cells`; moving a tenant is a data change. Redis keys use `{tenant}` hash tags so a cell can\nbecome a Redis Cluster later."
+  },
+  {
+   "id": "docs/adr/0005-cells.md#2-0",
+   "source": "docs/adr/0005-cells.md",
+   "heading": "ADR-005: Cells: scale workers by adding independent units — Consequences",
+   "text": "- Horizontal scale and fault isolation without code changes.\n- A tenant larger than one cell needs the cell itself to scale (Redis Cluster, more workers)."
+  },
+  {
+   "id": "docs/adr/0009-scale-targets.md#0-0",
+   "source": "docs/adr/0009-scale-targets.md",
+   "heading": "ADR-009: What \"1M users\" and \"99% uptime\" mean here — Context",
+   "text": "The owner asked for a design that can serve 1M+ simultaneous users with at least 99% uptime.\nFleetwright's users are operators; a million connected sessions only exists as a multi-tenant SaaS.\nA million browser sessions would need about 100 TB of RAM, which is a different problem."
+  },
+  {
+   "id": "docs/adr/0009-scale-targets.md#1-0",
+   "source": "docs/adr/0009-scale-targets.md",
+   "heading": "ADR-009: What \"1M users\" and \"99% uptime\" mean here — Decision",
+   "text": "The control plane (API, console, live updates) is designed for 1M concurrent connected sessions\nacross many tenants. The worker plane is designed to grow by cells from tens to 10,000+ workers. The\navailability target for the cloud reference is **99.9%** per month (stricter than the 99% asked for).\nNothing beyond what was measured is claimed as achieved."
+  },
+  {
+   "id": "docs/adr/0009-scale-targets.md#2-0",
+   "source": "docs/adr/0009-scale-targets.md",
+   "heading": "ADR-009: What \"1M users\" and \"99% uptime\" mean here — Consequences",
+   "text": "- The scaling docs separate *measured* from *target* numbers.\n- The current single-server public workspace cannot meet either target and says so."
+  },
+  {
+   "id": "docs/scaling/README.md#0-0",
+   "source": "docs/scaling/README.md",
+   "heading": "Scaling to 1M+ connected console users",
+   "text": "The long-term product target is **at least 1,000,000 simultaneous connected console users**, across\nmany tenants, with separately budgeted automated browser capacity. This is a future architecture\nand validation plan. The present deployment is a single server. Isolated verification sustained\n50 and 70 Chromium contexts for separate uninterrupted hours, using a small owned fixture;\na separate 30-second control-plane test exercised 16 API and 32 SSE clients. These measurements\ndo not establish one-million-user capacity or representative destination throughput. See\nthe measured evidence and limitations."
+  },
+  {
+   "id": "docs/scaling/README.md#1-0",
+   "source": "docs/scaling/README.md",
+   "heading": "Scaling to 1M+ connected console users — Workload contract",
+   "text": "“Simultaneous” means authenticated/authorized sessions actively connected during a sustained test,\nnot registered accounts or a one-minute arrival count. The target test includes API reads/writes,\nevent fan-out, reconnects, tenant skew, slow clients, revoked users and an availability-zone failure.\nOne million browser contexts is a different workload; 100 MB per context would alone require\nabout 100 TB of memory. It is not the one-million-user control-plane target.\n\n| Plane | Target workload | Main constraints |\n| Static console | 1M+ simultaneous sessions | CDN cache misses, assets and regional delivery |\n| API/authorization | Session, list, approval and investigation requests | Pool budget, query plans, per-tenant fairness and auth storage |\n| Update gateway | 1M+ live connections | File descriptors, socket memory, event fan-out, bandwidth and reconnect storms |\n| Execution | Independently scaled browser cells | Context memory/CPU, account exclusivity and destination permission/rate limits |\n| Evidence | Bounded investigation and export | Retention, object storage, access control and retrieval cost |"
+  },
+  {
+   "id": "docs/scaling/README.md#2-0",
+   "source": "docs/scaling/README.md",
+   "heading": "Scaling to 1M+ connected console users — Delivery stages and exit gates",
+   "text": "| Stage | Required implementation | Proof before promotion |\n| Current single host | Hardened Compose, private data network, fenced jobs, immutable releases, backup tooling | Functional/adverse-condition suites and release rehearsal; no availability claim |\n| Operational baseline | Verified archive/restore and monitoring tooling; independently operated availability checks and notifications | Full-host/key recovery, tested alert delivery and rolling 30-day SLI evidence; initial 99% operating objective |\n| One region, multiple zones | Redundant API/gateways, database standby/PITR, isolated Redis cells, pooled connections, rolling releases | Zone-loss exercise under representative workload, no tenant crossover, 99.9% rolling objective |\n| Many execution cells | Existing bounded cell-scoped tenant turns, account pacing/ownership and durable handover; expand deployment isolation | 50/70 fixture hours passed; next require representative approved workflows, tenant skew and cell-loss/rebalance under load |\n| 1k to 100k connected users | Gateway sharding/fan-out, event coalescing, bounded refetch, reconnect jitter, read caches/replicas | Separate 1k, 10k and 100k sustained mixed-load tests, tenant skew and measured resource/cost curves |\n| 1M+ connected users | Multi-zone gateway fleet, CDN, partitioned history, pooled database/read replicas, independent cells | At least 1M concurrent"
+  },
+  {
+   "id": "docs/scaling/README.md#3-1",
+   "source": "docs/scaling/README.md",
+   "heading": "Scaling to 1M+ connected console users — Delivery stages and exit gates",
+   "text": "sessions sustained for an hour, representative actions/events, node/zone failures and measured SLOs |\n| Regional recovery | Tested standby region, explicit writer authority and data residency | Recovery from regional loss with measured RPO/RTO; no automatic split-brain writes |"
+  },
+  {
+   "id": "docs/scaling/README.md#4-0",
+   "source": "docs/scaling/README.md",
+   "heading": "Scaling to 1M+ connected console users — Required engineering",
+   "text": "Keep authoritative transitions in PostgreSQL. Pool application connections independently from\nopen HTTP connections; a million sessions must not imply a million database connections. Start\nwith measured query/index improvements and partition large histories before adopting sharding.\nSharding needs a tenant directory, migration protocol and explicit cross-shard limits.\n\nShard gateway subscriptions by tenant/channel, batch or coalesce invalidations and bound client\nqueues. Disconnect slow consumers with a recoverable cursor; provide resynchronization when the\ncursor has expired. Spread reconnects with randomized backoff and throttle snapshot requests.\nThe current gateway and refetch behavior need load evidence before this design is promoted.\n\nCurrent approved-workflow runners enumerate bounded tenant pages within their assigned cell and\ntake bounded turns. Account group eligibility, DB-clock pacing and durable handover are enforced.\nExtend these controls with weighted tenant admission, deployment-level failure isolation and\nrepresentative fairness measurements. Scale by oldest eligible queue age and resource pressure,\nwithin approved infrastructure and destination limits. Never create a retry storm around `UNKNOWN`\nwork. Redis delivery is transport; PostgreSQL retains action and raw-detection authority."
+  },
+  {
+   "id": "docs/scaling/README.md#5-1",
+   "source": "docs/scaling/README.md",
+   "heading": "Scaling to 1M+ connected console users — Required engineering",
+   "text": "Use zone-independent spare capacity so losing a zone does not depend on immediately provisioning\nnew capacity. Multi-region execution requires a single authoritative owner for an action and a\nrecovery protocol; geographic duplication alone does not establish safety.\nThis follows the spare-capacity principle in\nAWS static stability.\n\nEvery milestone publishes concurrency, active tenants, request/event rates, payload sizes,\nduration, hardware, resource limits, failure scenarios and percentile/error results. Cost estimates\nrequire current provider quotes and owner approval before resources are provisioned."
+  },
+  {
+   "id": "docs/scaling/README.md#6-0",
+   "source": "docs/scaling/README.md",
+   "heading": "Scaling to 1M+ connected console users — Architecture and decision records",
+   "text": "The future service design defines the proposed routing, authorization,\ndata, fan-out and execution boundaries. Capacity arithmetic exposes the\nassumptions behind resource and cost scenarios; the 500–1,000-user baseline\nmodels the first realistic audience. Availability and recovery defines the\npromotion objectives; adding a cell covers the current migration procedure.\nThe product roadmap owns delivery sequencing.\n\nNo cloud resources are created by these documents or the offline Terraform tests. Multi-zone\nspare capacity, managed data services, regional traffic and evidence storage require a separately\nreviewed operational budget; free-tier limits are not a capacity guarantee."
+  },
+  {
+   "id": "docs/scaling/README.md#7-0",
+   "source": "docs/scaling/README.md",
+   "heading": "Scaling to 1M+ connected console users — Reproducible tier acceptance",
+   "text": "The scale validation plan is the execution checklist for each future tier.\nIt defines preparation, steady traffic, tenant skew, reconnect/slow-reader pressure, zone loss,\nrestore and evidence publication. Tie the 99% operating objective and later 99.9% multi-zone objective\nto a declared SLI window and owned error-budget policy.\n\nUse measured bottlenecks to select the next infrastructure change. Record resource/cost scenarios\nbefore approval, then verify the resulting topology against the same workload and failure gates.\nCustomer onboarding and data residency remain part of promotion, with responsibility assigned in\ncommercial readiness."
+  },
+  {
+   "id": "docs/security/README.md#0-0",
+   "source": "docs/security/README.md",
+   "heading": "Security documentation",
+   "text": "Fleetwright treats human authority, tenant isolation, destination permission and uncertain external\nactions as separate security boundaries. The model proposes typed work; the operator approves\nthe exact account and inputs; database-backed authority governs execution and recovery.\n\n| Document | Purpose |\n| Control status | Implemented protections, release verification and operational responsibilities |\n| Threat model | Assets, trust boundaries, attack scenarios and residual risks |\n| ASVS assurance map | Selected OWASP ASVS 5 evidence, unassessed controls and explicit exceptions |\n| Security reporting | Private vulnerability reporting and supported reporting scope |\n| Privacy and legal register | Deployment-specific permission, data protection and incident obligations |\n| Operations runbooks | Deployment, incident and recovery procedures |\n\nScan results apply to their exact source/image identities and scan time. Zero reported\nHIGH/CRITICAL vulnerabilities does not establish absence of all vulnerabilities, an independent\npenetration test or certification. The latest verified release evidence and remaining gates are\nrecorded in the assurance map; a newer release repeats relevant artifact gates."
+  },
+  {
+   "id": "docs/security/README.md#1-1",
+   "source": "docs/security/README.md",
+   "heading": "Security documentation",
+   "text": "Additions to destinations, model providers, permissions, storage or topology require a threat-model\nand legal-scope review. Never submit private keys, account sessions, raw page traces or customer\nrecords through a public issue."
+  },
+  {
+   "id": "docs/security/README.md#2-0",
+   "source": "docs/security/README.md",
+   "heading": "Security documentation — Data, authority and operational handoff",
+   "text": "Data lifecycle assigns handling requirements for identities, credentials,\nworkflow records, raw evidence, local profiles, exports and archives. Review it alongside the\nthreat model when adding a destination, provider, storage location or permission.\n\nSecurity acceptance includes real role/CSRF/revocation behavior, tenant isolation, exact-action\napproval, browser recovery, private evidence and verified backup/key recovery. Track unsupported\ncontrols and retained advisories explicitly. Service ownership\nand commercial readiness assign follow-up and incident duties."
+  },
+  {
+   "id": "docs/legal/acceptable-use.md#0-0",
+   "source": "docs/legal/acceptable-use.md",
+   "heading": "Acceptable use and client onboarding gate",
+   "text": "Fleetwright is a tool for automating web workflows **that the client is allowed to automate**.\nThese rules apply to private, customer and public workspace operation. Software licensing,\ndestination permission and a lawful processing purpose are separate onboarding requirements."
+  },
+  {
+   "id": "docs/legal/acceptable-use.md#1-0",
+   "source": "docs/legal/acceptable-use.md",
+   "heading": "Acceptable use and client onboarding gate — Allowed",
+   "text": "- Sites and systems the client owns or operates.\n- Third-party sites whose terms permit automated access, or that have given the client written\n  permission (for example, an API agreement or a partner programme).\n- Testing and verification against the owned freight board in `apps/mockboard`."
+  },
+  {
+   "id": "docs/legal/acceptable-use.md#2-0",
+   "source": "docs/legal/acceptable-use.md",
+   "heading": "Acceptable use and client onboarding gate — Not allowed",
+   "text": "- Sites whose terms prohibit automation, without written approval from the site operator. Many\n  freight load boards fall into this category.\n- Bypassing logins, IP blocks, rate limits, captchas or other technical access controls.\n- Using accounts the client does not own, shared or bought accounts, or credentials obtained\n  without the account holder's consent.\n- Collecting personal data without a lawful basis, or beyond what the task needs.\n- Fake engagement, fake reviews, or AI-generated content presented as human without disclosure.\n- Anything that degrades the target service (load beyond normal human-like use)."
+  },
+  {
+   "id": "docs/legal/acceptable-use.md#3-0",
+   "source": "docs/legal/acceptable-use.md",
+   "heading": "Acceptable use and client onboarding gate — Onboarding gate (required before any new destination)",
+   "text": "No new destination is configured until every item is answered in writing and retained with its\nscope/contract. The repository's license separately requires written permission\nfor production/commercial use or third-party-site access.\n\n| # | Question | Evidence kept |\n| 1 | Which site or platform, and which accounts? | Target list, account owners |\n| 2 | Is automation allowed by its terms, or is there written permission? | Link to the terms clause, or the permission letter |\n| 3 | Does it process personal data, and which basis/rights/risk-assessment duties apply? | Data inventory, assessed legal basis and DPIA where required; do not assume every task uses legitimate interests |\n| 4 | Which hosting, model, proxy, OTP and other providers are used, with compatible permission/privacy terms? | Provider/subprocessor register; no CAPTCHA or access-control bypass |\n| 5 | Data retention period and deletion process | Retention setting |\n| 6 | Jurisdictions involved (client, target, data subjects, hosting) | Hosting region, transfer mechanism |\n| 7 | Rate limits agreed with, or acceptable to, the target | Configured per-account limits |\n| 8 | Who approves exact actions, handles uncertainty and revokes access? | Named authority, workflow contract, receipt/reconciliation and incident contacts |\n\n**If question 2 cannot be answered with \"yes\", the project does not go ahead.**"
+  },
+  {
+   "id": "docs/legal/acceptable-use.md#4-0",
+   "source": "docs/legal/acceptable-use.md",
+   "heading": "Acceptable use and client onboarding gate — Operator responsibilities",
+   "text": "Operators with console access must not change targets, accounts or rate limits outside what was\napproved at onboarding. Every change is recorded in the tenant's audit log.\n\nStop affected admission when permission expires, an account is revoked, destination behavior\nchanges materially or execution becomes uncertain. Preserve evidence and reconcile accepted\nactions before replacements. A working selector or login does not override permission boundaries.\nDo not present generated reviews, identities or engagement as authentic human activity."
+  },
+  {
+   "id": "docs/legal/privacy.md#0-0",
+   "source": "docs/legal/privacy.md",
+   "heading": "Privacy and data protection",
+   "text": "This describes current processing and the deployment obligations an operator must complete.\nOwned destination records are maintained for workflow verification; operator identities, network\nmetadata and security logs can still be personal data. Do not treat an owned workspace as exempt\nfrom privacy obligations."
+  },
+  {
+   "id": "docs/legal/privacy.md#1-0",
+   "source": "docs/legal/privacy.md",
+   "heading": "Privacy and data protection — Responsibility",
+   "text": "The public site's operator determines its processing purposes. In a customer deployment,\ncontroller/processor roles depend on actual decisions and contracts; they are not automatically\nassigned by the software. Document roles, lawful basis, notices and a DPA where required before\nprocessing customer data. Use the legal register for applicability and source links."
+  },
+  {
+   "id": "docs/legal/privacy.md#2-0",
+   "source": "docs/legal/privacy.md",
+   "heading": "Privacy and data protection — Data inventory",
+   "text": "| Data | Purpose / storage | Current protection |\n| Console email, role and password hash | Identity and authorization in PostgreSQL | Argon2id; role checks; encrypted TOTP secret |\n| Target credentials/session state | Authorized destination login in account vault | Envelope encryption, row-bound associated data and tenant RLS |\n| One-time codes | Login completion in memory/short-lived messaging | Limited lifetime, no intended log persistence |\n| Freight/job/request inputs and receipts | Execution and reconciliation in PostgreSQL | Tenant isolation, exact-action fingerprint and bounded evidence |\n| Approval/grant/session records | Human authority and client access | Expiry/revocation checks; stored token digests |\n| Audit identity and network prefix | Investigation/accountability | Append-only application grants; IPv4 /24 or IPv6 /48 prefix in application audit |\n| Browser screenshots/traces | Private failure investigation | Private storage and configured pruning; artifacts may contain page data |\n| Database archives | Recovery | Restricted host permissions, verified manifests; archives remain sensitive |\n| Help assistant questions and answers | Answering the asker in the console | Not stored by Fleetwright; kept only in the open page. Sent with retrieved documentation and read-only console data to the configured model provider (OpenRouter, routed only to providers that do not"
+  },
+  {
+   "id": "docs/legal/privacy.md#3-1",
+   "source": "docs/legal/privacy.md",
+   "heading": "Privacy and data protection — Data inventory",
+   "text": "train on prompts); daily counters and a one-hour single-use feedback id hold no question text |\n\nEdge, hosting and infrastructure access logs may have different network metadata than application\naudit. Review their retention and vendor terms separately. Evidence redaction in JSON exports does\nnot establish that raw screenshots/traces or database archives are anonymous."
+  },
+  {
+   "id": "docs/legal/privacy.md#4-0",
+   "source": "docs/legal/privacy.md",
+   "heading": "Privacy and data protection — Retention and requests",
+   "text": "Browser evidence has a configured retention period, seven days by default, and pruning in the\nfreight worker. Backup loop retention defaults to seven completed archives. Database job/audit\nretention is not a complete automated deletion policy today. Before customer onboarding, assign\nperiods by category, legal holds, backup expiry, deletion ownership and verification. Restrict free\ntext and prohibit unnecessary sensitive personal data in workflow inputs.\n\nHandle access, correction, deletion and objection requests through the deployment operator:\nverify identity/authority, identify the tenant and records, assess legal retention duties, export\nor correct/delete through an approved procedure, and record completion. Append-only audit records\nneed a legally reviewed minimization/pseudonymization policy; do not promise automatic deletion\nthat is not implemented. Apply the applicable jurisdiction's deadline and extensions.\n\nMaintain an operator request register with receipt date, verified requester/authority, applicable\njurisdiction, affected categories, legal holds, deadline, decision and completion evidence.\nProcessing-record duties are separate from permission to retain all raw personal data. Apply the\ncurrent Bangladesh Act and jurisdiction-specific requirements where relevant;\nolder ordinance summaries are not the current legal baseline."
+  },
+  {
+   "id": "docs/legal/privacy.md#5-1",
+   "source": "docs/legal/privacy.md",
+   "heading": "Privacy and data protection — Retention and requests",
+   "text": "Deletion must account for rows, caches, browser profiles, screenshots/traces, exports and archive\nexpiry. Where a protected archive is retained for recovery, restrict access, record expiry and\nreapply approved minimization/deletion decisions after restoration. Preserve necessary legal or\nincident evidence under an assessed hold; indefinite retention is not a security control."
+  },
+  {
+   "id": "docs/legal/privacy.md#6-0",
+   "source": "docs/legal/privacy.md",
+   "heading": "Privacy and data protection — Cookies, providers and transfers",
+   "text": "The application uses necessary session/CSRF mechanisms and local browser preferences; no application\nadvertising or analytics integration is configured. Hosting/CDN providers may apply their own\nsecurity mechanisms. Document subprocessors and hosting regions in a deployment-specific notice.\nInternational transfer safeguards require an assessed legal mechanism and contract; choosing a\nregion or provider does not by itself complete that assessment.\n\nMCP exports exclude credentials, cookies, arbitrary payloads and raw page HTML. Client prompts\nand model-provider retention are outside that export boundary: send only necessary redacted\nmaterial and review the selected provider's terms. There is no automatic paid model API fallback.\n\nThe standalone agent keeps private local state/history and uses a dedicated profile or isolated\nCDP context. Its configured\nlocal Ollama flow avoids a hosted model API for that path, but destination submissions still leave\nthe device. CDP connection, exports, remote destinations and any newly selected provider each need\nassessment; local inference is not a promise that all processing remains local."
+  },
+  {
+   "id": "docs/legal/privacy.md#7-1",
+   "source": "docs/legal/privacy.md",
+   "heading": "Privacy and data protection — Cookies, providers and transfers",
+   "text": "Before deployment, publish the actual operator identity/contact, purposes and legal bases,\nretention schedule, rights channels, recipients/subprocessors and transfer safeguards. This\nengineering inventory is not a completed deployment-specific privacy notice or DPA."
+  },
+  {
+   "id": "docs/legal/privacy.md#8-0",
+   "source": "docs/legal/privacy.md",
+   "heading": "Privacy and data protection — Help assistant provider",
+   "text": "The console help assistant sends the visitor's question, recent turns of the same conversation,\nmatching documentation passages and read-only data the visitor's role can already see to the\nconfigured model API (currently OpenRouter). The request asks the router to use only providers\nthat do not collect prompts for training. Provider-side retention, subprocessors and transfer terms\nare the provider's; review them before a customer deployment and do not enable the assistant for\nregulated data without a processing agreement. Operators can switch it off (`FW_ASSISTANT__ENABLED`),\nwhich leaves documentation search working."
+  },
+  {
+   "id": "docs/legal/privacy.md#9-0",
+   "source": "docs/legal/privacy.md",
+   "heading": "Privacy and data protection — Security incidents",
+   "text": "Contain unauthorized access, preserve private evidence, identify affected data and notify the\nresponsible controller/operator promptly. GDPR controller notification to a supervisory authority\nis generally within 72 hours where required; processor notification is without undue delay.\nOther jurisdictions can differ. Follow incident response."
+  },
+  {
+   "id": "docs/operations/crawler.md#0-0",
+   "source": "docs/operations/crawler.md",
+   "heading": "Catalogue crawling",
+   "text": "An operator or owner can start an approved catalogue cycle from **Console → Crawl jobs**. The\nconsole shows durable progress, extraction errors, change counts and quality alerts. Exports contain\nonly the configured allowed fields. Public visitors can inspect aggregate progress; submission,\ncancellation and export require an authenticated operator role and mutations require CSRF.\n\nStart the worker with `uv run python -m fw_coordinator.crawls`. Apply database migrations first.\nThe release template supervises the crawler independently from freight and approved browser jobs.\nThe API and crawler share the private export volume. The local environment template documents\nall `FW_CRAWL__*` settings; deployment settings control the volume path and resource limits.\n\nDefinitions live in `config/crawls.yaml`: approved origin name, seed paths, JSON Pointer or CSS row\nselector, optional next-page selector, field allowlist/types/lengths, identity field and robots\npolicy. Arbitrary operators cannot submit selectors or destinations through the API. Additional\npublic origin URLs belong to typed `FW_CRAWL__ORIGINS`; they receive no private-address exception.\nReview destination authorization and network egress before enabling one."
+  },
+  {
+   "id": "docs/operations/crawler.md#1-1",
+   "source": "docs/operations/crawler.md",
+   "heading": "Catalogue crawling",
+   "text": "Robots are respected by default. Robots errors fail closed; redirects are refused. Requests have\nresponse-size and time bounds. Shared per-origin admission, bounded retries and a durable failed\nfrontier prevent an unbounded retry loop. Cancellation finishes at the next bounded page boundary.\nAn expired lease is recovered with a new fence, retaining pages already committed.\n\nA layout change can produce an extraction failure or result-drop alert. Inspect the maintained\ncontract and destination before running another cycle. An incomplete cycle does not report old\nunseen items as removed. JSONL exports for failed cycles contain only records actually extracted\nin that cycle. Missing identity/type/length data causes page failure rather than silent truncation.\n\nThe configured retention period deletes old export files, corresponding frontier data and old\ncurrent-item rows. Run the worker regularly for retention enforcement. Backups have their own\nretention policy; deleting an export does not erase data from previously retained database archives.\n\nThe owned catalogue provides a stable, paginated target. Its alternate layout exercises the quality\nalarm. It is separate from the live freight feed. External webhooks, paid proxy/captcha services and\nParquet/S3 delivery are not enabled in this release; use the private JSONL export interface."
+  },
+  {
+   "id": "docs/operations/crawler.md#2-0",
+   "source": "docs/operations/crawler.md",
+   "heading": "Catalogue crawling — Inspect, export and investigate",
+   "text": "The API exposes maintained definitions, paginated jobs, operator submission/cancellation and\ntenant-bound exports; see integration routes and generated OpenAPI. The native\nconsole path is select catalogue → Start crawl → inspect progress → Download JSONL. Exports are\nno-store responses and expire under configured retention.\n\nBefore accepting a cycle, check its terminal state, extracted item count, errors, added/changed/\nremoved counts and alerts. A failed export is partial evidence, not a complete catalogue snapshot.\nInvestigate zero-result/drop alerts before consuming downstream removals. Keep field types and\nidentity constraints synchronized with the destination.\n\nThe real owned catalogue flow reaches COMPLETE and exports four exact records across two pages.\nTests also exercise TLS hostname verification, numeric DNS pinning, malformed/truncated JSON,\nphysical termination of slow fetches, stale fences, cancellation and cross-tenant/export denial.\nThe subprocess boundary confirms over-budget network work exits before retrying; cancelling only\nan await is insufficient. See test evidence."
+  },
+  {
+   "id": "docs/operations/crawler.md#3-0",
+   "source": "docs/operations/crawler.md",
+   "heading": "Catalogue crawling — Network and privacy policy",
+   "text": "Only explicitly configured owned origins may receive private-address access. Additional origins\nretain public-address restrictions. DNS validation/pinning, TLS hostname checks, refusal of redirects\nand independent byte/time/page budgets constrain the supported HTTP path; do not claim a general\npurpose network sandbox. Review lawful collection, personal-data minimization and retention before\nadding a destination. See privacy and acceptable use."
+  },
+  {
+   "id": "docs/operations/reliable-browser.md#0-0",
+   "source": "docs/operations/reliable-browser.md",
+   "heading": "Reliable browser workflows",
+   "text": "Fleetwright coordinates complete authorized workflows around its existing freight engine.\nThe second owned workflow creates a maintenance request on the owned freight board's `/portal` page.\nBoth use the same destination account vault but have different forms, payloads and receipt checks.\nNeither requires a paid model API or a third-party account.\n\nAuthentication contracts are separate from freight contracts: a service-only target can supply\nlogin and identity checks without inventing freight endpoints. Legacy freight workers filter\ntheir account acquisition to freight-capable targets. These adapters remain restricted to the\nconfigured owned origin; this is not arbitrary-site browser execution."
+  },
+  {
+   "id": "docs/operations/reliable-browser.md#1-0",
+   "source": "docs/operations/reliable-browser.md",
+   "heading": "Reliable browser workflows — Start and authorize",
+   "text": "1. Install the locked workspace (`uv sync --frozen`) and Playwright Chromium. Start the local\n   data stack, owned freight board and coordinator using the existing development instructions.\n2. Run `python -m fw_coordinator.migrate`. Apply every current migration; workflow, crawler, pacing and durable-detection changes have\n   separate compatibility requirements described in deployment.\n3. Sign in as a real owner with password and TOTP. The shared workspace account cannot approve\n   or issue access grants. `POST /v1/workflow-grants` accepts `{\"scopes\":[\"observe\",\"execute\"]}`\n   with the authenticated cookie and session CSRF header. Use observation alone for investigation.\n4. Save the returned tenant ID and short-lived token as `FW_MCP__TENANT_ID` and\n   `FW_MCP__ACCESS_TOKEN` in the gitignored local environment, and record the actual recovery\n   values in the already-ignored credentials file. Never put tokens into CLI arguments,\n   client JSON/TOML, prompts, evidence, or source control. A grant is limited by\n   `FW_WORKFLOWS__GRANT_TTL_S`; revocation is immediate on the next tool call.\n5. Configure a stdio client, then run `python -m fw_worker.workflows` separately. The MCP server\n   submits durable proposals; the supervised worker performs approved browser actions."
+  },
+  {
+   "id": "docs/operations/reliable-browser.md#2-1",
+   "source": "docs/operations/reliable-browser.md",
+   "heading": "Reliable browser workflows — Start and authorize",
+   "text": "The owner API also supports `DELETE /v1/workflow-grants/{grant_id}` and\n`DELETE /v1/workflows/jobs/{job_id}/approval`. All mutations require CSRF. The API contract is\ngenerated in `contracts/openapi.yaml`."
+  },
+  {
+   "id": "docs/operations/reliable-browser.md#3-0",
+   "source": "docs/operations/reliable-browser.md",
+   "heading": "Reliable browser workflows — Claude and Codex",
+   "text": "Run each server in the workspace directory so typed settings load its private `.env`. Use the\nworkspace's Python executable, not an unrelated global interpreter. On Windows select the\nvirtual environment under `Scripts`; on Linux select the executable under `bin`.\n\nCodex host/project configuration:\n\nClaude project configuration:\n\n`python` above must resolve to the activated workspace environment. Alternatively set `command`\nto that environment's executable and configure the server working directory in the client.\nClient configuration contains no secret values. Use the current client's installed model and\nsubscription settings; do not silently fall back to paid APIs.\n\nAsk the client to list contracts, then submit a stable action identity, workflow ID, permitted\naccount ID and exactly the required inputs. `workflow_contracts` returns field constraints.\nReuse the same identity only for the same action. Changing input under an existing identity is\nrejected. Missing or disabled accounts are denied.\n\nOfficial setup references: Codex MCP,\nClaude MCP, MCP tools specification."
+  },
+  {
+   "id": "docs/operations/reliable-browser.md#4-0",
+   "source": "docs/operations/reliable-browser.md",
+   "heading": "Reliable browser workflows — Human review and outcome",
+   "text": "Open **Console → Browser workflows**, refresh, and review a proposal. The screen shows the\ndestination account, exact inputs and action fingerprint. An owner must check the review box\nbefore approving. An operator may inspect and request cancellation but cannot approve.\nThe fingerprint includes tenant, account, full input and complete contract revision/hash.\nSet-valued contract fields are sorted before hashing, so independent coordinator and worker\nprocesses compute the same identity. An eight-seed subprocess regression verifies this boundary.\nWorkers recheck approval, grant, current roles, account state and DB-clock lease immediately\nbefore committing ACTING. Changed, expired, revoked or already-consumed approvals cannot act.\n\nCancellation before ACTING safely terminates the job. Cancellation during ACTING or UNKNOWN\nrecords intent without claiming the destination action was undone. A worker death after ACTING\nbecomes UNKNOWN on lease expiry. UNKNOWN is never selected for another click. Fair, persisted\nreconciliation rotates through old and new unknown jobs without changing their outcome age.\nMissing receipts are inconclusive on these two destinations; they do not authorize a retry."
+  },
+  {
+   "id": "docs/operations/reliable-browser.md#5-1",
+   "source": "docs/operations/reliable-browser.md",
+   "heading": "Reliable browser workflows — Human review and outcome",
+   "text": "Expired approval on a queued job prevents execution. Cancel it and create a separately reviewed\nproposal if the pre-action state is known; never use this procedure for UNKNOWN work.\nAn unavailable/expired destination session can leave a job UNKNOWN for operator investigation.\nNo exactly-once promise is made for arbitrary websites or destinations without verifiable receipts."
+  },
+  {
+   "id": "docs/operations/reliable-browser.md#6-0",
+   "source": "docs/operations/reliable-browser.md",
+   "heading": "Reliable browser workflows — Evidence and monitoring",
+   "text": "Inspect a job and download its evidence in the console, or call `export_evidence`. Follow\n`next_cursor` to retrieve later pages. Job listing is also paginated. Exports contain bounded\nstate transitions, fences, safe status/reason codes and receipt hashes, excluding credentials,\nraw page HTML, cookies and arbitrary payloads. Each page has a SHA-256 hash over canonical JSON:\nthis detects content changes; it is not a signature or proof of who authored an export.\n\nAuthenticated operators can read `/v1/workflows/health`. Prometheus-compatible metrics at\n`/v1/workflows/metrics` require an observation bearer grant and `X-Fleetwright-Tenant` header.\nThey report state counts, freight unknowns, pending outbox rows and alert counts. Old UNKNOWN\noutcomes and stalled queued work have actionable alerts. Thresholds and operational bounds live\nin typed workflow settings; operator messages and workflow definitions live in validated YAML.\nDo not expose the metrics endpoint anonymously or include grant tokens in scrape logs.\n\nConsole database mutations and audit records share a transaction. External Redis/HTTP actions\nrecord intent before action and outcome afterward, leaving visible unresolved intent on a crash.\nLive streams recheck session authorization, including while idle, at the configured\n`FW_GATEWAY__REVOCATION_CHECK_S` interval."
+  },
+  {
+   "id": "docs/operations/reliable-browser.md#7-0",
+   "source": "docs/operations/reliable-browser.md",
+   "heading": "Reliable browser workflows — Backup and restore",
+   "text": "Configure `FW_BACKUP__*` through the typed settings and private environment. The host-side\nbackup command uses the existing Docker CLI and database container, with credentials retained\ninside the database environment. `python -m fw_coordinator.backup create` writes custom-format\nPostgreSQL archives, verifies their contents and records hashes. A failed backup does not remove\nthe last good backup. `loop` repeats at the configured interval and keeps the configured number\nof completed backups; supervise it using the host's service manager and a protected backup location.\n\n`python -m fw_coordinator.backup drill <backup-folder>` verifies hashes before restoring into\nnew uniquely named databases ending in `_restore_test`. It refuses existing targets and never\ndrops development or production databases. Database archives do not contain cluster roles:\nbootstrap the repository's role setup first when restoring onto a new cluster, using private\ncurrent passwords. Protect archives as secrets and copy them to an independently protected\ndestination using the operator's approved backup policy."
+  },
+  {
+   "id": "docs/operations/reliable-browser.md#8-1",
+   "source": "docs/operations/reliable-browser.md",
+   "heading": "Reliable browser workflows — Backup and restore",
+   "text": "The automated drill restores into a fresh network-isolated cluster and checks the approved job,\napproval, events and audit. That is stronger evidence than counting tables in the source cluster.\nThe readiness probe waits for loopback TCP: the official image temporarily accepts Unix-socket\nconnections during initialization before shutting down that server. A delayed-initialization\nregression verifies the final server is ready before one-time role bootstrap and restoration.\nThe 13 October release also verifies the protected production\nscheduler, current-release process directory and archive/source integrity. These checks do not\nestablish off-site backup retention or full-host recovery."
+  },
+  {
+   "id": "docs/operations/reliable-browser.md#9-0",
+   "source": "docs/operations/reliable-browser.md",
+   "heading": "Reliable browser workflows — Verification",
+   "text": "The historical reliable-browser extension met 14/14 acceptance criteria for the owner-adjusted scope:\nClaude's actual client run is explicitly deferred; Codex's actual run passed for both workflows."
+  },
+  {
+   "id": "docs/operations/reliable-browser.md#10-1",
+   "source": "docs/operations/reliable-browser.md",
+   "heading": "Reliable browser workflows — Verification",
+   "text": "| Gate | Verified result |\n| Backend behavior | Final regression run:147passed; unchanged contention benchmark separately passed in205.19s (previous full147-case run:546.13s), including the unchanged 200-worker/10,000-job contention benchmark and corrected fresh-cluster restore regression |\n| Python lint / formatting / types | Ruff clean, 160 files formatted; mypy clean on 66 source files |\n| Dashboard | ESLint, TypeScript and production build passed |\n| Packaging / configuration | All eight Python wheel/sdist builds and Compose configuration passed; settings/config regressions passed |\n| Security | Bandit medium+ clean; Gitleaks history and public working snapshot clean; Semgrep117rules/276targets, zero findings/errors |\n| Dependency audit | Patched MCP SDK 1.28.1: Python audit clean; npm production audit clean. Full npm audit retains the development-only advisory described below |\n| Real workflows | Freight and maintenance portal, interrupted acknowledgement, OS-killed worker after acceptance, receipt reconciliation, owner approval and evidence download passed |\n| Operations | Idle-stream revocation, authenticated metrics, scheduled backup, corrupt-archive refusal and isolated fresh-cluster restoration passed |\n| Client / independent review | Actual Codex submission/result/export passed; fresh-context review approved after all reported defects were fixed |"
+  },
+  {
+   "id": "docs/operations/reliable-browser.md#11-2",
+   "source": "docs/operations/reliable-browser.md",
+   "heading": "Reliable browser workflows — Verification",
+   "text": "An earlier full run timed out in the legacy load benchmark before its final assertions. The\nunchanged isolated rerun passed; the original 900-second deadline and coverage were preserved.\nThe timeout's root cause was not conclusively established. Deployment is verified separately in\nthe release evidence; representative authenticated fleet capacity remains unproven.\n\nFull npm audit is **not clean**: the development-only Next ESLint dependency chain includes\n`braces` 3.0.3, affected by GHSA-vfj7-8cjw-p6xm.\nThe advisory and npm registry currently provide no patched release. Independent review found\nthe identified call handles repository `settings.next.rootDir` patterns, which this project does\nnot configure, and found no application runtime import. The finding is retained, with no audit\nsuppression or framework downgrade. Reassess when a fix appears or lint tooling accepts untrusted\npatterns. This is an explicit limitation of local acceptance."
+  },
+  {
+   "id": "docs/operations/reliable-browser.md#12-3",
+   "source": "docs/operations/reliable-browser.md",
+   "heading": "Reliable browser workflows — Verification",
+   "text": "Run `python tools/dev/run_tests.py -q` against isolated test databases. Build the dashboard before\nthe console browser gate. The harness serializes runs so one cannot reset another's destination.\nThe tests cover worker contention, stale fences, killed processes after acceptance, response loss,\nchanged/expired/replayed approval, tenant isolation, immediate revocation, bounded redaction,\natomic audit, fair recovery and fresh-cluster restoration. The separate private Codex verification\nscript is an explicit manual subscription check, not a CI test or paid API fallback.\n\nClaude's live verification is deferred at the owner's request because its subscription is off.\nKeep client setup and transport verification separate from claims about an actual model-driven run."
+  },
+  {
+   "id": "docs/operations/reliable-browser.md#13-0",
+   "source": "docs/operations/reliable-browser.md",
+   "heading": "Reliable browser workflows — Configuration and secret audit",
+   "text": "The final working-source and Git-history scans found no real secrets. Private credentials,\nenvironment files, memory and browser/backup artifacts are ignored and absent from tracked\nhistory. Typed settings and both environment templates cover the added execution, approval,\ngrant, pagination, reconciliation, stream-revocation and backup bounds. Automated configuration\nregressions reject provider URLs, model IDs and obvious secret patterns in backend source.\n\nWorkflow descriptions, selectors, paths, input constraints, destination statuses, server\ninstructions and operator messages live in validated YAML. Deployment URLs, timeouts, storage,\ncredentials and operational limits live at the settings boundary. Stable API routes, state/scope\nnames, SQL identifiers, cryptographic primitives and fixed input/evidence safety caps remain\nprotocol definitions; changing a destination workflow requires configuration rather than editing\nthe execution state machine."
+  },
+  {
+   "id": "docs/operations/reliable-browser.md#14-0",
+   "source": "docs/operations/reliable-browser.md",
+   "heading": "Reliable browser workflows — Account pools in the release",
+   "text": "The seed provisions a dedicated `workflow` account group alongside the four freight accounts.\n`FW_WORKER__RESERVED_ACCOUNT_GROUPS` excludes that group from long-lived freight slot acquisition.\nChoose the approved-workflow account when submitting jobs; accounts occupied by freight slots remain\nunavailable until released. This prevents the two supervised workers from monopolizing each other's\ncapacity. Keep reserved groups aligned with the seed configuration."
+  },
+  {
+   "id": "docs/operations/reliable-browser.md#15-0",
+   "source": "docs/operations/reliable-browser.md",
+   "heading": "Reliable browser workflows — Current browser recovery and readiness",
+   "text": "The 14 October correction, retained and reverified in the 15 October publication release,\nsupervises the Chromium connection with a bounded read-only protocol\nroundtrip and disconnect callback. Driver/browser loss triggers resource drain and process exit\nfor the existing supervisor. Only connected, ready slots report running; starting slots remain stale.\nThe typed heartbeat interval and action timeout own the probe cadence/deadline. The CDP method\nname is fixed protocol syntax. Actual child termination recovered four ready slots in one restart;\nstrict normal SIGTERM still exits 0 with all holds released. Public bookings and both approved\nworkflows passed. See the current release record."
+  },
+  {
+   "id": "docs/operations/reliable-browser.md#16-0",
+   "source": "docs/operations/reliable-browser.md",
+   "heading": "Reliable browser workflows — Historical 13 October completion verification and lifecycle",
+   "text": "The final completion regression passed 274 tests with six expected skips in 762.41 seconds;\nall 435 source/tool hashes remained unchanged. Exact rc4 release rehearsal\nincludes both real MCP workflows, owner review/evidence, crawler and responsive console flows.\nSeparate installed-model local-agent proof and 50/70-context owned-fixture hours broaden the evidence;\nthey do not establish arbitrary destination correctness or authenticated fleet capacity.\n\nThe final rc4 rehearsal passed actual freight drain with four stopped slots and zero held accounts,\na controlled 12-second workflow drain, and crawler SIGTERM exit 0/non-OOM with its exact container\nrestored. All three configured container grace periods are 60 seconds. A separate-process crawler\nresumed only after natural lease expiry; static-only rollback preserved pending durable detections\nand backend identities. These are exact rehearsal proofs; deployed rc4 separately passed public\nMCP/UI/HTTP and running-image/artifact parity checks.\n\nBefore dependency/service replacement, gracefully stop the freight worker, workflow worker and\ncrawler when present. Verify all stop graces exceed application drain bounds and record successful\nnon-OOM exits and released holds. Keep old control available through legacy stream drain, then\nstop control and take a fresh archive before migration. See deployment and\noperational runbooks."
+  },
+  {
+   "id": "docs/operations/reliable-browser.md#17-1",
+   "source": "docs/operations/reliable-browser.md",
+   "heading": "Reliable browser workflows — Historical 13 October completion verification and lifecycle",
+   "text": "Operational collection and independent encrypted recovery now have dedicated implementations and\nproof boundaries; use monitoring and recovery instead of treating a\nlocal scheduled archive as complete host-loss protection. Final installation and live evidence\nbelong in the release record."
+  },
+  {
+   "id": "docs/operations/local-agent.md#0-0",
+   "source": "docs/operations/local-agent.md",
+   "heading": "Standalone local browser agent",
+   "text": "The standalone application runs on the owner's machine with SQLite, Playwright Chromium and an\nalready-installed local Ollama model. It uses neither the fleet's PostgreSQL/Redis services nor a\nDocker runtime. No cloud model, API key or paid service is required or enabled."
+  },
+  {
+   "id": "docs/operations/local-agent.md#1-0",
+   "source": "docs/operations/local-agent.md",
+   "heading": "Standalone local browser agent — Start and use",
+   "text": "1. Install the workspace with `uv sync`, then install Chromium with `python -m playwright install chromium`.\n2. Start Ollama with an already-installed model. Set `FW_AGENT__MODEL_ID` to its exact installed name.\n   The application refuses cloud-suffixed models, models absent from local inventory, remote-backed\n   model metadata, redirects and non-numeric/non-loopback model endpoints.\n3. Copy the agent group from `.env.example` into the local ignored `.env`. The typed boundary owns\n   the model URL/name, database/profile/evidence paths, loopback host/port, destination origins,\n   headless setting, deadlines, body/content/model/tab/action/approval budgets and optional CDP URL.\n   `FW_AGENT__HISTORY_LIMIT` controls how many recent tasks the UI/API lists, newest first; older\n   records remain in SQLite and can still be retrieved by their identifiers.\n4. Run `python -m fw_agent` from the repository root. Open the exact HTTP origin defined by the\n   configured numeric loopback host and port. The API deliberately rejects alternate Host headers,\n   remote clients, cross-site requests and mutation requests without same-origin CSRF authorization.\n5. Select a template and explicit destination, describe the draft, and choose **Read pages and draft\n   locally**. Wait for `AWAITING_APPROVAL`; inspect the source, final draft, full proposal and hash.\n6. Edit the draft if necessary. Saving"
+  },
+  {
+   "id": "docs/operations/local-agent.md#2-1",
+   "source": "docs/operations/local-agent.md",
+   "heading": "Standalone local browser agent — Start and use",
+   "text": "edits cancels the old proposal and creates a new proposal/hash.\n   **Approve this exact save** consumes one unexpired approval. Download the receipt after confirmation.\n7. Use **Cancel task** or **Stop all agent tasks** to halt work. The global stop requires application\n   restart before new tasks can start. An action interrupted after approval becomes `UNKNOWN`."
+  },
+  {
+   "id": "docs/operations/local-agent.md#3-0",
+   "source": "docs/operations/local-agent.md",
+   "heading": "Standalone local browser agent — Three maintained workflows",
+   "text": "| Template | Source tab | Destination tab | Effect |\n| Maintenance request | Owned equipment status | Maintenance draft form | Saves an owned local record |\n| Dispatch handover note | Owned dispatch status | Handover draft form | Saves an owned local record |\n| Inspection summary | Owned inspection observations | Inspection draft form | Saves an owned local record |\n\nThe lab is enabled explicitly by configuration. These are functional owned workflows;\nthey do not send emails, post publicly, buy anything or integrate with a third-party production app.\nOther explicitly authorized origins can be configured only when they implement the same strict form\nand receipt contract. This is not an arbitrary-site autonomous agent. CAPTCHA/login bypass is absent."
+  },
+  {
+   "id": "docs/operations/local-agent.md#4-0",
+   "source": "docs/operations/local-agent.md",
+   "heading": "Standalone local browser agent — Approval and uncertainty",
+   "text": "SQLite WAL with full synchronous durability is the action authority. SHA-256 binds the complete\ntemplate snapshot, origin, request, captured source and final title/body. Approval is atomically\nconsumed before browser execution. Expired, replayed and changed approvals are refused. Changing a\ntemplate after a proposal was created also requires a fresh proposal. Approval cannot be emitted by\nthe model: its schema contains only `title` and `body`, with extra fields forbidden.\n\n`PREPARING → AWAITING_APPROVAL → ACTING → CONFIRMED` is the normal flow. Interrupted actions become\n`UNKNOWN`, including `ACTING` rows found at application restart. The agent never blindly resubmits\nan UNKNOWN action. **Check destination receipt** performs a read only. A receipt must match the task\nidentifier, hash, title and body before confirmation. Missing or mismatched receipts retain UNKNOWN\nfor human investigation. The owned lab records one idempotent receipt for each exact task."
+  },
+  {
+   "id": "docs/operations/local-agent.md#5-0",
+   "source": "docs/operations/local-agent.md",
+   "heading": "Standalone local browser agent — Browser and local API boundary",
+   "text": "Dedicated persistent profiles are the default. Only that application's profile pages are controlled.\nOptional loopback CDP attaches to Chromium and creates a new isolated context; it deliberately does\nnot inherit the owner's existing tabs or login. Closing the agent closes its own context and stops\nthe Playwright connection. It does not call `browser.close()` on the owner's attached browser."
+  },
+  {
+   "id": "docs/operations/local-agent.md#6-1",
+   "source": "docs/operations/local-agent.md",
+   "heading": "Standalone local browser agent — Browser and local API boundary",
+   "text": "The agent uses two tabs and nine explicit navigation/fill/click interactions for a complete template.\nThe title/body wire schema, identifier formats, hash serialization and named adapter interaction\ncost are versioned protocol constraints; deployment limits come from the central settings boundary.\nWaits, reads and evidence capture have bounded timeouts. Context routing blocks other origins,\nand a configured request ceiling bounds each prepare, execute or reconciliation phase. It blocks\npreapproval mutations, popup navigation and all mutation payloads except the single exact approved\nPOST to the maintained template's accept path. Service workers are blocked.\nWebSockets are denied for the entire dedicated/isolated-CDP context lifetime, before task pages\nare opened; rejection does not connect to the remote WebSocket server. HTTP request routing alone\ndoes not cover that transport. The model cannot choose selectors, URLs or operations.\nDestination page text remains untrusted reference material; this\nconstrains authority even if the model repeats poisoned prose. Human content review remains necessary."
+  },
+  {
+   "id": "docs/operations/local-agent.md#7-2",
+   "source": "docs/operations/local-agent.md",
+   "heading": "Standalone local browser agent — Browser and local API boundary",
+   "text": "The UI uses same-site HTTP-only session cookies, same-origin CSRF tokens, strict Host/client/Origin\nchecks, bounded bodies, no CORS wildcard, a self-only content security policy and no-store responses.\nLoopback HTTP is intentional; remote exposure/reverse proxying is unsupported. Local hostile software\nwith access to the same user account is outside this boundary. Keep the SQLite database, profile,\nscreenshots and receipt exports private: they can contain the source and human draft.\nOn POSIX, the application restricts its owned state/profile/evidence directories to0700 and state\nfiles to0600, including SQLite WAL/SHM. It preserves existing content while tightening permissions\nand refuses symlink or foreign-owned state paths. Use dedicated directories for these paths.\nWindows inherits the chosen directory's ACLs; POSIX mode checks do not establish Windows ACL privacy.\n\nThese application-level HTTP/WebSocket controls are not an operating-system network sandbox.\nOther browser channels such as WebRTC, WebTransport and DNS are not claimed to be constrained by\nPlaywright HTTP routing. Use only owned or expressly authorized contract pages; do not use this\napplication to execute arbitrary hostile sites. Isolating hostile executable pages requires an\nindependent OS/container egress policy, which this lightweight standalone runtime does not install."
+  },
+  {
+   "id": "docs/operations/local-agent.md#8-0",
+   "source": "docs/operations/local-agent.md",
+   "heading": "Standalone local browser agent — Verification and recovery",
+   "text": "`pytest -q packages/fw_agent/tests -m 'not slow'` runs authority, API and real Chromium tests without\na local model. `pytest -q packages/fw_agent/tests --agent-model-proof` additionally exercises all three\ntemplates with the installed local model and prints its private local evidence directory.\nCI does not claim to have an installed model: that one proof skips unless explicitly requested.\n\nAfter power loss, restart the application against the same SQLite database and profile. Review\nUNKNOWN tasks and reconcile\nreceipts; never delete task rows to force a retry. JSON evidence records the exact approval hash and\nmatching receipt; screenshots show the destination acknowledgement."
+  },
+  {
+   "id": "docs/operations/local-agent.md#9-0",
+   "source": "docs/operations/local-agent.md",
+   "heading": "Standalone local browser agent — Model and review maintenance",
+   "text": "The installed model is selected by typed settings, not by task text. The adapter checks local\ninventory and remote-backed metadata, requests a strict title/body JSON schema, bounds model\nresponse size/tokens/time, and supplies no action tools. See the\nofficial structured chat format.\n\nTreat page content and model prose as untrusted. Review both title and body, including any\nunsupported inference. Unsaved fields survive blur, manual refresh and polling; approval refuses\nthem until Save edits produces a new proposal. Confirm that the final receipt matches the reviewed\ncontent rather than checking only the CONFIRMED label.\n\nFor upgrades, stop active tasks, preserve the SQLite/profile/evidence directories, back up private\nstate and inspect UNKNOWN tasks after restart. Re-run approval, cancellation, injection and\ntwo-origin HTTP/WebSocket tests when changing templates or browser policy. Actual installed-model\nproof is separate from default CI; POSIX permission checks do not establish Windows ACL privacy."
+  }
+ ]
+}

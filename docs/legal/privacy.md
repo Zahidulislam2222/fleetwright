@@ -24,6 +24,7 @@ processing customer data. Use [the legal register](README.md) for applicability 
 | Audit identity and network prefix | Investigation/accountability | Append-only application grants; IPv4 /24 or IPv6 /48 prefix in application audit |
 | Browser screenshots/traces | Private failure investigation | Private storage and configured pruning; artifacts may contain page data |
 | Database archives | Recovery | Restricted host permissions, verified manifests; archives remain sensitive |
+| Help assistant questions and answers | Answering the asker in the console | Not stored by Fleetwright; kept only in the open page. Sent with retrieved documentation and read-only console data to the configured model provider (OpenRouter, routed only to providers that do not train on prompts); daily counters and a one-hour single-use feedback id hold no question text |
 
 Edge, hosting and infrastructure access logs may have different network metadata than application
 audit. Review their retention and vendor terms separately. Evidence redaction in JSON exports does
@@ -75,6 +76,16 @@ assessment; local inference is not a promise that all processing remains local.
 Before deployment, publish the actual operator identity/contact, purposes and legal bases,
 retention schedule, rights channels, recipients/subprocessors and transfer safeguards. This
 engineering inventory is not a completed deployment-specific privacy notice or DPA.
+
+### Help assistant provider
+
+The console help assistant sends the visitor's question, recent turns of the same conversation,
+matching documentation passages and read-only data the visitor's role can already see to the
+configured model API (currently OpenRouter). The request asks the router to use only providers
+that do not collect prompts for training. Provider-side retention, subprocessors and transfer terms
+are the provider's; review them before a customer deployment and do not enable the assistant for
+regulated data without a processing agreement. Operators can switch it off (`FW_ASSISTANT__ENABLED`),
+which leaves documentation search working.
 
 ## Security incidents
 

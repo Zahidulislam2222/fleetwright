@@ -53,6 +53,9 @@ class Runner:
                 source = await self.browser.source(template, proposal["origin"])
                 draft = await self.model.draft(template.prompt, proposal["request"], source)
                 proposal.update({"source": source, "draft": draft.model_dump()})
+                # Machine-readable marking of AI-generated text (EU AI Act Art. 50(2)); it is part of
+                # the approved fingerprint, so the marking cannot be stripped without a fresh approval.
+                proposal["provenance"] = {"ai_generated": True, "model": self.settings.model_id}
                 self.store.ready(task_id, proposal, self.settings.approval_ttl_s)
         except asyncio.CancelledError:
             if self.store.get(task_id)["state"] == "PREPARING":
@@ -72,6 +75,7 @@ class Runner:
         self.store.transition(task_id, "CANCELLED", "human edited draft; superseded by fresh proposal")
         new_proposal = dict(task["proposal"])
         new_proposal["draft"] = draft.model_dump()
+        new_proposal["provenance"] = {**task["proposal"].get("provenance", {}), "human_edited": True}
         replacement = self.store.create(new_proposal)
         self.store.ready(replacement, new_proposal, self.settings.approval_ttl_s)
 

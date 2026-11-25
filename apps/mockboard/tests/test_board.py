@@ -252,3 +252,16 @@ async def test_public_watch_feed_needs_no_login(board: Board) -> None:
     assert httpx.get(f"{board.url}/watch").status_code == 200
     page = httpx.get(f"{board.url}/watch")
     assert "default-src 'self'" in page.headers["content-security-policy"]
+
+
+async def test_every_page_explains_the_demo_in_a_collapsed_guide(board: Board) -> None:
+    """Visitors (clients, developers) learn what the board is; automation sees only a closed <details>."""
+    for path in ("/watch", "/login"):
+        page = httpx.get(f"{board.url}{path}").text
+        guide = re.search(r'<details class="guide">(.*?)</details>', page, re.S)
+        if (
+            guide is None
+            or "owned and operated by the Fleetwright project" not in guide.group(1)
+            or " open" in page.split("<details")[1][:20]
+        ):
+            pytest.fail(f"{path}: the visitor guide is missing or opens by default")

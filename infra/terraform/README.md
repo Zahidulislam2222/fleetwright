@@ -42,6 +42,12 @@ inventory, cost model, IAM/data-residency review, release/migration plan and ope
 zone failure at the proposed traffic tier with existing spare capacity and bounded reconnects.
 Keep database writer ownership, RLS and uncertain-action reconciliation intact through failover.
 
+Resource names follow the shared `<project>-<purpose>` convention (`fleetwright-api`, `fleetwright-db`,
+`fleetwright-cluster`) and every resource carries `Hub` and `Project` tags (2026-11-25). This reference
+has never been applied. If an earlier copy was ever applied with the old names, a plan would replace
+renamed resources such as the database instance: review the plan, keep the final snapshot and use
+`moved` blocks or a snapshot restore before accepting any replacement.
+
 The [validation plan](../../docs/scaling/validation-plan.md) specifies the 1k→10k→100k→1M+ workload
 ladder; [customer readiness](../../docs/legal/commercial-readiness.md) covers legal, privacy, support
 and SLA decisions. The present task uses the existing server and local tools only.

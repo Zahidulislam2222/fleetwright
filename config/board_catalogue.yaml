@@ -22,6 +22,19 @@ lanes:
 branding:
   name: Fleet Freight Exchange
   banner: "Owned freight exchange for authorized workflow verification. No commercial freight is offered."
+  guide:
+    summary: "About this freight exchange — what is happening here?"
+    intro: >-
+      This freight exchange is owned and operated by the Fleetwright project for workflow verification.
+      It stands in for a client's real job board, so the automation fleet can be seen working without
+      touching any third-party site. No commercial freight is offered and no real carrier is involved.
+    points:
+      - "New loads appear on the board at a controlled rate, each with a recorded publish time."
+      - "Fleetwright's browser workers sign in with their own exchange accounts (password, then an emailed one-time code), watch the feed and try to book matching loads."
+      - "Rival bots compete for the same loads, so the duplicate-proof claim system is tested for real: each load can be booked once."
+      - "Faults can be switched on — rate limits, server errors, slow answers, expired sessions, a changed page layout — to show how the fleet recovers."
+      - "The Live activity page shows bookings as they happen; the console shows the fleet's side: claims, latency and worker health."
+    console_label: "Watch the fleet and ask its AI help assistant in the Fleetwright console:"
 captcha:
   operands: [2, 19]   # "What is A + B?" — our own trivially solvable owned captcha
 competitors:

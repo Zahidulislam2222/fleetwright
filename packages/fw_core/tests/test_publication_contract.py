@@ -4,6 +4,7 @@ import json
 import re
 from pathlib import Path, PurePosixPath
 
+import pytest
 import yaml
 from dotenv import dotenv_values
 
@@ -128,3 +129,20 @@ def test_documentation_links_and_required_topics():
         for target in re.findall(r"\]\(([^)#]+)(?:#[^)]*)?\)", path.read_text(encoding="utf-8")):
             if "://" not in target and not target.startswith("mailto:"):
                 assert (path.parent / target).exists(), f"{path}: {target}"
+
+
+def test_only_the_api_can_reach_the_internet():
+    """The backend network stays internal; the assistant's provider egress is the API's alone (ADR 0016)."""
+    compose = (ROOT / "deploy/templates/compose.yaml").read_text()
+    config = json.loads((ROOT / "deploy/deploy.config.json").read_text())
+    values = {**config, **config["limits"], **config["backend"], "releaseId": "x"}
+    values.update({"postgresImage": "p", "redisImage": "r", "mailpitImage": "m"})
+    doc = yaml.safe_load(re.sub(r"\{\{(\w+)\}\}", lambda match: str(values[match[1]]), compose))
+    networks = doc["networks"]
+    if networks["backend"].get("internal") is not True or networks["egress"].get("internal"):
+        pytest.fail("backend must stay internal and egress must be a normal bridge")
+    on_egress = sorted(name for name, svc in doc["services"].items() if "egress" in (svc.get("networks") or []))
+    if on_egress != ["api"]:
+        pytest.fail(f"only the API may join the egress network, found {on_egress}")
+    if doc["services"]["api"].get("ports"):
+        pytest.fail("the API must not publish ports")

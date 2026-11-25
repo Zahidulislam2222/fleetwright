@@ -161,6 +161,169 @@ components:
       - action_hash
       title: ApprovalIn
       type: object
+    AskIn:
+      additionalProperties: false
+      properties:
+        history:
+          default: []
+          items:
+            $ref: '#/components/schemas/Turn'
+          maxItems: 20
+          title: History
+          type: array
+        question:
+          maxLength: 4000
+          minLength: 1
+          title: Question
+          type: string
+      required:
+      - question
+      title: AskIn
+      type: object
+    AssistantAnswer:
+      additionalProperties: false
+      properties:
+        ai_generated:
+          title: Ai Generated
+          type: boolean
+        answer:
+          title: Answer
+          type: string
+        disclosure:
+          title: Disclosure
+          type: string
+        id:
+          title: Id
+          type: string
+        mode:
+          enum:
+          - ai
+          - search
+          title: Mode
+          type: string
+        notice:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Notice
+        reason:
+          anyOf:
+          - enum:
+            - search_only
+            - budget_exhausted
+            - rate_limited
+            - busy
+            - disabled
+            - nothing_found
+            type: string
+          - type: 'null'
+          title: Reason
+        sources:
+          items:
+            $ref: '#/components/schemas/AssistantSource'
+          title: Sources
+          type: array
+        used_tools:
+          items:
+            type: string
+          title: Used Tools
+          type: array
+      required:
+      - id
+      - mode
+      - ai_generated
+      - answer
+      - notice
+      - reason
+      - sources
+      - used_tools
+      - disclosure
+      title: AssistantAnswer
+      type: object
+    AssistantContact:
+      additionalProperties: false
+      properties:
+        label:
+          title: Label
+          type: string
+        note:
+          title: Note
+          type: string
+        url:
+          title: Url
+          type: string
+      required:
+      - label
+      - url
+      - note
+      title: AssistantContact
+      type: object
+    AssistantInfo:
+      additionalProperties: false
+      properties:
+        contact:
+          $ref: '#/components/schemas/AssistantContact'
+        disclosure:
+          title: Disclosure
+          type: string
+        enabled:
+          title: Enabled
+          type: boolean
+        knowledge_version:
+          title: Knowledge Version
+          type: string
+        max_history_chars:
+          title: Max History Chars
+          type: integer
+        max_history_turns:
+          title: Max History Turns
+          type: integer
+        max_question_chars:
+          title: Max Question Chars
+          type: integer
+        suggestions:
+          items:
+            type: string
+          title: Suggestions
+          type: array
+        today:
+          anyOf:
+          - additionalProperties:
+              type: integer
+            type: object
+          - type: 'null'
+          title: Today
+      required:
+      - enabled
+      - disclosure
+      - contact
+      - suggestions
+      - max_question_chars
+      - max_history_turns
+      - max_history_chars
+      - knowledge_version
+      title: AssistantInfo
+      type: object
+    AssistantSource:
+      additionalProperties: false
+      properties:
+        path:
+          title: Path
+          type: string
+        title:
+          title: Title
+          type: string
+        url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Url
+      required:
+      - title
+      - path
+      - url
+      title: AssistantSource
+      type: object
     AuditEntry:
       additionalProperties: false
       properties:
@@ -590,6 +753,32 @@ components:
       - adversity
       - caps
       title: DemoStatus
+      type: object
+    FeedbackIn:
+      additionalProperties: false
+      properties:
+        helpful:
+          title: Helpful
+          type: boolean
+        id:
+          maxLength: 40
+          minLength: 8
+          title: Id
+          type: string
+      required:
+      - id
+      - helpful
+      title: FeedbackIn
+      type: object
+    FeedbackResult:
+      additionalProperties: false
+      properties:
+        recorded:
+          title: Recorded
+          type: boolean
+      required:
+      - recorded
+      title: FeedbackResult
       type: object
     Filter:
       additionalProperties: false
@@ -1141,6 +1330,25 @@ components:
       - name
       title: Tenant
       type: object
+    Turn:
+      additionalProperties: false
+      properties:
+        content:
+          maxLength: 4000
+          minLength: 1
+          title: Content
+          type: string
+        role:
+          enum:
+          - user
+          - assistant
+          title: Role
+          type: string
+      required:
+      - role
+      - content
+      title: Turn
+      type: object
     User:
       additionalProperties: false
       properties:
@@ -1387,6 +1595,63 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
           description: Validation Error
       summary: Manual Otp
+  /v1/assistant:
+    get:
+      operationId: describe_v1_assistant_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssistantInfo'
+          description: Successful Response
+      summary: Describe
+  /v1/assistant/ask:
+    post:
+      operationId: ask_v1_assistant_ask_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AskIn'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssistantAnswer'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Ask
+  /v1/assistant/feedback:
+    post:
+      operationId: feedback_v1_assistant_feedback_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeedbackIn'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedbackResult'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Feedback
   /v1/audit:
     get:
       operationId: audit_page_v1_audit_get

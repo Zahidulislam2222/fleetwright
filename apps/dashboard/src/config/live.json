@@ -4,5 +4,7 @@
   "eventThrottleMs": 5000,
   "listLimit": 200,
   "recentClaims": 6,
-  "demoStatusPollMs": 5000
+  "demoStatusPollMs": 5000,
+  "assistantRequestBytes": 15000,
+  "_assistantNote": "assistantRequestBytes keeps a question plus its history under the edge proxy's API body limit (deploy/deploy.config.json apiBodyLimit, 16k), with headroom."
 }

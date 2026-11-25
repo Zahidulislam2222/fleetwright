@@ -101,3 +101,23 @@ def demo_run_dirty() -> str:
 def demo_adversity_dirty() -> str:
     """Adversity was changed; the reset loop restores the idle preset once demo_changed expires."""
     return f"{PREFIX}:demo:adversity-dirty"
+
+
+def assistant_spend(day: str) -> str:
+    """Console help assistant: provider spend reserved today, in micro-USD (deployment-wide budget)."""
+    return f"{PREFIX}:assistant:spend:{day}"
+
+
+def assistant_questions(subject: str) -> str:
+    """Console help assistant: questions asked by one user or client address range this hour."""
+    return f"{PREFIX}:assistant:asked:{subject}"
+
+
+def assistant_stats(day: str) -> str:
+    """Console help assistant: privacy-preserving daily counters (no question text)."""
+    return f"{PREFIX}:assistant:stats:{day}"
+
+
+def assistant_answer(answer_id: str) -> str:
+    """Console help assistant: an answer that may still receive one helpful/not-helpful vote."""
+    return f"{PREFIX}:assistant:answer:{answer_id}"

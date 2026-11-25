@@ -73,6 +73,28 @@ The Commission states that the AI Act generally became applicable on 2 August 20
 exceptions. The AI Omnibus entered into force on 27 July 2026. Relevant Annex III high-risk rules
 apply from 2 December 2027 and regulated-product high-risk rules from 2 August 2028. Relevant
 transparency duties apply from 2 August 2026.
+Rechecked 25 November 2026 against the Omnibus text (Art. 1(39)(b) adding AI Act Art. 111(4)) and
+the Commission's final Article 50 guidelines (20 July 2026). Art. 50(1) (telling people they are
+interacting with an AI system) applies from 2 August 2026 without delay. The four-month transition
+for Art. 50(2) machine-readable marking, ending 2 December 2026, covers only systems placed on the
+market before 2 August 2026; systems placed later had no grace period. Fleetwright's AI parts were
+built after that date, so both apply now. The Commission's voluntary Code of Practice on marking and
+labelling AI-generated content was published on 10 June 2026. Whether a public portfolio demo is
+"placed on the market" needs legal review; the engineering response assumes it is.
+
+Current engineering response: the console help assistant states that it is an AI before the first
+question, marks every AI answer with `ai_generated: true` in the API response and
+`data-ai-generated="true"` in the page, and labels documentation-search fallbacks separately. The
+local agent records `provenance.ai_generated` (and `human_edited`) inside the approved proposal
+fingerprint and labels drafts in its window. A generic "assistant" label alone is not relied on.
+
+US notes (not legal advice; checked 25 November 2026 mostly from secondary sources): no general
+federal AI-chatbot disclosure statute was found, while FTC Act deception rules still apply.
+California SB 243 (companion chatbots, from 1 January 2026) reportedly excludes business-operations
+and customer-service bots. Utah's AI disclosure law treats a clear disclosure at the start of a chat
+as a safe harbor. Colorado SB 26-189 (from 1 January 2027) concerns consequential automated decisions,
+which a help assistant does not make.
+
 Classify each intended use rather than declaring the whole platform low risk. Recheck the
 [Commission framework and timeline](https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai)
 and the [Omnibus legal text, Regulation (EU) 2026/1744](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=OJ:L_202601744)

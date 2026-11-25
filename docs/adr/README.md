@@ -20,6 +20,7 @@ original context and consequences. Editorial terminology changes do not create a
 | 013 | [Local drafting and exact approval have separate authority](0013-local-drafting-and-approval-authority.md) | Accepted |
 | 014 | [Bind release identity and stop all actors before replacement](0014-release-identity-and-worker-shutdown.md) | Accepted |
 | 015 | [Browser readiness and child-process supervision](0015-browser-supervision-and-readiness.md) | Accepted; extends 006 and 014 |
+| 016 | [Console help assistant and its provider egress](0016-assistant-provider-egress.md) | Accepted |
 
 ## Reading the decisions
 

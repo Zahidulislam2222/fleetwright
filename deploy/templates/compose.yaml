@@ -1,6 +1,8 @@
 # GENERATED from deploy/templates/compose.yaml by deploy/build-release.mjs — edit the template.
 # Networks: `edge` carries only Caddy -> web; `backend` is internal (no route to the internet), so
 # the engine, owned destinations and data services can reach each other and nothing else.
+# `egress` gives only the API outbound internet access, for the help assistant's model provider
+# (docs/adr/0016-assistant-provider-egress.md). No other service joins it; nothing listens on it.
 name: {{slug}}
 
 x-hardened: &hardened
@@ -152,6 +154,7 @@ services:
   api:
     <<: *app
     command: ["python", "-m", "fw_coordinator.api"]
+    networks: [backend, egress]
     environment:
       FW_CRAWL__OUTPUT_DIRECTORY: "{{crawlOutputDirectory}}"
     volumes:
@@ -242,6 +245,10 @@ networks:
         - subnet: {{edgeSubnet}}
   backend:
     internal: true
+  egress:
+    ipam:
+      config:
+        - subnet: {{egressSubnet}}
 
 volumes:
   pgdata:

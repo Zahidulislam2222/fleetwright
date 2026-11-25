@@ -13,7 +13,7 @@ Use the [release record](releases/2026-10-15.md) for status and retained verific
 
 | Area | Documents |
 |---|---|
-| Product and integration | [Product and boundaries](product.md) · [API and MCP reference](integrations.md) · [Reliable browser workflows](operations/reliable-browser.md) |
+| Product and integration | [Product and boundaries](product.md) · [Console guide and help assistant](console-guide.md) · [API and MCP reference](integrations.md) · [Reliable browser workflows](operations/reliable-browser.md) |
 | Architecture | [Overview](architecture/overview.md) · [Claim lifecycle](architecture/claim-lifecycle.md) · [Decision records](adr/README.md) |
 | Setup and operations | [Local development](operations/local-development.md) · [Configuration](operations/configuration.md) · [Deployment](operations/deployment.md) · [Runbooks](operations/runbooks.md) |
 | Crawling and local agent | [Catalogue crawler](operations/crawler.md) · [Standalone local agent](operations/local-agent.md) |
@@ -21,7 +21,7 @@ Use the [release record](releases/2026-10-15.md) for status and retained verific
 | Portfolio and proposals | [Three capability drafts, technical answers and public case study](proposal-kit/README.md) |
 | Security | [Reporting policy](../SECURITY.md) · [Threat model](security/threat-model.md) · [Control status](security/controls.md) |
 | Law and privacy | [Legal register](legal/README.md) · [Acceptable use](legal/acceptable-use.md) · [Privacy and retention](legal/privacy.md) |
-| Future scale and availability | [1M+ simultaneous users](scaling/README.md) · [Capacity arithmetic](scaling/capacity-model.md) · [Add an execution cell](scaling/adding-a-cell.md) · [99% / 99.9% SLOs and recovery](scaling/slo.md) |
+| Future scale and availability | [1M+ simultaneous users](scaling/README.md) · [Capacity arithmetic](scaling/capacity-model.md) · [Add an execution cell](scaling/adding-a-cell.md) · [99% / 99.9% SLOs and recovery](scaling/slo.md) · [500–1,000-user baseline](scaling/baseline-workload.md) |
 | Assurance and maintenance | [Testing and measurements](testing.md) · [Maintenance and accessibility](maintenance.md) · [Roadmap](roadmap.md) · [Changelog](../CHANGELOG.md) |
 | Operating ownership | [Service dependencies and release handoff](operations/service-ownership.md) · [Data lifecycle](security/data-lifecycle.md) |
 | Customer and expansion readiness | [Commercial/legal handoff](legal/commercial-readiness.md) · [Tiered scale/availability validation](scaling/validation-plan.md) |

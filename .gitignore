@@ -84,3 +84,7 @@ design/media/originals/
 
 # Local runtime data (evidence files, logs)
 /var/
+
+# ─── Private study notes and task tracker (Rules 21 / 25) ────────
+/study/
+/TASKS.md

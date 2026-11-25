@@ -94,7 +94,7 @@ resource "aws_vpc_security_group_egress_rule" "api_redis" {
   to_port                      = var.redis_port
 }
 resource "aws_lb" "api" {
-  name                       = var.name
+  name                       = "${var.name}-api"
   internal                   = false
   load_balancer_type         = "application"
   subnets                    = [for subnet in aws_subnet.public : subnet.id]
@@ -103,7 +103,7 @@ resource "aws_lb" "api" {
   drop_invalid_header_fields = true
 }
 resource "aws_lb_target_group" "api" {
-  name        = var.name
+  name        = "${var.name}-api-tg"
   port        = var.container_port
   protocol    = "HTTP"
   target_type = "ip"
@@ -127,14 +127,14 @@ resource "aws_cloudwatch_log_group" "api" {
   kms_key_id        = var.log_kms_key_arn
 }
 resource "aws_ecs_cluster" "main" {
-  name = var.name
+  name = "${var.name}-cluster"
   setting {
     name  = "containerInsights"
     value = "enabled"
   }
 }
 resource "aws_ecs_task_definition" "api" {
-  family                   = var.name
+  family                   = "${var.name}-api"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   cpu                      = var.cpu
@@ -152,7 +152,7 @@ resource "aws_ecs_task_definition" "api" {
   }])
 }
 resource "aws_ecs_service" "api" {
-  name            = var.name
+  name            = "${var.name}-api"
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.api.arn
   desired_count   = var.api_replicas
@@ -174,11 +174,11 @@ resource "aws_ecs_service" "api" {
   depends_on = [aws_lb_listener.https]
 }
 resource "aws_db_subnet_group" "main" {
-  name       = var.name
+  name       = "${var.name}-db"
   subnet_ids = [for subnet in aws_subnet.private : subnet.id]
 }
 resource "aws_db_instance" "main" {
-  identifier                  = var.name
+  identifier                  = "${var.name}-db"
   engine                      = "postgres"
   engine_version              = var.postgres_version
   instance_class              = var.database_class

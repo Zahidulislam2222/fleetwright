@@ -315,6 +315,18 @@
             "type": "string",
             "writeOnly": true
           },
+          "console_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Console Url"
+          },
           "cookie_secure": {
             "default": true,
             "title": "Cookie Secure",
@@ -875,6 +887,272 @@
         "title": "ApiSettings",
         "type": "object"
       },
+      "AssistantSettings": {
+        "description": "Console help assistant (global Rule 24). Off unless enabled; when on, the provider endpoint,\nkey, model and its per-token prices must be configured (no defaults for any of them).\nSpend is bounded twice: this daily budget in the app and the provider key's own monthly limit.",
+        "properties": {
+          "api_key": {
+            "anyOf": [
+              {
+                "format": "password",
+                "type": "string",
+                "writeOnly": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Api Key"
+          },
+          "concurrency": {
+            "default": 4,
+            "maximum": 64,
+            "minimum": 1,
+            "title": "Concurrency",
+            "type": "integer"
+          },
+          "daily_budget_usd": {
+            "default": 0.5,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Daily Budget Usd",
+            "type": "number"
+          },
+          "deny_data_collection": {
+            "default": true,
+            "title": "Deny Data Collection",
+            "type": "boolean"
+          },
+          "docs_base_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Docs Base Url"
+          },
+          "enabled": {
+            "default": false,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "excerpt_chars": {
+            "default": 420,
+            "maximum": 2000,
+            "minimum": 100,
+            "title": "Excerpt Chars",
+            "type": "integer"
+          },
+          "feedback_ttl_s": {
+            "default": 3600,
+            "maximum": 86400,
+            "minimum": 60,
+            "title": "Feedback Ttl S",
+            "type": "integer"
+          },
+          "max_history_chars": {
+            "default": 6000,
+            "maximum": 40000,
+            "minimum": 0,
+            "title": "Max History Chars",
+            "type": "integer"
+          },
+          "max_history_turns": {
+            "default": 6,
+            "maximum": 20,
+            "minimum": 0,
+            "title": "Max History Turns",
+            "type": "integer"
+          },
+          "max_output_tokens": {
+            "default": 600,
+            "maximum": 4000,
+            "minimum": 50,
+            "title": "Max Output Tokens",
+            "type": "integer"
+          },
+          "max_prompt_chars": {
+            "default": 24000,
+            "maximum": 200000,
+            "minimum": 2000,
+            "title": "Max Prompt Chars",
+            "type": "integer"
+          },
+          "max_question_chars": {
+            "default": 800,
+            "maximum": 4000,
+            "minimum": 20,
+            "title": "Max Question Chars",
+            "type": "integer"
+          },
+          "max_steps": {
+            "default": 3,
+            "maximum": 6,
+            "minimum": 1,
+            "title": "Max Steps",
+            "type": "integer"
+          },
+          "max_tool_calls": {
+            "default": 4,
+            "maximum": 10,
+            "minimum": 1,
+            "title": "Max Tool Calls",
+            "type": "integer"
+          },
+          "model_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Model Id"
+          },
+          "openrouter_extensions": {
+            "default": true,
+            "title": "Openrouter Extensions",
+            "type": "boolean"
+          },
+          "price_input_per_mtok_usd": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Price Input Per Mtok Usd"
+          },
+          "price_output_per_mtok_usd": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Price Output Per Mtok Usd"
+          },
+          "provider_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Provider Url"
+          },
+          "public_per_hour": {
+            "default": 12,
+            "maximum": 1000,
+            "minimum": 0,
+            "title": "Public Per Hour",
+            "type": "integer"
+          },
+          "rate_window_s": {
+            "default": 3600,
+            "maximum": 86400,
+            "minimum": 60,
+            "title": "Rate Window S",
+            "type": "integer"
+          },
+          "retrieval_top_k": {
+            "default": 4,
+            "maximum": 10,
+            "minimum": 1,
+            "title": "Retrieval Top K",
+            "type": "integer"
+          },
+          "slot_wait_s": {
+            "default": 0.5,
+            "maximum": 10,
+            "minimum": 0,
+            "title": "Slot Wait S",
+            "type": "number"
+          },
+          "stats_retention_days": {
+            "default": 40,
+            "maximum": 400,
+            "minimum": 1,
+            "title": "Stats Retention Days",
+            "type": "integer"
+          },
+          "temperature": {
+            "default": 0.2,
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Temperature",
+            "type": "number"
+          },
+          "timeout_s": {
+            "default": 20.0,
+            "exclusiveMinimum": 0,
+            "maximum": 120,
+            "title": "Timeout S",
+            "type": "number"
+          },
+          "tokenizer_char_ratio": {
+            "default": 3.0,
+            "maximum": 8,
+            "minimum": 1,
+            "title": "Tokenizer Char Ratio",
+            "type": "number"
+          },
+          "tool_claims_limit": {
+            "default": 10,
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Tool Claims Limit",
+            "type": "integer"
+          },
+          "tool_list_limit": {
+            "default": 20,
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Tool List Limit",
+            "type": "integer"
+          },
+          "tool_result_max_chars": {
+            "default": 3000,
+            "maximum": 20000,
+            "minimum": 200,
+            "title": "Tool Result Max Chars",
+            "type": "integer"
+          },
+          "total_deadline_s": {
+            "default": 25.0,
+            "exclusiveMinimum": 0,
+            "maximum": 28,
+            "title": "Total Deadline S",
+            "type": "number"
+          },
+          "user_per_hour": {
+            "default": 40,
+            "maximum": 5000,
+            "minimum": 0,
+            "title": "User Per Hour",
+            "type": "integer"
+          }
+        },
+        "title": "AssistantSettings",
+        "type": "object"
+      },
       "AuthSettings": {
         "properties": {
           "cookie_name": {
@@ -1375,6 +1653,44 @@
       },
       "app_db": {
         "$ref": "#/$defs/DatabaseSettings"
+      },
+      "assistant": {
+        "$ref": "#/$defs/AssistantSettings",
+        "default": {
+          "api_key": null,
+          "concurrency": 4,
+          "daily_budget_usd": 0.5,
+          "deny_data_collection": true,
+          "docs_base_url": null,
+          "enabled": false,
+          "excerpt_chars": 420,
+          "feedback_ttl_s": 3600,
+          "max_history_chars": 6000,
+          "max_history_turns": 6,
+          "max_output_tokens": 600,
+          "max_prompt_chars": 24000,
+          "max_question_chars": 800,
+          "max_steps": 3,
+          "max_tool_calls": 4,
+          "model_id": null,
+          "openrouter_extensions": true,
+          "price_input_per_mtok_usd": null,
+          "price_output_per_mtok_usd": null,
+          "provider_url": null,
+          "public_per_hour": 12,
+          "rate_window_s": 3600,
+          "retrieval_top_k": 4,
+          "slot_wait_s": 0.5,
+          "stats_retention_days": 40,
+          "temperature": 0.2,
+          "timeout_s": 20.0,
+          "tokenizer_char_ratio": 3.0,
+          "tool_claims_limit": 10,
+          "tool_list_limit": 20,
+          "tool_result_max_chars": 3000,
+          "total_deadline_s": 25.0,
+          "user_per_hour": 40
+        }
       },
       "auth": {
         "$ref": "#/$defs/AuthSettings",

@@ -2,7 +2,16 @@ variable "name" {
   type = string
   validation {
     condition     = can(regex("^[a-z][a-z0-9-]{2,19}$", var.name))
-    error_message = "Use a short lowercase resource prefix."
+    error_message = "Use a short lowercase project slug; resources are named <slug>-<purpose>."
+  }
+}
+variable "hub" {
+  description = "Portfolio hub tag value for shared grouping and cost views (global Rule 20)."
+  type        = string
+  default     = "portfolio-hub"
+  validation {
+    condition     = can(regex("^[a-z][a-z0-9-]{2,39}$", var.hub))
+    error_message = "Use a short lowercase hub name."
   }
 }
 variable "region" { type = string }

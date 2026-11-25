@@ -28,6 +28,8 @@ ui:
   expiry: Approval expires
   model: Installed local model
   edits_required: Save your edits to create a fresh proposal before approving.
+  ai_generated: AI-generated draft from the local model. Check it before approving.
+  human_edited: Edited by a person after generation.
 templates:
   - id: maintenance_request
     name: Maintenance request

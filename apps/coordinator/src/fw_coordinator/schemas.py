@@ -314,3 +314,46 @@ class DemoHint(Wire):
 
 class Accepted(Wire):
     accepted: bool
+
+
+# ---------------- console help assistant ----------------
+
+
+class AssistantContact(Wire):
+    label: str
+    url: str
+    note: str
+
+
+class AssistantInfo(Wire):
+    enabled: bool
+    disclosure: str
+    contact: AssistantContact
+    suggestions: list[str]
+    max_question_chars: int
+    max_history_turns: int
+    max_history_chars: int
+    knowledge_version: str
+    today: dict[str, int] | None = None  # owner only: today's privacy-preserving counters
+
+
+class AssistantSource(Wire):
+    title: str
+    path: str
+    url: str | None
+
+
+class AssistantAnswer(Wire):
+    id: str
+    mode: Literal["ai", "search"]
+    ai_generated: bool  # machine-readable AI marking (EU AI Act Art. 50(2))
+    answer: str
+    notice: str | None
+    reason: Literal["search_only", "budget_exhausted", "rate_limited", "busy", "disabled", "nothing_found"] | None
+    sources: list[AssistantSource]
+    used_tools: list[str]
+    disclosure: str
+
+
+class FeedbackResult(Wire):
+    recorded: bool

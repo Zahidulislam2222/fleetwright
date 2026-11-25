@@ -11,6 +11,7 @@ import { fmtDateTime, tenants } from "@/mocks/data";
 import seed from "@/mocks/seed.json";
 import copy from "@/content/console.json";
 import { navIcons } from "./icons";
+import { AssistantButton } from "./AssistantPanel";
 import { usePrototype, type DataStateKind, type ThemeChoice } from "./prototypeStore";
 import { refreshSession, useLive } from "@/lib/live/store";
 import { apiSend } from "@/lib/live/api";
@@ -219,6 +220,7 @@ export function ConsoleShell({ children }: { children: React.ReactNode }) {
               </select>
               </>
               )}
+              <AssistantButton />
               <Account />
               <RadioGroup
                 label={copy.shell.themeLabel}

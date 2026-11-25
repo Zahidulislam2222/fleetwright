@@ -17,6 +17,7 @@ crawling and a separate local model-assisted browser application.
 | MCP supervision | Six bounded stdio tools with separate observe/execute grants, expiry and immediate revocation checks |
 | Catalogue crawler | Durable frontier, same-origin definitions, pinned HTTP/TLS egress, JSON/CSS extraction, quality alarms, retention and private JSONL export |
 | Local browser agent | SQLite and installed Ollama model, three maintained form workflows, exact approvals, receipts, cancellation and isolated optional CDP |
+| Console help assistant | AI answers from the published docs and the read-only data the visitor's role can see; disclosed as AI, marked machine-readably, no write tools, per-user limits and a daily budget, documentation-search fallback ([console guide](docs/console-guide.md)) |
 | Operations | Authenticated metrics, renewable observe-only collection, independent public probes, verified archives and encrypted off-host recovery |
 | Release assurance | Immutable source/artifact inventory, final-image SBOM/scans, offline signatures, rehearsal, compatibility-aware rollback and hash parity |
 

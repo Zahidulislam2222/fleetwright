@@ -59,6 +59,7 @@ class BoardSettings(BaseModel):
     """The fictitious mock load board itself (Phase 2 test target)."""
 
     admin_token: SecretStr  # protects the board's adversity / ground-truth admin API
+    console_url: str | None = None  # operator console address shown (as text) in the visitor guide; unset: hidden
     cookie_secure: bool = True
     session_ttl_s: int = Field(default=1800, ge=30)
     otp_ttl_s: int = Field(default=300, ge=30)
@@ -72,6 +73,13 @@ class BoardSettings(BaseModel):
     feed_poll_ms: int = Field(default=500, ge=50)  # how often the board page asks for new loads
     load_visible_s: int = Field(default=900, ge=10)  # loads older than this drop off the feed
     feed_page_limit: int = Field(default=200, ge=1, le=1000)
+
+    @field_validator("console_url")
+    @classmethod
+    def console_url_is_web_address(cls, value: str | None) -> str | None:
+        if value is not None and not value.startswith(("https://", "http://")):
+            raise ValueError("console_url must be an http(s) address")
+        return value
 
 
 class MailpitSettings(BaseModel):
@@ -356,6 +364,75 @@ class AgentSettings(BaseModel):
     lab_enabled: bool = True
 
 
+class AssistantSettings(BaseModel):
+    """Console help assistant (global Rule 24). Off unless enabled; when on, the provider endpoint,
+    key, model and its per-token prices must be configured (no defaults for any of them).
+    Spend is bounded twice: this daily budget in the app and the provider key's own monthly limit."""
+
+    enabled: bool = False
+    provider_url: str | None = None  # OpenAI-compatible chat-completions endpoint
+    api_key: SecretStr | None = None
+    model_id: str | None = None
+    # Zero would make every budget reservation free, so a configured price must be positive.
+    price_input_per_mtok_usd: float | None = Field(default=None, gt=0)
+    price_output_per_mtok_usd: float | None = Field(default=None, gt=0)
+    deny_data_collection: bool = True  # ask the router to use only providers that do not train on prompts
+    daily_budget_usd: float = Field(default=0.5, ge=0, le=100)
+    timeout_s: float = Field(default=20.0, gt=0, le=120)
+    max_steps: int = Field(default=3, ge=1, le=6)  # model calls per question (tool use included)
+    max_output_tokens: int = Field(default=600, ge=50, le=4000)
+    max_prompt_chars: int = Field(default=24000, ge=2000, le=200000)  # bounds input tokens per call
+    max_question_chars: int = Field(default=800, ge=20, le=4000)
+    max_history_turns: int = Field(default=6, ge=0, le=20)
+    max_history_chars: int = Field(default=6000, ge=0, le=40000)
+    tool_result_max_chars: int = Field(default=3000, ge=200, le=20000)
+    retrieval_top_k: int = Field(default=4, ge=1, le=10)
+    public_per_hour: int = Field(default=12, ge=0, le=1000)  # anonymous visitors, per address range
+    user_per_hour: int = Field(default=40, ge=0, le=5000)  # signed-in users, per user
+    concurrency: int = Field(default=4, ge=1, le=64)  # provider calls at once in one API process
+    docs_base_url: str | None = None  # where source links point (public repository docs)
+    # A whole question (every model call and tool) must finish inside this, below the edge proxy's
+    # read timeout (30 s in deploy/templates/nginx.conf), so the asker always gets an answer or the
+    # documentation fallback, never a 504. The wait for a free slot counts against it too.
+    total_deadline_s: float = Field(default=25.0, gt=0, le=28)
+    openrouter_extensions: bool = True  # send OpenRouter's usage/provider fields (off for plain OpenAI-compatible APIs)
+    temperature: float = Field(default=0.2, ge=0, le=1)
+    tokenizer_char_ratio: float = Field(default=3.0, ge=1, le=8)  # conservative estimate: reservations over-cover
+    slot_wait_s: float = Field(default=0.5, ge=0, le=10)  # wait for a free provider slot before "busy"
+    max_tool_calls: int = Field(default=4, ge=1, le=10)  # tool calls executed per model step
+    rate_window_s: int = Field(default=3600, ge=60, le=86400)  # window of the per-hour question limits
+    feedback_ttl_s: int = Field(default=3600, ge=60, le=86400)  # how long an answer accepts one vote
+    stats_retention_days: int = Field(default=40, ge=1, le=400)
+    excerpt_chars: int = Field(default=420, ge=100, le=2000)  # documentation-search excerpt length
+    tool_list_limit: int = Field(default=20, ge=1, le=200)
+    tool_claims_limit: int = Field(default=10, ge=1, le=200)
+
+    @model_validator(mode="after")
+    def call_fits_deadline(self) -> AssistantSettings:
+        if self.timeout_s > self.total_deadline_s:
+            raise ValueError("assistant timeout_s must not exceed total_deadline_s")
+        return self
+
+    @model_validator(mode="after")
+    def configured_when_enabled(self) -> AssistantSettings:
+        if self.enabled:
+            missing = [
+                name
+                for name in (
+                    "provider_url",
+                    "api_key",
+                    "model_id",
+                    "price_input_per_mtok_usd",
+                    "price_output_per_mtok_usd",
+                )
+                if getattr(self, name) is None
+                or (name == "api_key" and self.api_key is not None and not self.api_key.get_secret_value().strip())
+            ]
+            if missing:
+                raise ValueError(f"assistant enabled but not configured: {', '.join(missing)}")
+        return self
+
+
 class _Base(BaseSettings):
     # extra="ignore": one local .env serves every service; each service reads only its groups.
     # tests/test_settings.py checks .env.example against all service classes, so typos still fail.
@@ -385,6 +462,7 @@ class CoordinatorSettings(_Base):
     api: ApiSettings
     workflows: WorkflowSettings = WorkflowSettings()
     crawl: CrawlSettings
+    assistant: AssistantSettings = AssistantSettings()
 
 
 class SeedSettings(BaseModel):
