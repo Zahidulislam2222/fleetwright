@@ -29,7 +29,7 @@ computer; it does not control your browser remotely.
 
 ## Evidence and current boundary
 
-The deployed frontend/backend release is `20261125-assistant-rc4`, built from source `d95a685`; it
+The deployed frontend/backend release is `20261125-assistant-rc5`, built from source `26ebe46`; it
 adds the console help assistant (16/16 live evaluation cases) and patched images (zero HIGH/CRITICAL
 native findings). All 147 deployed files and eight application/web service-role image identities
 matched the signed release, and public UI/HTTP checks passed. Verification is maintained in the

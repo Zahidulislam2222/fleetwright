@@ -2,7 +2,7 @@
 
 ## 2026-11-25 — console help assistant and patched images
 
-Deployed frontend/backend `20261125-assistant-rc4`, owner source `d95a685`.
+Deployed frontend/backend `20261125-assistant-rc5`, owner source `26ebe46`.
 
 - Console help assistant: answers from approved public docs and read-only tools that run as the
   asker; every answer disclosed and marked AI-generated; documentation-search fallback for every
@@ -13,6 +13,7 @@ Deployed frontend/backend `20261125-assistant-rc4`, owner source `d95a685`.
   previous images carried advisories published after October).
 - Live evaluation 16/16 (p95 4.98 s, $0.0091). A drawer layout defect reached production on the first
   candidate and was fixed with a real-browser regression test; see the defect log.
+- Next.js 16.4.6 for published security advisories (found by the CI dependency audit).
 
 [Release evidence](docs/releases/2026-11-25.md).
 
