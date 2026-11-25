@@ -29,11 +29,12 @@ computer; it does not control your browser remotely.
 
 ## Evidence and current boundary
 
-The deployed frontend/backend release is `20261015-publication-rc1`, built from source `cd64e6b`.
-Exact rehearsal, native server image checks, independent artifact review, public workflows,
-operator UI and HTTP checks passed. All 146 deployed manifest entries and eight application/web
-service-role image identities matched the signed release. Verification is maintained in the
-[release record](docs/releases/2026-10-15.md).
+The deployed frontend/backend release is `20261125-assistant-rc4`, built from source `d95a685`; it
+adds the console help assistant (16/16 live evaluation cases) and patched images (zero HIGH/CRITICAL
+native findings). All 147 deployed files and eight application/web service-role image identities
+matched the signed release, and public UI/HTTP checks passed. Verification is maintained in the
+[release record](docs/releases/2026-11-25.md); the [previous record](docs/releases/2026-10-15.md)
+keeps the October workflow, recovery and endurance evidence.
 
 | Evidence | Verified result and scope |
 |---|---|

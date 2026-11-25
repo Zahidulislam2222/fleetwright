@@ -88,8 +88,23 @@ async def test_assistant_drawer_covers_the_viewport_and_answers(api: Api) -> Non
                 answer = dialog.locator("article[data-ai-generated]")
                 await expect(answer).to_be_visible(timeout=30_000)
                 check(await answer.get_attribute("data-ai-generated") == "false", "AI is off in tests: search answer")
+                # The drawer is the topmost element over the header area, not hidden behind it.
+                on_top = await page.evaluate(
+                    "() => !!document.elementFromPoint(innerWidth - 40, 20)?.closest('[role=dialog]')"
+                )
+                check(on_top, "drawer is not drawn above the header")
                 await page.keyboard.press("Escape")
                 await expect(dialog).to_be_hidden()
+                await expect(page.get_by_role("button", name="Open the help assistant")).to_be_focused()
+
+                # Phone width: the drawer covers the whole screen without horizontal scrolling.
+                await page.set_viewport_size({"width": 375, "height": 812})
+                await page.get_by_role("button", name="Open the help assistant").click()
+                await expect(dialog).to_be_visible()
+                phone = await dialog.bounding_box()
+                check(phone is not None and phone["width"] >= 374 and phone["height"] >= 811, f"phone drawer: {phone}")
+                overflow = await page.evaluate("() => document.documentElement.scrollWidth - innerWidth")
+                check(overflow <= 0, f"horizontal overflow {overflow}px at 375px")
             finally:
                 await browser.close()
     finally:

@@ -9,7 +9,7 @@ Deployed frontend/backend release: `20261015-publication-rc1`, source `cd64e6b`.
 Its runtime regression passed 289 cases with six expected skips; exact rehearsal, native image scans,
 signatures and lifecycle checks passed. Public workflows/UI/HTTP, signed service-image identities
 and deployed artifact parity passed. Fresh backup restore and monitor/scheduler recovery passed.
-Use the [release record](releases/2026-10-15.md) for status and retained verification boundaries.
+Use the [current release record](releases/2026-11-25.md) and the [October record](releases/2026-10-15.md) for status and retained verification boundaries.
 
 | Area | Documents |
 |---|---|

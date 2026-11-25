@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-11-25 — console help assistant and patched images
+
+Deployed frontend/backend `20261125-assistant-rc4`, owner source `d95a685`.
+
+- Console help assistant: answers from approved public docs and read-only tools that run as the
+  asker; every answer disclosed and marked AI-generated; documentation-search fallback for every
+  failure or limit; atomic daily budget, per-user limits and a deadline below the proxy timeout.
+- Owned freight exchange: collapsed visitor guide on every page. Local agent: AI provenance bound
+  into the approval fingerprint. API-only egress network; Terraform hub tags and names.
+- Patched images: application and web images now scan with zero HIGH/CRITICAL findings (the
+  previous images carried advisories published after October).
+- Live evaluation 16/16 (p95 4.98 s, $0.0091). A drawer layout defect reached production on the first
+  candidate and was fixed with a real-browser regression test; see the defect log.
+
+[Release evidence](docs/releases/2026-11-25.md).
+
 ## 2026-10-15 — public operating documentation and verified deployment
 
 Deployed frontend/backend `20261015-publication-rc1`, owner source `cd64e6b`.
