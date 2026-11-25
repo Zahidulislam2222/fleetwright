@@ -19,7 +19,7 @@ destination permission and a lawful processing purpose are separate onboarding r
 - Using accounts the client does not own, shared or bought accounts, or credentials obtained
   without the account holder's consent.
 - Collecting personal data without a lawful basis, or beyond what the task needs.
-- Fake engagement, fake reviews, or AI-generated content presented as human without disclosure.
+- Deceptive engagement, deceptive reviews, or AI-generated content presented as human without disclosure.
 - Anything that degrades the target service (load beyond normal human-like use).
 
 ## Onboarding gate (required before any new destination)

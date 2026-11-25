@@ -6,7 +6,7 @@ Browser-side building blocks for workers (Playwright).
 |---|---|
 | `login.py` | Sign-in flow: password, then one-time code, then optional captcha, with timeouts |
 | `otp.py` | One-time-code adapters (Mailpit API, IMAP) |
-| `captcha.py` | Captcha detection; the only solver is for the owned board's own arithmetic captcha. Real targets go to a human operator |
+| `captcha.py` | Captcha detection; the only solver is for the owned freight exchange's own arithmetic captcha. Real targets go to a human operator |
 | `proxy.py` | Proxy pool: sticky per account, rotation after repeated blocks, health scoring (local provider by default) |
 | `profiles.py` | Stable browser profiles per account group (locale, time zone, viewport) |
 | `evidence.py` | Failure evidence (trace chunk + screenshot) with retention pruning |
@@ -20,6 +20,9 @@ proof is in the coordinator workflow suite. See the
 [workflow runbook](../../docs/operations/reliable-browser.md).
 
 Release operation and limits: [deployment](../../docs/operations/deployment.md) · [maintenance](../../docs/maintenance.md).
+
+Current release: `20261125-assistant-rc5` ([25 November 2026 record](../../docs/releases/2026-11-25.md)).
+Browser behaviour is unchanged in that release.
 
 ## Adding a destination
 

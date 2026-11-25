@@ -31,7 +31,7 @@ Evidence: [setup and operating boundary](../operations/local-agent.md),
 [native UI and CDP preservation](../../packages/fw_agent/tests/test_ui_cdp.py),
 [WebSocket server-observation regression](../../packages/fw_agent/tests/test_websocket_egress.py).
 
-Portfolio: https://zahidul-islam.com/ · GitHub: https://github.com/Zahidulislam2222
+Website: https://zahidul-islam.com/ · GitHub: https://github.com/Zahidulislam2222
 
 The native UI regression checks that reviewed title/body edits survive blur and polling, become a
 fresh proposal and reach the exact destination receipt. Actual installed-model recordings cover all

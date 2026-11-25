@@ -24,7 +24,7 @@ A worker process runs **one Chromium with many isolated contexts** ("slots"). Ea
 ```bash
 uv run playwright install chromium
 uv run python -m fw_worker          # FW_WORKER__CELL, FW_WORKER__CONTEXTS, FW_WORKER__WATCHERS ...
-uv run python -m pytest apps/worker           # real Chromium against a real board
+uv run python -m pytest apps/worker           # real Chromium against the owned freight exchange
 ```
 
 Durable state remains in PostgreSQL and the encrypted session vault. A process death before action
@@ -32,7 +32,7 @@ can release work for another actor; a death during action leaves an uncertain ou
 receipt reconciliation. Cached sessions are restored when valid and renewed when expired/revoked.
 Use graceful drain for planned replacement and verify every slot/account hold is released.
 
-Historical measurements: about 70–103 MB per context and 1.8 cores at 32 contexts
+Historical developer-machine measurements: about 70–103 MB per context and 1.8 cores at 32 contexts
 ([capacity model](../../docs/scaling/capacity-model.md)).
 
 Run approved general workflows with `uv run python -m fw_worker.workflows`. These jobs use the
@@ -43,6 +43,11 @@ proof. See the [workflow runbook](../../docs/operations/reliable-browser.md).
 
 Release operation and limits: [deployment](../../docs/operations/deployment.md) · [maintenance](../../docs/maintenance.md).
 
+Current release: `20261125-assistant-rc5` ([25 November 2026 record](../../docs/releases/2026-11-25.md)).
+Worker and workflow runtime behaviour is unchanged in that release; it shipped patched image packages.
+Load-sensitive browser tests (start-up, pacing, timing) can fail intermittently on a busy development
+machine and pass when rerun in isolation; the release record lists this as a known limit.
+
 ## Admission, handover and capacity
 
 Account-group eligibility and database-clock cooldown are checked at admission and the action
@@ -50,7 +55,7 @@ boundary; completion advances pacing so slow preparation cannot bypass the accou
 Watchers persist raw detections before cell delivery. Tenant moves replay pending detections under
 current directory authority; the control process commits their filter/claim decision atomically.
 
-Separate 50- and 70-context one-hour owned-fixture runs passed with zero errors. These establish
+Historical, recorded 13 October 2026: separate 50- and 70-context one-hour owned-fixture runs passed with zero errors. These establish
 browser endurance under the recorded resource limits, not 50/70 authenticated customer workers.
 For destination capacity, measure login renewal, pacing, tenant skew, sustained receipts and drain
 on representative accounts. Keep the [capacity evidence](../../docs/scaling/verification-2026-10-13.md)
@@ -67,5 +72,5 @@ Release acceptance terminates the actual driver and browser child separately, ve
 supervisor restart and ready slots, then performs an ordinary SIGTERM drain with stopped rows,
 zero account holds and a successful non-OOM exit. Cleanup attempts continue if another resource
 fails. Preserve uncertain action evidence through restart. See
-[operating ownership](../../docs/operations/service-ownership.md) and
-[the dated recovery evidence](../../docs/releases/2026-10-14.md).
+[operating ownership](../../docs/operations/service-ownership.md) and the historical
+[14 October 2026 recovery evidence](../../docs/releases/2026-10-14.md).

@@ -1,16 +1,19 @@
 # Threat model
 
-Current release: [15 October verified publication](../releases/2026-10-15.md). Its native app/web
-scans each reported zero HIGH/CRITICAL at the signed identities; source gates, real public flows,
-image/artifact parity and fresh operational checks passed. Earlier rc4 measurements below retain
-their 13 October boundary; the passive ZAP/dev-dependency exceptions are not new scan results.
+Current release: [25 November 2026, `20261125-assistant-rc5`](../releases/2026-11-25.md), which added
+the console help assistant. Native Trivy scans reported zero HIGH/CRITICAL in the application image
+and zero HIGH/CRITICAL with one MEDIUM in the web image; Ed25519 provenance verified; Gitleaks, Bandit
+and Semgrep passed (Semgrep blocked one commit, fixed rather than suppressed). Earlier results are
+history: the [15 October publication](../releases/2026-10-15.md) and the rc4 measurements below
+retain their 13 October boundary; the passive ZAP/dev-dependency exceptions are not new scan results.
 
 
 Assets: destination credentials/sessions, human authority, action integrity, tenant records,
 execution evidence, encryption keys and recoverable backups. Trust boundaries include the public
 edge, operator browser, MCP client process, coordinator/database, queue, worker, destination and
-host backup service and local agent/API/browser profile. Destination content and model output
-are untrusted input. The OS, Docker daemon and privileged infrastructure roles remain trusted
+host backup service, local agent/API/browser profile and the help assistant's model provider.
+Destination content, documentation passages given to a model, tool results and model output are
+untrusted input. The OS, Docker daemon and privileged infrastructure roles remain trusted
 administrative boundaries; application controls are not an operating-system sandbox.
 
 | Threat | Current mitigation | Residual / next verification |
@@ -22,7 +25,11 @@ administrative boundaries; application controls are not an operating-system sand
 | Tenant crossover / confused deputy | RLS, invocation/job lookup authorization, explicit tenant grant | Privileged system roles and migrations require careful review |
 | Revoked client keeps observing/acting | Tool/execution rechecks and idle-stream authorization polling | Data already delivered cannot be recalled; streams close within configured interval |
 | Page/prompt injection | Typed allowlisted contracts, approved owned origins, HTTP/WebSocket guards and approval separate from the model | Local agent supports maintained controlled templates; arbitrary-site autonomy and complete injection resistance are not claimed |
-| Help assistant misuse (prompt injection, data leakage, cost abuse) | Read-only tools only, run as the asker in the asker's tenant (no audit/user tools); docs and tool results wrapped as untrusted data; answers rendered as plain text; per-user/per-address hourly limits, process concurrency limit, daily budget reserved before each paid call plus a provider key with its own monthly cap; documentation-search fallback | Model answers can still be wrong; held-out live evaluation results are recorded in the release evidence; provider retention is governed by provider terms |
+| Help assistant prompt injection (question, documentation or tool result tries to change rules, reveal the prompt or a key, or act) | No write tools, so an injected instruction cannot change state; passages and tool results wrapped as untrusted data; tool names/arguments allowlisted; provider key held server-side and never in the prompt; plain-text output, no links except the maintained contact; held-out cases for prompt and key extraction, write attempts and captcha help passed 16/16 | Complete injection resistance is not claimed; answers can be wrong or misleading; re-run the evaluation after any prompt, model, tool or knowledge change |
+| Help assistant data leakage across tenants | Tools run as the asker through the console's own tenant views and RLS; anonymous visitors reach only the public workspace, through the same read views the console already shows them; audit and user lists (the views holding personal data) are not exposed; daily counters only to the public workspace owner; nothing the asker types stored, so there is no cross-user history to leak | Any future answer cache must exclude tool results and tenant data; a new tool needs a cross-tenant denial test |
+| Help assistant cost exhaustion (scripted questions, long prompts, tool loops) | Per-user and per-address-range hourly limits; per-process concurrency; bounded question/history/prompt/output sizes, 3 model calls and 4 tool calls per step; daily budget reserved atomically at worst-case price; overflow falls back to documentation search | One deployment-wide budget means an attacker can use up the day's AI answers for everyone (degrading to search, not to cost); per-tenant quotas, budget sharding and a dedicated provider-side capped key are future work |
+| Help assistant provider outage, slowness or Redis failure | Per-call timeout and one 25 s whole-answer deadline below the 30 s edge timeout; provider and timeout errors return documentation passages (Redis errors too for anonymous visitors; signed-in sessions need Redis); a timed-out call keeps its reservation | No assistant alert yet; a second provider is a future option that needs its own review |
+| Help assistant egress misuse (SSRF from the API) | API calls only the configured provider endpoint and never fetches visitor-supplied URLs; only the API joins the egress network; `backend` stays internal | The API now has a general outbound route; any new outbound feature needs the crawler's egress guard or a provider-only egress proxy ([ADR 0016](../adr/0016-assistant-provider-egress.md)) |
 | Credentials in evidence | Safe JSON fields, bounded exports and log filtering | Raw screenshots/traces/archives remain sensitive; no blanket redaction claim |
 | Audit crash gap | Shared DB audit transaction; durable external intent and outcome | External operation can remain unresolved after acceptance |
 | Target/network denial of service | Timeouts, body/page limits, bounded attempts and queues | Large tenant skew, reconnect storms and slow clients need scale tests |
@@ -48,5 +55,5 @@ At higher scale, test credential attacks, tenant skew, reconnect storms, cache l
 writer failover and loss of a cell/zone together with active work. A healthy container or a passing
 passive scan does not establish correctness under those failures. Future architecture and failure
 promotion gates are specified in [the scaling design](../scaling/future-architecture.md).
-Reassess this model when adding destinations, permissions, model providers, storage, cells or
-regions. See [controls](controls.md), [legal scope](../legal/acceptable-use.md) and [roadmap](../roadmap.md).
+Reassess this model when adding destinations, permissions, model providers, assistant tools,
+storage, cells or regions. See [controls](controls.md), [legal scope](../legal/acceptable-use.md) and [roadmap](../roadmap.md).

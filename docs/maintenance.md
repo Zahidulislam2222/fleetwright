@@ -19,11 +19,17 @@ before upgrades. Rebuild the exact image and rerun affected transport/browser te
 security issues promptly according to severity, exposure and customer impact. Coordinate sensitive
 reports through [SECURITY.md](../SECURITY.md).
 
-Current known finding: the development lint dependency chain includes `braces` 3.0.3 under
-[GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm). At the last verified audit,
-there was no patched release. Python and npm production audits were clean; the full npm audit
-was not. This package is not part of the application runtime and the reviewed root-directory
-pattern configuration is unused. Reassess on each tooling update; no finding is suppressed.
+In the 25 November 2026 release, native image scans found new advisories in the previously
+deployed images; affected packages were upgraded and pinned, two candidates were rejected before
+activation, and Next.js was upgraded to 16.4.6 after the CI dependency audit reported published
+advisories ([release record](releases/2026-11-25.md)).
+
+Retained finding (last recorded in the October audits; recheck against the current lockfile): the
+development lint dependency chain includes `braces` 3.0.3 under
+[GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm). At the last verified
+audit, there was no patched release. Python and npm production audits were clean; the full npm audit
+was not. This package is not part of the application runtime and the reviewed root-directory pattern
+configuration is unused. Reassess on each tooling update; no finding is suppressed.
 
 ## Routine operations
 
@@ -40,6 +46,10 @@ or support commitments change. Larger capacity tiers follow the
 | Per release | Gates, compatibility, backup, rehearsal, smoke and parity | Commit, immutable manifest and verification record |
 | Quarterly target | Restore onto an isolated environment; rotate recovery responsibilities | Measured recovery time and integrity report |
 | Per customer/target change | Review authorization, data scope, region, retention and rate policy | Updated onboarding decision |
+| Per documentation change | Rebuild the help assistant's knowledge index (`uv run python tools/dev/build_assistant_knowledge.py`); the index test fails when it is stale | Updated `config/assistant-knowledge.json` and passing unit test |
+| Per prompt, model, tool or knowledge change | Re-run the paid held-out assistant evaluation with cost approval; record result, latency and cost in the release record | Thresholds in `config/assistant-eval.yaml` met |
+| Per model change and monthly | Recheck the provider's published price (and, once a dedicated key exists, its monthly cap); update the price settings | Dated price evidence in `.env.example` comments |
+| Weekly | Review assistant counters: budget use, fallback share, errors and votes | Counter snapshot; actions taken |
 
 Frequency is an operational policy; production collection, alert delivery and off-host retention
 must be explicitly configured and verified for each deployment. Local restore proof alone does
@@ -51,7 +61,8 @@ Keep keyboard navigation, focus return, contrast, reduced motion and responsive 
 the release process. WCAG 2.2 AA is the accessibility target; existing automated checks cover a
 subset, not a certification. Consult [WCAG2.2](https://www.w3.org/TR/WCAG22/) for full criteria.
 Update the root/component READMEs, API contract, architecture, operations, threat model, roadmap
-and changelog in the same release. Keep public material free of credentials and private host detail.
+and changelog in the same release. When documentation in the assistant's approved list changes,
+rebuild its knowledge index in the same change. Keep public material free of credentials and private host detail.
 
 ## Release compatibility and documentation ownership
 
@@ -64,7 +75,8 @@ generated contracts, configuration templates, operations, security/legal registe
 Update measured evidence with workload/scope and retain historical results as historical. Keep
 future 1M+ user and availability objectives separate from contractual commitments.
 
-The most recent native final application/web scans reported zero HIGH/CRITICAL findings; retain
+The most recent native final application/web scans (25 November 2026) reported zero HIGH/CRITICAL
+findings, with one MEDIUM in the web image; retain
 the exact scan/image identity and rescan before each release. This does not erase development-only
 audit findings or lower-severity dynamic findings. Current acceptance records preserve the inline
 style CSP exception and cross-origin isolation limitation rather than suppressing them.

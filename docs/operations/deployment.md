@@ -112,11 +112,16 @@ service correctness, secret hygiene or vulnerability absence. See
 
 ## Acceptance and operational handoff
 
-The deployed release is `20261015-publication-rc1`, source `cd64e6b`. Its runtime regression,
+The deployed release is `20261125-assistant-rc5`, source `26ebe46`: live files were checked before
+cutover, workers quiesced with a verified archive, eight role identities and 147/147 deployed files
+matched the signed release, 25/25 origin checks and the public assistant flow passed, and backup and
+monitor services moved to the release; see the [current release record](../releases/2026-11-25.md).
+
+Historical 15 October release `20261015-publication-rc1`, source `cd64e6b`: its runtime regression,
 actual driver/browser-loss recovery, strict freight drain, public MCP/UI/HTTP/CSP and native-image/
 146-artifact parity passed. All 224 host backup source files, protected units and current-release
 working directories match. Fresh two-database restore and backup/monitor recovery passed; see the
-[current release record](../releases/2026-10-15.md).
+[15 October record](../releases/2026-10-15.md).
 
 The validated rollback path uses retained old static assets on the current trusted web image with
 the compatible backend. It passed pending-mailbox and backend-identity preservation on the exact

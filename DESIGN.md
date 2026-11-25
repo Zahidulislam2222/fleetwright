@@ -12,7 +12,7 @@ radius, motion and layer value is defined once in the token source below (global
 | Motion presets | [`apps/dashboard/src/design/motion.ts`](apps/dashboard/src/design/motion.ts) |
 | Console copy, labels and assistant text | [`apps/dashboard/src/content/console.json`](apps/dashboard/src/content/console.json) |
 | Original brief, screens and acceptance | [`design/PHASE1-FRONTEND-SPEC.md`](design/PHASE1-FRONTEND-SPEC.md) |
-| Mock board styling (separate, deliberately plain test target) | [`apps/mockboard/src/mockboard/static/board.css`](apps/mockboard/src/mockboard/static/board.css) |
+| Owned freight exchange styling (separate, deliberately plain destination; package `apps/mockboard`) | [`apps/mockboard/src/mockboard/static/board.css`](apps/mockboard/src/mockboard/static/board.css) |
 
 ## Rules of use
 

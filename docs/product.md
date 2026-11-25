@@ -41,6 +41,24 @@ Codex integration has end-to-end verification; Claude configuration and transpor
 documented, with account-level verification deferred. Implementation and release verification
 are separate; consult the release record for what is currently deployed.
 
+## Console help assistant
+
+Since the [25 November 2026 release](releases/2026-11-25.md) the console has a help assistant: an
+AI that explains screens, states and workflows and troubleshoots what the asker sees.
+
+| It does | It does not |
+|---|---|
+| Answer from 16 approved public documents (keyword search) and cite them as sources | Change anything: it has no write tools, approvals or grants |
+| Read live console data through eight read-only tools that run as the asker, inside the asker's tenant | See audit records or user lists, or anything the asker's role cannot already see |
+| State that it is an AI before the first question and mark every AI answer as AI-generated | Store what the asker types: the conversation lives only in the open page |
+| Give the most relevant documentation passages when the AI is off, rate limited, busy, over budget, slow or failing | Promise correctness: answers can be wrong; check them against the linked sources |
+| Offer the human contact route (public GitHub issues; security reports through SECURITY.md) | Offer live chat, a response time or help with captchas, unauthorized scraping or evading detection |
+
+Spend is bounded before every paid call (daily budget, hourly question limits, a concurrency limit
+and one whole-answer deadline). Operators can switch the AI off; documentation search keeps working.
+See the [console guide](console-guide.md#the-help-assistant), [privacy](legal/privacy.md#help-assistant-provider)
+and [ADR 0016](adr/0016-assistant-provider-egress.md).
+
 ## Delivery boundaries
 
 Fleetwright includes its own freight board and service portal for controlled destination testing.
@@ -59,6 +77,7 @@ Hosted service pricing, support agreements and contractual service levels are se
 - [Capacity plan](scaling/capacity-model.md), [1M+ user architecture](scaling/README.md),
   [availability objectives](scaling/slo.md) and [roadmap](roadmap.md).
 - [Deployment](operations/runbooks.md), [testing](testing.md) and [maintenance](maintenance.md).
+- [Console guide](console-guide.md) and the [current release record](releases/2026-11-25.md).
 
 ## Onboard an authorized workload
 
@@ -83,9 +102,13 @@ See [acceptable use](legal/acceptable-use.md), [privacy](legal/privacy.md) and
 | Approved structured data collection | Catalogue cycle | Durable frontier, extraction allowlist and private export |
 | Local content drafting and form save | Standalone local agent | Installed model drafts; SQLite binds human approval and receipt |
 
-Current verification includes 289 passing runtime regression cases with six expected skips, actual
+The [current release record](releases/2026-11-25.md) (`20261125-assistant-rc5`, source `26ebe46`)
+records its gates, the help assistant's 16/16 held-out live evaluation and the failures found during
+that release, including the regression run that did not complete cleanly in one pass on a shared
+machine. Earlier verification (289 passing runtime regression cases with six expected skips, actual
 driver/browser-loss recovery, exact release MCP/browser/crawler rehearsal and public workflows/UI/HTTP
-with signed parity. Earlier installed-model flows and 50/70-context fixture hours retain their dated
-boundaries. The [current release record](releases/2026-10-14.md) separates these results. These do not establish a
-customer workload or availability SLA. [Testing](testing.md) records their scope;
-[future scale and availability](scaling/README.md) has explicit promotion gates.
+with signed parity) is history in the [15 October](releases/2026-10-15.md) and
+[14 October](releases/2026-10-14.md) records; installed-model flows and 50/70-context fixture hours
+retain their dated boundaries. None of these establish a customer workload or availability SLA.
+[Testing](testing.md) records their scope; [future scale and availability](scaling/README.md) has
+explicit promotion gates.

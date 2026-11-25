@@ -17,7 +17,29 @@ customer records outside public documentation, issues and release evidence.
 | Screenshots/traces | Private investigation storage and configured evidence pruning | Treat page records as sensitive, restrict access and apply incident/legal retention decisions |
 | Local agent tasks | Device-owned SQLite/history and approved form/receipt data | Protect local keys/profile, review model/destination data flow and stop/reconcile uncertain saves |
 | Database archives | Verified private custom-format dumps and authenticated encrypted off-host bundles | Separate keys from media, control recovery access, document expiry and test actual restore |
+| Help assistant | Questions and answers not stored by Fleetwright; Redis counters/limits only (see below); sent to the configured model provider | Review provider terms, retention and transfers before customer use; keep regulated data out until a processing agreement exists |
 | Infrastructure/monitor logs | Bounded operational collection and private local notification/history | Assess network metadata, provider retention, incident recipient and access review |
+
+## Help assistant data
+
+What the help assistant keeps, for how long and where (from `AssistantSettings` defaults and
+`fw_queue.keys`; change a period only through `FW_ASSISTANT__*` settings):
+
+| Data | Where | Kept for | Contains |
+|---|---|---|---|
+| Question, recent turns and answer | The asker's open page only (not browser storage) | Until the page is closed or reloaded | Whatever the asker typed; never written by Fleetwright to a database, Redis or logs |
+| Request to the model provider | Configured provider (OpenRouter; when enabled in settings, the router is asked to use providers that do not collect prompt data) | Provider's terms | Question, up to 6 recent turns, matching documentation passages and read-only tool results for the asker's tenant |
+| Hourly question count | Redis `fw:assistant:asked:{subject}` | 1 hour window (`RATE_WINDOW_S`) | A count keyed by user id (signed in) or the client address reduced to /24 (IPv4) or /48 (IPv6) |
+| Daily spend | Redis `fw:assistant:spend:{day}` | 2 days | Micro-USD integer for the deployment |
+| Daily counters | Redis `fw:assistant:stats:{day}` | 40 days (`STATS_RETENTION_DAYS`) | Counts of questions, AI and fallback answers, errors, cost and helpful/not-helpful votes; no question text |
+| Answer id for feedback | Redis `fw:assistant:answer:{id}` | 1 hour (`FEEDBACK_TTL_S`), deleted on the first vote | The answer mode only |
+| Application logs | Container logs (rotated by size: three 10 MB files per container) | Until rotated | Mode, steps, tool names, cost, latency; failure category and up to 200 characters of provider error detail; unexpected assistant or tool failures also log a stack trace; the question text is not logged |
+
+The daily counters are visible only to the owner of the public workspace. Redis keeps these keys in
+its append-only file until they expire; they are not part of the PostgreSQL archives. Because
+nothing the asker types is stored, an access or deletion request has no assistant conversation to
+return or delete on Fleetwright's side; the provider's records follow its own terms. See
+[privacy](../legal/privacy.md#help-assistant-provider).
 
 ## Collection and destination scope
 
@@ -28,7 +50,8 @@ and requires the corresponding authorization, privacy and security assessment.
 
 The installed local-model path drafts locally, but an approved destination submission transfers its
 fields to that destination. Optional browser attachment, exported artifacts, hosting/CDN services and
-any future model provider each have their own handling terms and access controls.
+the help assistant's model provider and any future model provider each have their own handling
+terms and access controls.
 
 ## Access, export and incident handling
 

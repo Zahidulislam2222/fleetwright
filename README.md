@@ -36,7 +36,17 @@ matched the signed release, and public UI/HTTP checks passed. Verification is ma
 [release record](docs/releases/2026-11-25.md); the [previous record](docs/releases/2026-10-15.md)
 keeps the October workflow, recovery and endurance evidence.
 
-| Evidence | Verified result and scope |
+| Current release check (25 November 2026) | Result and scope |
+|---|---|
+| Help assistant | 16/16 held-out live cases (prompt injection, key extraction, write attempts, refusals), p95 4.98 s, at most $0.0010 per question; 18 API, 8 unit and one real-browser test |
+| Images | Application and web images: zero HIGH/CRITICAL findings (Trivy 0.75.0) at the recorded scan; signed provenance verified |
+| Deployment | Live files checked before cutover; quiesced with a verified archive; 147/147 file parity, eight role identities, 25/25 origin checks, public TLS and real assistant flow passed |
+| Continuous integration | GitHub quality, security and independent uptime workflows passed on the deployed source |
+
+The table below is retained October evidence for the fleet, workflows and recovery; it was not
+re-measured in November because that runtime behaviour did not change.
+
+| October evidence (13–15 October 2026) | Verified result and scope |
 |---|---|
 | Full backend regression | 289 passed / 6 accounted skips in 714.96 seconds; native exit0, zero failures/errors and 363 runtime/configuration/build-prerequisite hashes unchanged |
 | Browser/model flows | Current public MCP workflows confirmed with matching receipts; three installed-model local-agent templates retain their 13 October proof |
@@ -47,11 +57,9 @@ keeps the October workflow, recovery and endurance evidence.
 | Browser recovery | Exact local driver and browser loss each caused one supervisor restart; four ready slots returned within 10.3 seconds; strict drain released all holds and exited 0 |
 | Recovery | Current post-activity archive restored into two new verification databases; backup/monitor supervisor recovery passed. Independent encrypted recovery remains the separately dated 13 October proof |
 
-Release source `cd64e6b` updates public documentation and the central distinct web-image tag;
-business runtime behavior is unchanged from the 14 October browser-supervision correction.
-The final complete suite ran after local builds/rehearsal finished, with its generated dashboard
-prerequisite frozen alongside runtime/configuration. Driver-loss supervision and readiness prevent
-a browserless process appearing healthy. Earlier failed verification attempts remain in the release record.
+Driver-loss supervision and readiness prevent a browserless process appearing healthy. Failed
+verification attempts, rejected release candidates and a layout defect that briefly reached
+production are kept in the release records and the [defect log](DEFECT-LOG.md).
 
 Historical owned-board latency was approximately 365 ms p50 / 540 ms p95 from detection to
 confirmation. Workload, hardware and limits belong with every measurement:

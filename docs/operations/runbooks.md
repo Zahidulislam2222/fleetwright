@@ -93,6 +93,61 @@ read-only receipt reconciliation. Do not approve a new identity to bypass uncert
 were made, verify the fresh proposal and final receipt contain the exact reviewed title/body.
 See [crawler](crawler.md) and [local agent](local-agent.md).
 
+## Help assistant
+
+Inside the application the assistant answers even when the AI cannot (the edge rate limit and a
+Redis outage for signed-in sessions still return errors): the response has `mode: "search"` and a `reason`
+(`disabled`, `rate_limited`, `busy`, `budget_exhausted`, `search_only`, `nothing_found`). Check today's
+counters as the public workspace owner with `GET /v1/assistant` (`today`: questions, AI and search
+answers, errors, `cost_micro`, votes) and the API logs ("assistant answered", "assistant model call
+failed"). None of these steps affect claims, workers, workflows or crawls.
+
+### Daily budget exhausted
+
+Symptom: answers come back with `reason: "budget_exhausted"` until 00:00 UTC.
+
+1. Compare `today.cost_micro` with `FW_ASSISTANT__DAILY_BUDGET_USD` and `today.questions` with the
+   usual daily count. A sudden jump in questions from one place suggests scripted use.
+2. If it is abuse, lower `FW_ASSISTANT__PUBLIC_PER_HOUR` (anonymous, per address range) or
+   `FW_ASSISTANT__USER_PER_HOUR`; the edge rate limits also apply.
+3. If it is real demand, raise the daily budget only after the owner's explicit cost approval. Once the
+   planned dedicated provider key exists, keep the budget below its monthly cap and never raise that cap
+   to work around the budget.
+4. Documentation search keeps working meanwhile; no action is required for the console itself.
+
+### Provider down, slow or rejecting calls
+
+Symptom: `reason: "search_only"`, rising `today.errors`, "assistant model call failed" warnings
+with a failure category (timeout, unreachable, HTTP status, not understood).
+
+1. Check the provider's public status page and the provider key's remaining limit in the provider
+   account. An HTTP 401, 402 or 403 from the provider typically points to a revoked key or exhausted credit.
+2. Confirm the API can still reach the provider over the `egress` network and that `backend` stays internal.
+3. Leave the assistant on: each question still gets documentation passages within the deadline. There is
+   no automatic second provider; adding one needs its own review and cost approval.
+4. A timed-out call keeps its budget reservation (the provider may still bill it), so heavy timeouts
+   can exhaust the day's budget early. Record the outage window for the [assistant objective](../scaling/slo.md#help-assistant-objectives).
+
+### Redis unavailable
+
+Anonymous visitors still get documentation-search answers when the assistant's rate or budget store
+fails; counters and feedback are best effort. Signed-in requests fail before reaching the assistant,
+because sessions are stored in Redis, so restoring Redis is the priority. Follow the cell-outage steps above for Redis itself.
+
+### Disable switch
+
+Use it for a suspected prompt-injection or data-exposure problem, a provider incident or a cost concern.
+
+1. Set `FW_ASSISTANT__ENABLED=false` in the private environment through the normal reviewed
+   deployment change, then restart only the API service. Settings are read at start-up.
+2. Verify: `GET /v1/assistant` returns `"enabled": false` and an ask returns `mode: "search"` with
+   `reason: "disabled"`. The console and every other service keep running.
+3. For a suspected key leak, also revoke the key at the provider and rotate it as in
+   [Rotate a secret](#rotate-a-secret). For a suspected leak of tenant data, follow
+   [incident response](#incident-response).
+4. Re-enable only after the cause is fixed and, for prompt, model, tool or knowledge changes, after the
+   held-out evaluation passes again (paid run, with cost approval).
+
 ## Monitor or archive warning
 
 Check the collector's latest committed sample, process state, renewal/revocation and notification

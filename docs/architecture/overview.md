@@ -25,6 +25,9 @@ flowchart LR
   Agent -->|draft request| Model[Installed local model]
   Model -->|title and body only| Agent
   Agent -->|exact reviewed browser save| Form[Authorized form and receipt]
+  Operator -->|question| API
+  API -->|budget and rate counters| Redis
+  API -->|egress network only| LLM[Model provider via OpenRouter]
 ```
 
 ## Responsibilities
@@ -32,7 +35,7 @@ flowchart LR
 | Component | Current responsibility |
 |---|---|
 | Core | Typed configuration, row-level tenant transactions, claim/job states, canonical contracts and fencing |
-| Coordinator | Password/TOTP sessions, CSRF and roles, approvals/grants, audit, freight dispatch, workflow investigation/metrics |
+| Coordinator | Password/TOTP sessions, CSRF and roles, approvals/grants, audit, freight dispatch, workflow investigation/metrics, help assistant |
 | Freight worker | One Chromium with isolated watcher/claimer contexts, warm sessions and freight-specific action handling |
 | Workflow worker | Separate process for approved freight and maintenance contracts, durable job/account holds and receipt reconciliation |
 | Catalogue crawler | Tenant/cell-scoped PostgreSQL frontier, pinned bounded HTTP requests, extraction/quality guards and private JSONL exports |
@@ -43,6 +46,53 @@ flowchart LR
 | Dashboard/gateway | Live operator views, owner workflow review, bounded SSE fan-out and periodic authorization rechecks |
 | Owned destinations | Independent destination database and receipts; freight exchange and maintenance portal use different payloads |
 | Backup CLI | Host-side Docker execution of PostgreSQL tools, archive validation, hashes, retention and fresh restore drills |
+
+## Help assistant data flow
+
+The console help assistant is part of the API process (`/v1/assistant`, `/v1/assistant/ask`,
+`/v1/assistant/feedback`). It cannot change state, so a page, document or question cannot make it act.
+
+```mermaid
+sequenceDiagram
+  participant U as Console user
+  participant A as API (assistant)
+  participant R as Redis
+  participant K as BM25 index (approved docs)
+  participant T as Read-only tools (asker's tenant)
+  participant P as Model provider (OpenRouter)
+  U->>A: question + recent turns (CSRF when signed in)
+  A->>K: keyword retrieval, top 4 passages
+  A->>R: hourly limit for user or address range
+  A->>R: reserve worst-case cost against today's budget
+  A->>P: prompt, passages, tool list (egress network)
+  P-->>A: answer or read-only tool calls
+  A->>T: tool call as the asker, inside a tenant transaction
+  A->>R: settle reservation to reported cost
+  A-->>U: plain-text answer, sources, ai_generated
+```
+
+1. **Retrieval.** A small BM25 keyword index over 16 approved public documents
+   (`config/assistant.yaml`, generated into `config/assistant-knowledge.json`; a test fails when the
+   index no longer matches the documents). No embeddings or vector store.
+2. **Limits before cost.** Per-user (signed in) or per-address-range (anonymous) hourly question
+   limits, a per-process concurrency limit and a deployment-wide daily budget, reserved atomically in
+   Redis at the worst-case price of each call and settled to the provider-reported cost.
+3. **Model call.** Only the API container joins a separate `egress` network; `backend` stays internal
+   and no other service gains internet access. The API calls only the configured provider endpoint and
+   never fetches URLs supplied by visitors. See [ADR 0016](../adr/0016-assistant-provider-egress.md).
+4. **Tools.** Eight read-only tools (overview, workers, claims, latency, filters, schedules, accounts,
+   public workspace status) run as the asker in the asker's tenant through the same views and RLS as
+   the console's read endpoints. No audit or user-list tools. Results are bounded and wrapped as
+   untrusted data.
+5. **Answer.** At most three model calls and four tool calls per step within one 25-second whole-answer
+   deadline, below the edge proxy's 30-second timeout. The answer is plain text, marked
+   `ai_generated`, with sources listed separately.
+6. **Fallback.** When the AI is off, rate limited, busy, over budget or slow, or when the provider fails (or Redis fails for an anonymous visitor; signed-in sessions themselves need Redis),
+   the asker gets the most relevant documentation passages instead (`mode: "search"`).
+
+Nothing the asker types is stored by Fleetwright. Redis holds only the day's spend, hourly question
+counts, daily counters without question text and a one-hour single-use feedback id; logs hold
+metadata (mode, steps, tool names, cost, latency). See [data lifecycle](../security/data-lifecycle.md).
 
 ## Durable workflow protocol
 
@@ -104,8 +154,9 @@ lifecycles. Catalogue collection uses a fenced durable frontier and an allowlist
 process; it does not give operators arbitrary browser scripting. The local agent uses SQLite on
 the user's computer and an installed model for typed drafting; it does not depend on fleet services.
 
-These boundaries prevent a model response, page instruction, Redis delivery or UI refresh from
-becoming authority. Local edits survive polling but cannot authorize the old proposal; saving them
+The help assistant is a fourth, read-only path: it reads through the asker's role and tenant and
+holds no execution authority. These boundaries prevent a model response, page instruction, Redis
+delivery or UI refresh from becoming authority. Local edits survive polling but cannot authorize the old proposal; saving them
 creates a new hash. Each uncertain action is reconciled against its destination contract.
 
 ## Operational failure domains

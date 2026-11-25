@@ -5,8 +5,8 @@
 
 ## Context
 
-Every user-facing application in this portfolio must offer a project-specific help assistant
-(owner rule). Console visitors — clients and developers evaluating the product — need answers about
+The Fleetwright console must offer a project-specific help assistant (product requirement; the
+owned freight exchange carries a visitor guide instead). Console visitors — clients and developers evaluating the product — need answers about
 screens, states and live fleet health. The owner chose a paid hosted model through OpenRouter over a
 small model on the shared server, whose CPUs are already busy with other applications. Until now the
 backend network was internal: no service could reach the internet.
@@ -17,8 +17,8 @@ backend network was internal: no service could reach the internet.
   index is generated and a test fails when it no longer matches the documents.
 - Read-only tools only, executed as the asker inside the asker's tenant. No audit or user-list tools.
 - Bounded spend: per-user/per-address hourly limits, a per-process concurrency limit, and a daily
-  budget reserved atomically in Redis at worst-case cost before each call, plus a dedicated provider
-  key with its own monthly limit. Any limit or failure falls back to documentation search.
+  budget reserved atomically in Redis at worst-case cost before each call. A dedicated provider key
+  with its own monthly cap per deployment is the intended second layer (planned, not yet in place). Any limit or failure falls back to documentation search.
 - AI disclosure before the first question; every AI answer is marked machine-readably.
 - Only the API container joins a new, separate `egress` bridge network. `backend` stays internal;
   no other service gains internet access. The API makes outbound calls only to the configured

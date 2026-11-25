@@ -4,7 +4,7 @@ Messaging on Redis.
 
 | Module | Purpose |
 |---|---|
-| `keys.py` | Every Redis key in one place, with `{tenant}` hash tags so a cell can become a Redis Cluster |
+| `keys.py` | Every Redis key in one place, with `{tenant}` hash tags so a cell can become a Redis Cluster; also the help assistant's daily spend, hourly question counters, daily counters and single-vote answer keys |
 | `streams.py` | Streams with consumer groups, `XAUTOCLAIM` reclaim, dead-letter after N deliveries |
 | `outbox.py` | Relay that publishes outbox rows, after checking the tenant still belongs to this cell |
 | `client.py` | Redis clients for the core and each cell |
@@ -12,6 +12,11 @@ Messaging on Redis.
 Tests: `uv run python -m pytest packages/fw_queue`.
 
 Release operation and limits: [deployment](../../docs/operations/deployment.md) · [maintenance](../../docs/maintenance.md).
+
+Current release: `20261125-assistant-rc5` ([25 November 2026 record](../../docs/releases/2026-11-25.md)).
+That release added only the help assistant's keys; stream, outbox and delivery behaviour is
+unchanged. The assistant's keys hold amounts and counters, never question text, and expire
+on their own.
 
 ## Durability and recovery
 

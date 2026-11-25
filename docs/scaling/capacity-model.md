@@ -76,6 +76,47 @@ replacement/failure headroom separately; these rows describe active nodes only.
 The existing verification used authorized infrastructure without provisioning another node. Its resource caps and measured
 simple-page test windows do not establish the quoted cloud-node assumptions above.
 
+## Help assistant token and cost model
+
+Labels: **measured** comes from the [25 November release record](../releases/2026-11-25.md);
+**configured** comes from `AssistantSettings` and `.env.example`; everything else is arithmetic.
+
+| Input | Value | Label |
+|---|---|---|
+| Model and price | `anthropic/claude-haiku-5.5` via OpenRouter, $0.10 input / $0.50 output per million tokens (provider list, 25 Nov 2026) | Configured; prices change, recheck |
+| Cost per question | About $0.0006 average ($0.0091 for 16 questions), at most $0.0010 | Measured, 16-case held-out evaluation only |
+| Latency | p95 4.98 s over the same 16 questions | Measured, evaluation only, not a production SLI |
+| Output per call | ≤ 600 tokens (≤ $0.0003) | Configured |
+| Input per call | ≤ 24,000 prompt characters plus tool declarations, reserved at 3 characters per token: about 8,000 tokens (≈ $0.0008) | Configured, conservative estimate |
+| Calls per question | ≤ 3 model calls, ≤ 4 tool calls per call | Configured |
+| Worst-case reservation | ≈ $0.0011 per call, ≈ $0.0033 per question, settled down to the reported cost | Arithmetic |
+| Daily budget | $0.16 on the current deployment (about $5/month); a provider-side capped key is planned | Configured (release record); `.env.example` default is $0.50 |
+
+At the measured cost, today's $0.16 budget covers about 160–270 AI answers a day; after that, answers
+fall back to documentation search until the next UTC day. Reservations briefly hold worst-case cost
+while calls are in flight, so a burst can reach the budget earlier than the settled total suggests.
+
+### Scenarios toward 1M+ users (arithmetic, not measured)
+
+Assumptions: questions spread over the day with a 3× peak, about 5 s per question in flight (the
+measured evaluation p95, used as a conservative mean) and the measured $0.0006–0.0010 per question.
+The 200,000 row applies the baseline ratio (10% of daily users ask 2 questions) to 1M daily users.
+
+| Questions/day | Peak questions/s | In flight at peak | Provider calls/s at peak (≤ 3 each) | Cost/day at measured rate | Worst-case reservation/day |
+|---|---|---|---|---|---|
+| 10,000 | 0.35 | ~2 | ≤ 1.0 | $6–10 | ~$33 |
+| 100,000 | 3.5 | ~18 | ≤ 10 | $60–100 | ~$330 |
+| 200,000 (1M daily users) | 6.9 | ~35 | ≤ 21 | $120–200 | ~$660 |
+| 1,000,000 | 35 | ~174 | ≤ 104 | $600–1,000 | ~$3,300 |
+
+Monthly cost is roughly 30× the daily figure (for example $3,600–6,000 for the 200,000 row). At the
+current per-process concurrency of 4, the 200,000 row needs about 9 processes' worth of slots and the
+1,000,000 row about 44, which is why the [future design](future-architecture.md#help-assistant-at-scale)
+moves model calls to a bounded worker pool with budget shards, per-tenant quotas and cached
+documentation-only answers. Provider request and token rate limits must be confirmed for the chosen
+key and tier before any of these rows; cache hit rates are unknown until measured. Every row needs a
+current price check and the owner's cost approval; none has been run.
+
 ## Database and queue budgets
 
 Budget connections as sum(replicas × pool size) plus migration/monitoring/operational reserve,

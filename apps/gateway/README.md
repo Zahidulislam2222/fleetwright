@@ -11,6 +11,10 @@ The service does not prove million-session capacity: slow-consumer/reconnect/ref
 gateway density require the [scaling validation ladder](../../docs/scaling/README.md).
 See [configuration](../../docs/operations/configuration.md) and [SLOs](../../docs/scaling/slo.md).
 
+Current release: `20261125-assistant-rc5` ([25 November 2026 record](../../docs/releases/2026-11-25.md)).
+The gateway's behaviour is unchanged in that release; the console help assistant uses ordinary
+API requests, not the update stream.
+
 ## Client contract and operation
 
 The same-origin edge exposes `/v1/stream`. Events invalidate cached console data; clients refetch

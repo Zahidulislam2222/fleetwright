@@ -16,6 +16,7 @@ actual roles and authority privately. Public documentation describes the product
 | Release security | Locks, native image/SBOM/signature checks, retained findings and support/patch ownership | Release/security owner |
 | Capacity and availability | Agreed workload, supported tier, SLIs/window, limits, incident response and remedies | Service owner/customer |
 | Recovery | Archive/key/config ownership, tested restore, retained uncertainty and assessed RPO/RTO | Recovery owner |
+| Help assistant | Enable or keep off per deployment; provider terms, retention, subprocessors and transfers reviewed; dedicated capped provider key and daily budget; AI disclosure and contact route confirmed; evaluation re-run on the deployment's model | Deployment operator/customer |
 | Support/change control | Response channels, support hours, escalation, maintenance and approval for scope changes | Commercial/service owner |
 | Exit and portability | Export fields, access revocation, data-return/deletion schedule and archive expiry | Customer/operator |
 
@@ -37,6 +38,12 @@ Use the [jurisdiction register](README.md) and its primary sources for computer-
 privacy, content/database rights, consumer protection, AI-system duties and product cybersecurity.
 Evaluate the intended use and parties rather than assigning duties from a product label or model
 choice. Separate account access from permission for scraping, booking, publication or communications.
+
+The console help assistant sends questions, recent turns, documentation passages and read-only
+console data to a model provider. Before enabling it for a customer, confirm the provider's processing
+terms, transfer safeguards and data-collection settings, and whether the customer's data may be sent
+at all; keep it off for regulated data without a processing agreement. Its AI disclosure and marking
+follow the [legal register](README.md#eu-obligations-and-dates); applicability needs legal review.
 
 For personal data, specify purpose, necessary fields, recipients, retention, rights handling,
 security and applicable transfer safeguards. Assess whether sensitive/regulated processing or a

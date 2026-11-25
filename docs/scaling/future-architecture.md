@@ -1,7 +1,7 @@
 # Future architecture for 1M+ connected console users
 
 This is a proposed architecture and acceptance plan. The current single-host release does not
-implement or demonstrate this topology. The target is one million or more simultaneous authorized
+implement or validate this topology. The target is one million or more simultaneous authorized
 console sessions across tenants; browser execution is a separate, permission-constrained service.
 The [capacity model](capacity-model.md) supplies scenario arithmetic, and the
 [verification record](verification-2026-10-13.md) records the smaller measured workloads.
@@ -110,6 +110,44 @@ unconsumed raw detections. Stop admission, bound drain time and allow admitted w
 preserve its uncertainty. Reconcile `UNKNOWN` through receipts; never increase throughput by
 blindly replaying an uncertain action.
 
+## Help assistant at scale
+
+Today the assistant runs inside each API process with a per-process concurrency of 4, one
+deployment-wide daily budget key in Redis and one provider key. That is sized for the current
+single-server deployment ([baseline workload](baseline-workload.md)), not for 1M+ users. The
+[capacity model](capacity-model.md#help-assistant-token-and-cost-model) gives the cost arithmetic.
+Everything in this section is design, not implemented or measured.
+
+```mermaid
+flowchart LR
+    U[Console question] --> X[API admission: role, CSRF, per-user and per-tenant quota]
+    X --> C{Documentation-only answer cached?}
+    C -->|yes| R[Cached answer, still marked AI-generated]
+    C -->|no| B[Budget shard reserve]
+    B -->|reserved| Q[Bounded assistant queue]
+    B -->|exhausted| S[Documentation search fallback]
+    Q -->|slot within deadline| W[Assistant workers]
+    Q -->|full or deadline| S
+    W --> P1[Primary provider]
+    W -.future option.-> P2[Second provider]
+    W --> T[Read-only tools in asker's tenant]
+```
+
+| Concern | Design | Acceptance before relying on it |
+|---|---|---|
+| Budget sharding | Split the daily budget into slices per cell or tenant group, each reserved atomically in its own Redis key; a periodic rebalancer moves unused slices. Reservations stay at worst-case price and settle to reported cost | No overspend above the global cap under concurrent load and Redis failover; a reservation is never lost or double-counted |
+| Per-tenant quotas | Daily and hourly question/cost quotas per tenant on top of today's per-user and per-address limits, so one tenant cannot use another's share | A heavy tenant hits its quota while small tenants still get AI answers |
+| Cache common answers | Cache only answers built from documentation alone (no tool results, no tenant data), keyed by normalized question, knowledge version, prompt version and model. Expire on any of those changes. Never cache answers that used live data | Cross-tenant leakage test; cache hit/miss latency and cost saved are measured |
+| Queueing and backpressure | Move model calls from the API process to a bounded assistant worker pool. Admission waits at most a short slot time; a full queue or an exceeded whole-answer deadline returns the documentation fallback, never a 5xx | Burst test shows bounded queue age, fallback share and no API latency impact on other routes |
+| Provider rate limits | Budget requests/min and tokens/min per provider key; a token bucket below the provider's published limit; provider 429s count as fallback, not retries | No retry storm; fallback rate stays within the SLO during throttling |
+| Multi-provider failover (future option) | A second provider and model behind the same interface, with its own price settings, data-processing review and evaluation pass. Never an automatic paid fallback without approval | Held-out evaluation passes on each model; failover tested by stopping the primary |
+| Static fallback | BM25 documentation search runs in-process with no external call, and the published documentation is static. It remains the answer when every provider, Redis or the budget is unavailable | Provider and Redis outage tests return search answers within the fallback latency objective |
+
+The assistant must never consume capacity the console needs: its workers, connection pools and
+egress are isolated from claim, approval and stream paths, and the console remains fully usable with
+the assistant switched off. Tool calls use the same bounded tenant views as the console, so they add
+reads to the database budget and count in its connection plan.
+
 ## Zone failure and spare capacity
 
 Place redundant APIs/gateways and data services across zones, retaining sufficient running
@@ -137,6 +175,7 @@ availability and a single writer remain mandatory in either design.
 | Execution | Representative approved workflows, destination budgets, browser resource peaks, process death and receipt recovery |
 | Failure mode | Node/zone loss, rolling release, drain/rebalance and unavailable provisioning control plane within the same workload/SLO |
 | Recovery | Independent encrypted archive, fresh database/key/config recovery, measured RPO/RTO and no duplicate uncertain actions |
+| Help assistant | Budget-shard correctness, per-tenant quotas, cache isolation, queue backpressure, provider throttling/outage and held-out evaluation at the tier's question rate, with measured cost per question |
 | Commercial readiness | Current provider quotes, cost per session/tenant/action, documented limits and approved support/SLA/legal duties |
 
 An hour establishes a bounded capacity observation, not monthly availability. Publish rejected

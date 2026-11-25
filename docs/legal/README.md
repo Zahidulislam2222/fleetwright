@@ -24,9 +24,9 @@ requires the copyright holder's written permission.
 | EU/EEA personal data | GDPR controller/processor roles, lawful basis, rights, security, DPIA and transfers | Data inventory, signed DPA where appropriate, retention/request procedures, transfer assessment |
 | California privacy | CCPA/CPRA scope, roles, rights and current regulations | Request/opt-out process, contract restrictions and audit/risk/ADMT assessment where triggered |
 | Bangladesh personal data | Personal Data Protection Act 2026, roles, commencement provisions, rules and transfers | Current-law assessment, notices/basis, security, retention/requests and classification/transfer conditions |
-| AI systems/content | EU AI Act role, intended use, risk classification and transparency | Per-workflow assessment, human oversight and required AI-content disclosure |
+| AI systems/content | EU AI Act role, intended use, risk classification and transparency, including Art. 50 for the console help assistant | Per-workflow assessment, human oversight and required AI-content disclosure; the help assistant discloses that it is an AI and marks every AI answer (see [EU obligations](#eu-obligations-and-dates)) |
 | Product cybersecurity | CRA product/manufacturer scope and reporting applicability | Vulnerability intake, release/support process and applicable reporting escalation |
-| Consumer protection | Deceptive claims, fake reviews/testimonials and misleading AI output | Accurate capability claims and prohibition on deceptive engagement |
+| Consumer protection | Deceptive claims, deceptive reviews/testimonials and misleading AI output | Accurate capability claims and prohibition on deceptive engagement |
 | Communications/payments | Marketing consent, messaging laws, payment/financial duties | Separate authorized workflow review; no bundled payment or messaging service is represented |
 | Other jurisdictions | Operator, customer, destination, hosting and data-subject locations | Local counsel review, including Bangladesh where relevant; no universal-law claim |
 
@@ -79,14 +79,17 @@ interacting with an AI system) applies from 2 August 2026 without delay. The fou
 for Art. 50(2) machine-readable marking, ending 2 December 2026, covers only systems placed on the
 market before 2 August 2026; systems placed later had no grace period. Fleetwright's AI parts were
 built after that date, so both apply now. The Commission's voluntary Code of Practice on marking and
-labelling AI-generated content was published on 10 June 2026. Whether a public portfolio demo is
-"placed on the market" needs legal review; the engineering response assumes it is.
+labelling AI-generated content was published on 10 June 2026. Whether the public workspace and
+its help assistant are "placed on the market" needs legal review; the engineering response assumes they are.
 
 Current engineering response: the console help assistant states that it is an AI before the first
 question, marks every AI answer with `ai_generated: true` in the API response and
 `data-ai-generated="true"` in the page, and labels documentation-search fallbacks separately. The
 local agent records `provenance.ai_generated` (and `human_edited`) inside the approved proposal
 fingerprint and labels drafts in its window. A generic "assistant" label alone is not relied on.
+This response shipped in the [25 November 2026 release](../releases/2026-11-25.md); it is an
+engineering implementation of the transparency duties, not a legal conclusion that they are met.
+The help assistant's provider, data and retention are described in [privacy](privacy.md#help-assistant-provider).
 
 US notes (not legal advice; checked 25 November 2026 mostly from secondary sources): no general
 federal AI-chatbot disclosure statute was found, while FTC Act deception rules still apply.

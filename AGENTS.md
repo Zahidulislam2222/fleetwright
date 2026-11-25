@@ -15,12 +15,12 @@ The owner's global engineering rules apply too; they are referenced here by numb
 
 ## Layout
 
-- `apps/coordinator` — FastAPI `/v1` console API, auth, demo controls, workflows, crawls, assistant.
+- `apps/coordinator` — FastAPI `/v1` console API, auth, workspace controls (`/v1/demo`), workflows, crawls, assistant.
 - `apps/gateway` — live-update stream. `apps/worker` — Playwright runtime. `apps/mockboard` — the
-  fictitious demo load board (test target). `apps/dashboard` — Next.js landing + console.
+  owned freight exchange used as the test destination. `apps/dashboard` — Next.js landing + console.
 - `packages/fw_core` — settings (the only configuration boundary), DB, claims, crypto, workflows.
 - `packages/fw_queue`, `fw_browser`, `fw_mcp`, `fw_agent` — streams/sessions, browser, MCP, local agent.
-- `config/` — validated YAML/JSON product data (demo catalogue, prompts, assistant knowledge).
+- `config/` — validated YAML/JSON product data (workspace catalogue, prompts, assistant knowledge).
 - `infra/`, `deploy/` — Compose, Postgres roles, Terraform reference (plan only), release tooling.
 
 ## Commands (gates — all must pass before a change is called done)

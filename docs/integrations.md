@@ -19,10 +19,21 @@ the session's configured CSRF header. Session cookies are HttpOnly and Secure in
 | `/v1/crawls/contracts`, `/v1/crawls/jobs` | Maintained catalogue contracts and durable cycles | Tenant reads; authenticated operator/owner and CSRF for start/cancel |
 | `/v1/crawls/jobs/{job_id}/export` | Private retained JSONL download | Authenticated operator/owner in the same tenant |
 | `/v1/stream` | Live invalidation hints | Current session; bounded revocation recheck |
+| `/v1/assistant` | Help assistant description: on/off, disclosure, contact, suggestions, limits, knowledge version | Anyone who can open the console; today's counters only for the public workspace owner |
+| `/v1/assistant/ask` | Ask a question; returns `mode` (`ai` or `search`), `ai_generated`, plain-text answer, sources, read-only tools used and a fallback `reason` | Current principal and tenant; CSRF when signed in; hourly limits per user or address range |
+| `/v1/assistant/feedback` | One helpful/not-helpful vote per answer id, within one hour | CSRF when signed in; ids are single-use |
 
 Check the generated schema for exact methods, request bodies and subresource paths. Do not
 guess routes from this overview. Permission failures do not disclose another tenant's records.
 Clients must handle 403 authorization failures, 409 conflicts and rate limiting explicitly.
+
+The assistant endpoints return 404 when the deployment has no assistant. Inside the application, a valid question
+(within size limits, with CSRF when signed in) gets a 200 answer even when the assistant cannot use the
+AI: its own rate limits, budget, provider failures and the off switch return `mode: "search"` with
+documentation passages, so read `mode` and `reason` to tell them apart. The edge proxy can still return
+429 for request floods, and a signed-in request needs Redis for its session, so clients must handle
+those statuses as for any other `/v1` route. Render `answer` as plain text. Treat it as AI-generated content that can
+be wrong; it never performs an action. See [architecture](architecture/overview.md#help-assistant-data-flow).
 
 ## Stdio MCP
 

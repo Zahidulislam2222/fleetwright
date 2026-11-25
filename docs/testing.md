@@ -1,6 +1,43 @@
 # Testing and verification evidence
 
-## Current release — 15 October 2026
+## Current release — 25 November 2026
+
+Release `20261125-assistant-rc5`, owner source `26ebe46`, added the console help assistant. Recorded
+in the [current release record](releases/2026-11-25.md):
+
+| Gate | Result and boundary |
+|---|---|
+| Quality | Ruff and formatting (256 files), strict mypy (90 source files), dashboard typegen/lint/types/build and WCAG AA contrast passed; GitHub quality and security workflows passed on `26ebe46` |
+| Source security | Gitleaks, Bandit (medium+) and Semgrep `p/security-audit` passed; Semgrep blocked one commit (a template variable in a link), fixed rather than suppressed |
+| Help assistant | 18 API tests, 8 unit tests, a real-browser drawer test and a 16/16 held-out live evaluation (see [below](#help-assistant)) |
+| Full regression | **Not one clean run.** On a build machine shared with other projects, the final commit's run gave 283 passed, 7 skipped, 1 failed and 35 errors: all 35 errors came from one fixture start-up timeout of the owned freight board, and the failure is a known load-sensitive agent browser test. The worker suite and that test were rerun separately (35 passed; the two that failed there passed alone). Every test has a passing run on the assistant source |
+| Next.js 16.4.6 upgrade | Dashboard-only dependency change after the CI dependency audit; checked by dashboard lint, types and build, CI and the live console ask |
+| Native images and trust | Trivy 0.75.0: application 0 HIGH/CRITICAL; web 0 HIGH/CRITICAL, one MEDIUM. Ed25519 provenance verified for 145 primary artifacts |
+| Production | Quiescence, unchanged schema (0007), 147/147 file parity, 25/25 edge checks and a public visitor's live ask with sources and two read-only tools passed |
+
+A drawer layout defect reached production for about one hour because unit and API tests cannot see
+layout; the real-browser regression test was added with the fix ([defect log](../DEFECT-LOG.md)).
+
+## Help assistant
+
+| Suite | Path | What it proves |
+|---|---|---|
+| API, limits and failures (18 tests) | `apps/coordinator/tests/test_assistant.py` | With a stand-in provider: disclosure and fallback when off, CSRF and size limits, owner-only counters, AI marking and spend settlement, tools run as the asker in their tenant, tool-call limits and malformed calls, instructions hidden in history, provider failure, a timed-out call keeps its reservation, whole-answer deadline, busy, daily budget, per-address rate limit and single-use feedback |
+| Unit (8 tests) | `apps/coordinator/tests/test_assistant_unit.py` | Knowledge index matches the approved documents; retrieval; removal of invisible and bidirectional characters; settings refuse a zero price or a deadline beyond the proxy timeout; prompt fitting never drops the question; Redis outage still answers from the documentation |
+| Real browser | `apps/coordinator/tests/test_assistant_browser.py` | Against the real dashboard build: drawer full height, opaque, outside the header, an answer appears and Escape returns focus |
+| Held-out live evaluation (paid, opt-in) | `apps/coordinator/tests/test_assistant_live_eval.py`, cases in `config/assistant-eval.yaml` | 16 cases written for the evaluation, including prompt injection, key extraction, write attempts, off-topic and captcha-help refusals and private-contact requests |
+
+Live evaluation result on 25 November 2026: **16/16 passed**, p95 latency 4.98 s, $0.0091 total, at
+most $0.0010 per question. Thresholds: pass rate ≥ 0.85, six must-pass safety cases, p95 ≤ 15 s,
+≤ $0.01 per question and a $0.25 cap on the run. The first live run found Markdown symbols in answers
+and one case without the human contact route; the prompt was fixed and the re-run passed 16/16.
+
+The live evaluation calls a paid model, so it runs only with explicit cost approval and is not part
+of `run_tests.py` by default or of CI. Running it in CI on prompt, model or knowledge changes is on
+the [roadmap](roadmap.md#help-assistant-next-steps). Sixteen cases are a small sample: they show the
+release met its thresholds, not that answers are always correct.
+
+## Historical release — 15 October 2026
 
 Release `20261015-publication-rc1`, owner source `cd64e6b`, passed **289 tests with six accounted
 skips in 714.96 seconds**: 295 collected cases, zero failures/errors and native wrapper exit0.
@@ -11,7 +48,7 @@ Complete the normal dashboard build before the full suite. Static export shares 
 export, image preparation and real-flow rehearsal outside the complete regression run. Earlier
 missing-prerequisite and timing failures remain recorded; the accepted isolated run changed no
 assertion or timeout. See [contributor order](../CONTRIBUTING.md) and
-[current release evidence](releases/2026-10-15.md).
+[15 October release evidence](releases/2026-10-15.md).
 
 The skips are one installed-model opt-in, four POSIX-permission cases on Windows and one unavailable
 Windows symlink privilege. Existing installed-model and platform-specific proof retains its dated
@@ -34,7 +71,9 @@ in the final destination receipt. The full affected agent/configuration suite th
 with five expected skips**. Platform-specific POSIX checks passed separately on Linux, and actual
 installed-model evidence covers all three templates.
 
-## Current assurance
+## Assurance recorded with the 15 October release
+
+The table below is the historical October baseline; the current release's gates are listed above.
 
 | Gate | Recorded result and scope |
 |---|---|
@@ -55,8 +94,8 @@ installed-model evidence covers all three templates.
 
 These are scoped results. Image findings depend on the recorded database/time and exact identity.
 Fixture contexts are not authenticated freight workers; source gates, signed artifacts and live
-deployment are separate proofs. See [current release evidence](releases/2026-10-14.md) and [historical evidence](releases/2026-10-13.md) and
-[capacity observations](scaling/verification-2026-10-13.md).
+deployment are separate proofs. See the historical [14 October](releases/2026-10-14.md) and
+[13 October](releases/2026-10-13.md) evidence and [capacity observations](scaling/verification-2026-10-13.md).
 
 ## Run reproducibly
 
@@ -167,7 +206,7 @@ Lifecycle regressions also cover a removed retired tenant during fleet drain, fa
 after cleanup and Linux crawler SIGTERM cancellation. The physical crawler control changed a
 forced exit 137 into exit 0 with fetch-child termination/reaping, socket closure and engine cleanup.
 The historical 13 October rc4 rehearsal independently verified successful stops and restoration
-using its final image; current release lifecycle evidence is recorded above.
+using its final image; later lifecycle evidence is recorded in the release sections above.
 
 ## Publication regression coverage
 

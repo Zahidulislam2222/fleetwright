@@ -23,6 +23,7 @@ about 100 TB of memory. It is not the one-million-user control-plane target.
 | Update gateway | 1M+ live connections | File descriptors, socket memory, event fan-out, bandwidth and reconnect storms |
 | Execution | Independently scaled browser cells | Context memory/CPU, account exclusivity and destination permission/rate limits |
 | Evidence | Bounded investigation and export | Retention, object storage, access control and retrieval cost |
+| Help assistant | Questions per session, share needing live tools, cached answers | Provider rate limits and price, per-tenant budget and quota, queueing and documentation-search fallback ([capacity model](capacity-model.md)) |
 
 ## Delivery stages and exit gates
 

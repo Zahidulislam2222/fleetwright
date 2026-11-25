@@ -1,9 +1,11 @@
-# ASVS 5.0 assurance map — 13 October 2026
+# ASVS 5.0 assurance map — 13 October 2026, help assistant rows 25 November 2026
 
-Current release: [15 October verified publication](../releases/2026-10-15.md). Its native app/web
-scans each reported zero HIGH/CRITICAL at the signed identities; source gates, real public flows,
-image/artifact parity and fresh operational checks passed. Earlier rc4 measurements below retain
-their 13 October boundary; the passive ZAP/dev-dependency exceptions are not new scan results.
+Current release: [25 November 2026, `20261125-assistant-rc5`](../releases/2026-11-25.md), which added
+the console help assistant. Native Trivy scans reported zero HIGH/CRITICAL in the application image
+and zero HIGH/CRITICAL with one MEDIUM in the web image; Ed25519 provenance verified; Gitleaks, Bandit
+and Semgrep passed (Semgrep blocked one commit, fixed rather than suppressed). Earlier results are
+history: the [15 October publication](../releases/2026-10-15.md) and the rc4 measurements below
+retain their 13 October boundary; the passive ZAP/dev-dependency exceptions are not new scan results.
 
 
 This is an engineering evidence map, **not ASVS Level 2 compliance, certification, or an independent
@@ -52,6 +54,25 @@ artifact/running-image parity checks passed; see the release record for remainin
 | V16 audit/errors | Transactional DB audit, redaction, intent/outcome records | External uncertainty retained as UNKNOWN; no automatic replay |
 | V17 WebRTC | No WebRTC feature | Not applicable to present application |
 
+### Help assistant (added 25 November 2026)
+
+ASVS 5.0 has no chapter written for language-model features, so the help assistant is mapped to the
+existing chapters by area, without claiming specific requirement identifiers. The
+[OWASP Top 10 for LLM applications](https://genai.owasp.org/llm-top-10/) is a supplementary reference.
+Evidence: `apps/coordinator/src/fw_coordinator/assistant.py`, `assistant_api.py`,
+`apps/coordinator/tests/test_assistant*.py` and the [release record](../releases/2026-11-25.md).
+
+| ASVS area | Project evidence | Status / assessment boundary |
+|---|---|---|
+| V8 authorization (tool access) | Read-only tools run as the asker inside a tenant transaction with RLS through the console's read views; no audit/user-list or write tools | API tests with a stand-in provider; no independent assessment; each new tool needs a cross-tenant denial test |
+| V2 validation/business logic (spend and abuse) | Hourly per-user/per-address limits, per-process concurrency, atomic worst-case budget reservation, bounded sizes and call counts, one whole-answer deadline | 18 API/limit/failure tests (budget, rate, busy, deadline, timeout keeps reservation) plus a unit test for the Redis-outage fallback; no distributed abuse simulation |
+| V1 encoding / output handling | Control and invisible format characters stripped; answers rendered as plain text, never HTML; links limited to the maintained contact | Unit and browser tests; model output is still untrusted text |
+| V1/V2 injection resistance | Passages and tool results wrapped as untrusted data; allowlisted tool names and claim-state argument | 16/16 held-out live cases incl. prompt and key extraction, write attempts and captcha help; complete injection resistance not claimed |
+| V3 frontend / V4 API (CSRF) | Signed-in asks and feedback require the session CSRF token; anonymous asks carry no session to borrow | API tests for CSRF; feedback ids are single-use and expire after one hour |
+| V13 configuration / V11 secrets | Provider key is a secret setting, never sent to the browser or the model; assistant refuses to start enabled without provider, key, model and positive prices | Settings tests; key custody is the operator's; dedicated capped key per deployment planned |
+| V14 data protection | Nothing the asker types stored; Redis holds counters and a single-use answer id; logs hold metadata only | Provider-side retention follows provider terms; see [data lifecycle](data-lifecycle.md) |
+| V16 logging/errors | Provider/tool failures logged as safe categories with bounded detail; the asker gets documentation passages, not an error page | No assistant alert in the monitor collector yet |
+
 ## Authorized dynamic verification
 
 Run adversarial requests only against isolated local databases and owned local destinations; the
@@ -67,6 +88,7 @@ shared public workspace is checked functionally and is not a stress/penetration-
 | API/SSE reconnect and slow consumer | `loadtest/tests/test_http.py`: real loopback coordinator/gateway, bounded clients; direct Hub overflow separately |
 | Prompt injection/destination escape | Local agent and crawler suites; arbitrary third-party-site safety is not claimed |
 | Archive tamper/wrong recovery key and manifest/path attacks | Backup/recovery suites; off-host operational restore is a separate gate |
+| Help assistant injection, write attempts, key extraction and limits | `apps/coordinator/tests/test_assistant.py` (stand-in provider) and the paid opt-in `test_assistant_live_eval.py` (16/16 on 25 November 2026); run the live evaluation only with cost approval |
 | Browser process death after destination acceptance | Existing real workflow crash child + receipt reconciliation; blind retry forbidden |
 
 Exceptions are tracked here openly; do not turn missing controls into passing findings. This map

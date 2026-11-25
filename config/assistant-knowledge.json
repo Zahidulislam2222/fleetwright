@@ -2,17 +2,17 @@
  "version": "2026-11-25.3",
  "sources": {
   "docs/console-guide.md": "3325af2dd02d834d1281d33cb9465b78030a353c6e3862d4e7428cb81e129111",
-  "README.md": "50d5bca4f7114ced82cb0a088b6a304ce429e508e96456f1caa96d32e2508abf",
-  "docs/product.md": "f7b800f44984129998a368f42e7c990caf996b6be8f66e3876e3014443d602f7",
-  "docs/architecture/overview.md": "ad9477c429cf9ddd51c6ad295a2add40506a3c9347cd4763bccf74026d3d58c7",
+  "README.md": "c72f8fee4af789115d51253b4434a32ee4e19bdfbac007657dd94ac90a5ae718",
+  "docs/product.md": "6fc6b44d35cf5a94ea01d0d47d4a6da2554794c750ed443a8f13d65d1eb062f3",
+  "docs/architecture/overview.md": "fc97d3e7aaf2a7093a74d31d3c578a0ceffd26b6ce7a06df07e858e03c088262",
   "docs/architecture/claim-lifecycle.md": "97db93a6f399b6df8acb8d7c00ae88d1e142d2e76be281ce69123f6a10b3f495",
   "docs/adr/0001-postgres-is-the-claim-authority.md": "d1b6582e0bcea5695f8ccfed2d4f740978b83d4d76e941d6250177ea1ee7f951",
   "docs/adr/0002-unknown-is-never-retried.md": "173e8232ab89087f552e926ce5d190cbe369c3a9e79c9b708ab8038158b53e00",
   "docs/adr/0005-cells.md": "0fc3ffcb7ab581120c6034c1f2ec04d0d685e5fd9e42637204fce5f3121c8f84",
   "docs/adr/0009-scale-targets.md": "8dddc127278d62cd6aa251b1a8359ae3f1fde34ca13ac2efd7109bd2d683f3f8",
-  "docs/scaling/README.md": "e199232d2c7dae5293f3a412805f35c8348739253508688d6ca16badb4e03c37",
-  "docs/security/README.md": "66549cebc2ed39bf11b4fd9f18501f31b6bb5066dbd2c5c1550132f16c4926c2",
-  "docs/legal/acceptable-use.md": "6971c1e9e3f3f1dc7c0fbf6d0f884f58fad204307c5567cb07700a161f97e1d4",
+  "docs/scaling/README.md": "83a2e65f42c05b9f74d6309a0e63c97186795dfe637cd1b7abd4e81a8adc6ad6",
+  "docs/security/README.md": "542fd4fea28e81e1949b6314acd76af839b19e3ea625f8b68faf400290850a13",
+  "docs/legal/acceptable-use.md": "dd74e20cd7f2c24794ad3abd9a92a098a701eb0c0645e11c40f93809330ed9ca",
   "docs/legal/privacy.md": "5e7c75a156466a00ad96947e89ff93829101d195a94a9c8c72bb0153b2ac622a",
   "docs/operations/crawler.md": "3738c3acc29dffeb05aec9f31af4907fd55bf831115ca982bf92884c269cfef1",
   "docs/operations/reliable-browser.md": "9896a6208fac54b6318b6109f7cee85549af27c4f0933ad5a1384a8d75a5bb26",
@@ -131,19 +131,19 @@
    "id": "README.md#3-0",
    "source": "README.md",
    "heading": "Fleetwright — Reliable Browser Operations — Evidence and current boundary",
-   "text": "The deployed frontend/backend release is `20261015-publication-rc1`, built from source `cd64e6b`.\nExact rehearsal, native server image checks, independent artifact review, public workflows,\noperator UI and HTTP checks passed. All 146 deployed manifest entries and eight application/web\nservice-role image identities matched the signed release. Verification is maintained in the\nrelease record."
+   "text": "The deployed frontend/backend release is `20261125-assistant-rc5`, built from source `26ebe46`; it\nadds the console help assistant (16/16 live evaluation cases) and patched images (zero HIGH/CRITICAL\nnative findings). All 147 deployed files and eight application/web service-role image identities\nmatched the signed release, and public UI/HTTP checks passed. Verification is maintained in the\nrelease record; the previous record\nkeeps the October workflow, recovery and endurance evidence.\n\n| Current release check (25 November 2026) | Result and scope |\n| Help assistant | 16/16 held-out live cases (prompt injection, key extraction, write attempts, refusals), p95 4.98 s, at most $0.0010 per question; 18 API, 8 unit and one real-browser test |\n| Images | Application and web images: zero HIGH/CRITICAL findings (Trivy 0.75.0) at the recorded scan; signed provenance verified |\n| Deployment | Live files checked before cutover; quiesced with a verified archive; 147/147 file parity, eight role identities, 25/25 origin checks, public TLS and real assistant flow passed |\n| Continuous integration | GitHub quality, security and independent uptime workflows passed on the deployed source |\n\nThe table below is retained October evidence for the fleet, workflows and recovery; it was not\nre-measured in November because that runtime behaviour did not change."
   },
   {
    "id": "README.md#4-1",
    "source": "README.md",
    "heading": "Fleetwright — Reliable Browser Operations — Evidence and current boundary",
-   "text": "| Evidence | Verified result and scope |\n| Full backend regression | 289 passed / 6 accounted skips in 714.96 seconds; native exit0, zero failures/errors and 363 runtime/configuration/build-prerequisite hashes unchanged |\n| Browser/model flows | Current public MCP workflows confirmed with matching receipts; three installed-model local-agent templates retain their 13 October proof |\n| Exact release UI | Native owner login, fleet confirmation, crawler completion/export, public authorization denial, SPA navigation and responsive layouts passed with zero observed CSP violations/page errors |\n| Browser endurance | Separate 50- and 70-context owned-fixture runs exceeded one hour with zero errors; these are fixture endurance results |\n| Contention | 200 coordination competitors and 10,000 jobs with zero duplicate action attempts; competitors are not 200 browsers |\n| Image assurance | Final native application and web image scans reported zero HIGH/CRITICAL findings at the recorded scan |\n| Browser recovery | Exact local driver and browser loss each caused one supervisor restart; four ready slots returned within 10.3 seconds; strict drain released all holds and exited 0 |\n| Recovery | Current post-activity archive restored into two new verification databases; backup/monitor supervisor recovery passed. Independent encrypted recovery remains the separately dated 13 October proof |"
+   "text": "| October evidence (13–15 October 2026) | Verified result and scope |\n| Full backend regression | 289 passed / 6 accounted skips in 714.96 seconds; native exit0, zero failures/errors and 363 runtime/configuration/build-prerequisite hashes unchanged |\n| Browser/model flows | Current public MCP workflows confirmed with matching receipts; three installed-model local-agent templates retain their 13 October proof |\n| Exact release UI | Native owner login, fleet confirmation, crawler completion/export, public authorization denial, SPA navigation and responsive layouts passed with zero observed CSP violations/page errors |\n| Browser endurance | Separate 50- and 70-context owned-fixture runs exceeded one hour with zero errors; these are fixture endurance results |\n| Contention | 200 coordination competitors and 10,000 jobs with zero duplicate action attempts; competitors are not 200 browsers |\n| Image assurance | Final native application and web image scans reported zero HIGH/CRITICAL findings at the recorded scan |\n| Browser recovery | Exact local driver and browser loss each caused one supervisor restart; four ready slots returned within 10.3 seconds; strict drain released all holds and exited 0 |\n| Recovery | Current post-activity archive restored into two new verification databases; backup/monitor supervisor recovery passed. Independent encrypted recovery remains the separately"
   },
   {
    "id": "README.md#5-2",
    "source": "README.md",
    "heading": "Fleetwright — Reliable Browser Operations — Evidence and current boundary",
-   "text": "Release source `cd64e6b` updates public documentation and the central distinct web-image tag;\nbusiness runtime behavior is unchanged from the 14 October browser-supervision correction.\nThe final complete suite ran after local builds/rehearsal finished, with its generated dashboard\nprerequisite frozen alongside runtime/configuration. Driver-loss supervision and readiness prevent\na browserless process appearing healthy. Earlier failed verification attempts remain in the release record.\n\nHistorical owned-board latency was approximately 365 ms p50 / 540 ms p95 from detection to\nconfirmation. Workload, hardware and limits belong with every measurement:\ntesting and capacity evidence.\nThe deployment has a single-host failure domain. 1M+ simultaneous control-plane users\nand 99% / 99.9% availability objectives are future design and validation\ntargets. Arbitrary-site exactly-once execution and measured monthly availability are not established."
+   "text": "dated 13 October proof |\n\nDriver-loss supervision and readiness prevent a browserless process appearing healthy. Failed\nverification attempts, rejected release candidates and a layout defect that briefly reached\nproduction are kept in the release records and the defect log.\n\nHistorical owned-board latency was approximately 365 ms p50 / 540 ms p95 from detection to\nconfirmation. Workload, hardware and limits belong with every measurement:\ntesting and capacity evidence.\nThe deployment has a single-host failure domain. 1M+ simultaneous control-plane users\nand 99% / 99.9% availability objectives are future design and validation\ntargets. Arbitrary-site exactly-once execution and measured monthly availability are not established."
   },
   {
    "id": "README.md#6-0",
@@ -196,26 +196,32 @@
   {
    "id": "docs/product.md#4-0",
    "source": "docs/product.md",
-   "heading": "Fleetwright product guide — Delivery boundaries",
-   "text": "Fleetwright includes its own freight board and service portal for controlled destination testing.\nNo relationship with a commercial freight marketplace is implied. Customer integrations require\nwritten authorization and the onboarding checklist.\n\nThis repository is source-available under LICENSE. Public availability of source is\nnot a grant of unrestricted commercial use; review the license before distribution or resale.\nHosted service pricing, support agreements and contractual service levels are separate agreements."
+   "heading": "Fleetwright product guide — Console help assistant",
+   "text": "Since the 25 November 2026 release the console has a help assistant: an\nAI that explains screens, states and workflows and troubleshoots what the asker sees.\n\n| It does | It does not |\n| Answer from 16 approved public documents (keyword search) and cite them as sources | Change anything: it has no write tools, approvals or grants |\n| Read live console data through eight read-only tools that run as the asker, inside the asker's tenant | See audit records or user lists, or anything the asker's role cannot already see |\n| State that it is an AI before the first question and mark every AI answer as AI-generated | Store what the asker types: the conversation lives only in the open page |\n| Give the most relevant documentation passages when the AI is off, rate limited, busy, over budget, slow or failing | Promise correctness: answers can be wrong; check them against the linked sources |\n| Offer the human contact route (public GitHub issues; security reports through SECURITY.md) | Offer live chat, a response time or help with captchas, unauthorized scraping or evading detection |\n\nSpend is bounded before every paid call (daily budget, hourly question limits, a concurrency limit\nand one whole-answer deadline). Operators can switch the AI off; documentation search keeps working.\nSee the console guide, privacy\nand ADR 0016."
   },
   {
    "id": "docs/product.md#5-0",
    "source": "docs/product.md",
-   "heading": "Fleetwright product guide — Documentation map",
-   "text": "- Architecture, workflow operations\n  and API/MCP reference.\n- Security, privacy and legal register.\n- Capacity plan, 1M+ user architecture,\n  availability objectives and roadmap.\n- Deployment, testing and maintenance."
+   "heading": "Fleetwright product guide — Delivery boundaries",
+   "text": "Fleetwright includes its own freight board and service portal for controlled destination testing.\nNo relationship with a commercial freight marketplace is implied. Customer integrations require\nwritten authorization and the onboarding checklist.\n\nThis repository is source-available under LICENSE. Public availability of source is\nnot a grant of unrestricted commercial use; review the license before distribution or resale.\nHosted service pricing, support agreements and contractual service levels are separate agreements."
   },
   {
    "id": "docs/product.md#6-0",
+   "source": "docs/product.md",
+   "heading": "Fleetwright product guide — Documentation map",
+   "text": "- Architecture, workflow operations\n  and API/MCP reference.\n- Security, privacy and legal register.\n- Capacity plan, 1M+ user architecture,\n  availability objectives and roadmap.\n- Deployment, testing and maintenance.\n- Console guide and the current release record."
+  },
+  {
+   "id": "docs/product.md#7-0",
    "source": "docs/product.md",
    "heading": "Fleetwright product guide — Onboard an authorized workload",
    "text": "1. Establish the customer/tenant owner, destination permission, account scope and data purpose.\n2. Select fleet workflow, catalogue crawler or local agent according to the actual action boundary.\n3. Define allowed origins, fields/selectors, identity, rate budgets, retention and success/uncertainty receipts.\n4. Provision private accounts and least-privilege grants; validate tenant isolation and owner approvals.\n5. Exercise session expiry, rate limits, changed pages, interrupted acknowledgements and recovery.\n6. Agree operating ownership, support, measured capacity and recovery objectives before production use.\n\nThe built-in destinations provide reproducible acceptance environments. New targets require their\nown contract and review; an accessible page or a permissive robots file alone is not authorization.\nSee acceptable use, privacy and\nsecurity onboarding."
   },
   {
-   "id": "docs/product.md#7-0",
+   "id": "docs/product.md#8-0",
    "source": "docs/product.md",
    "heading": "Fleetwright product guide — Choose the execution path",
-   "text": "| Need | Execution path | Authority and state |\n| Sustained coordinated freight work | Warm fleet actors and watchers | PostgreSQL claims, account pacing and cells |\n| A reviewed business action | MCP proposal plus owner console | Versioned workflow approval and fenced worker |\n| Approved structured data collection | Catalogue cycle | Durable frontier, extraction allowlist and private export |\n| Local content drafting and form save | Standalone local agent | Installed model drafts; SQLite binds human approval and receipt |\n\nCurrent verification includes 289 passing runtime regression cases with six expected skips, actual\ndriver/browser-loss recovery, exact release MCP/browser/crawler rehearsal and public workflows/UI/HTTP\nwith signed parity. Earlier installed-model flows and 50/70-context fixture hours retain their dated\nboundaries. The current release record separates these results. These do not establish a\ncustomer workload or availability SLA. Testing records their scope;\nfuture scale and availability has explicit promotion gates."
+   "text": "| Need | Execution path | Authority and state |\n| Sustained coordinated freight work | Warm fleet actors and watchers | PostgreSQL claims, account pacing and cells |\n| A reviewed business action | MCP proposal plus owner console | Versioned workflow approval and fenced worker |\n| Approved structured data collection | Catalogue cycle | Durable frontier, extraction allowlist and private export |\n| Local content drafting and form save | Standalone local agent | Installed model drafts; SQLite binds human approval and receipt |\n\nThe current release record (`20261125-assistant-rc5`, source `26ebe46`)\nrecords its gates, the help assistant's 16/16 held-out live evaluation and the failures found during\nthat release, including the regression run that did not complete cleanly in one pass on a shared\nmachine. Earlier verification (289 passing runtime regression cases with six expected skips, actual\ndriver/browser-loss recovery, exact release MCP/browser/crawler rehearsal and public workflows/UI/HTTP\nwith signed parity) is history in the 15 October and\n14 October records; installed-model flows and 50/70-context fixture hours\nretain their dated boundaries. None of these establish a customer workload or availability SLA.\nTesting records their scope; future scale and availability has\nexplicit promotion gates."
   },
   {
    "id": "docs/architecture/overview.md#0-0",
@@ -227,46 +233,64 @@
    "id": "docs/architecture/overview.md#1-0",
    "source": "docs/architecture/overview.md",
    "heading": "Architecture overview — Responsibilities",
-   "text": "| Component | Current responsibility |\n| Core | Typed configuration, row-level tenant transactions, claim/job states, canonical contracts and fencing |\n| Coordinator | Password/TOTP sessions, CSRF and roles, approvals/grants, audit, freight dispatch, workflow investigation/metrics |\n| Freight worker | One Chromium with isolated watcher/claimer contexts, warm sessions and freight-specific action handling |\n| Workflow worker | Separate process for approved freight and maintenance contracts, durable job/account holds and receipt reconciliation |\n| Catalogue crawler | Tenant/cell-scoped PostgreSQL frontier, pinned bounded HTTP requests, extraction/quality guards and private JSONL exports |\n| Standalone local agent | SQLite/WAL, local model drafts, bounded dedicated/isolated-CDP browser contexts and exact approved form saves |\n| Operational tools | Renewable observe-only collection, independent encrypted recovery and offline artifact signing |\n| Browser adapters | Generic authentication separated from freight fields, permitted owned origins, form/receipt validation |\n| MCP server | Six bounded stdio tools; every call checks tenant, user, grant scope, expiry and revocation |\n| Dashboard/gateway | Live operator views, owner workflow review, bounded SSE fan-out and periodic authorization rechecks |\n| Owned destinations | Independent destination database and receipts; freight exchange"
+   "text": "| Component | Current responsibility |\n| Core | Typed configuration, row-level tenant transactions, claim/job states, canonical contracts and fencing |\n| Coordinator | Password/TOTP sessions, CSRF and roles, approvals/grants, audit, freight dispatch, workflow investigation/metrics, help assistant |\n| Freight worker | One Chromium with isolated watcher/claimer contexts, warm sessions and freight-specific action handling |\n| Workflow worker | Separate process for approved freight and maintenance contracts, durable job/account holds and receipt reconciliation |\n| Catalogue crawler | Tenant/cell-scoped PostgreSQL frontier, pinned bounded HTTP requests, extraction/quality guards and private JSONL exports |\n| Standalone local agent | SQLite/WAL, local model drafts, bounded dedicated/isolated-CDP browser contexts and exact approved form saves |\n| Operational tools | Renewable observe-only collection, independent encrypted recovery and offline artifact signing |\n| Browser adapters | Generic authentication separated from freight fields, permitted owned origins, form/receipt validation |\n| MCP server | Six bounded stdio tools; every call checks tenant, user, grant scope, expiry and revocation |\n| Dashboard/gateway | Live operator views, owner workflow review, bounded SSE fan-out and periodic authorization rechecks |\n| Owned destinations | Independent destination database and receipts;"
   },
   {
    "id": "docs/architecture/overview.md#2-1",
    "source": "docs/architecture/overview.md",
    "heading": "Architecture overview — Responsibilities",
-   "text": "and maintenance portal use different payloads |\n| Backup CLI | Host-side Docker execution of PostgreSQL tools, archive validation, hashes, retention and fresh restore drills |"
+   "text": "freight exchange and maintenance portal use different payloads |\n| Backup CLI | Host-side Docker execution of PostgreSQL tools, archive validation, hashes, retention and fresh restore drills |"
   },
   {
    "id": "docs/architecture/overview.md#3-0",
+   "source": "docs/architecture/overview.md",
+   "heading": "Architecture overview — Help assistant data flow",
+   "text": "The console help assistant is part of the API process (`/v1/assistant`, `/v1/assistant/ask`,\n`/v1/assistant/feedback`). It cannot change state, so a page, document or question cannot make it act."
+  },
+  {
+   "id": "docs/architecture/overview.md#4-1",
+   "source": "docs/architecture/overview.md",
+   "heading": "Architecture overview — Help assistant data flow",
+   "text": "1. **Retrieval.** A small BM25 keyword index over 16 approved public documents\n   (`config/assistant.yaml`, generated into `config/assistant-knowledge.json`; a test fails when the\n   index no longer matches the documents). No embeddings or vector store.\n2. **Limits before cost.** Per-user (signed in) or per-address-range (anonymous) hourly question\n   limits, a per-process concurrency limit and a deployment-wide daily budget, reserved atomically in\n   Redis at the worst-case price of each call and settled to the provider-reported cost.\n3. **Model call.** Only the API container joins a separate `egress` network; `backend` stays internal\n   and no other service gains internet access. The API calls only the configured provider endpoint and\n   never fetches URLs supplied by visitors. See ADR 0016.\n4. **Tools.** Eight read-only tools (overview, workers, claims, latency, filters, schedules, accounts,\n   public workspace status) run as the asker in the asker's tenant through the same views and RLS as\n   the console's read endpoints. No audit or user-list tools. Results are bounded and wrapped as\n   untrusted data.\n5. **Answer.** At most three model calls and four tool calls per step within one 25-second whole-answer\n   deadline, below the edge proxy's 30-second timeout. The answer is plain text, marked\n   `ai_generated`, with sources listed separately.\n6. **Fallback.** When the AI is"
+  },
+  {
+   "id": "docs/architecture/overview.md#5-2",
+   "source": "docs/architecture/overview.md",
+   "heading": "Architecture overview — Help assistant data flow",
+   "text": "off, rate limited, busy, over budget or slow, or when the provider fails (or Redis fails for an anonymous visitor; signed-in sessions themselves need Redis),\n   the asker gets the most relevant documentation passages instead (`mode: \"search\"`).\n\nNothing the asker types is stored by Fleetwright. Redis holds only the day's spend, hourly question\ncounts, daily counters without question text and a one-hour single-use feedback id; logs hold\nmetadata (mode, steps, tool names, cost, latency). See data lifecycle."
+  },
+  {
+   "id": "docs/architecture/overview.md#6-0",
    "source": "docs/architecture/overview.md",
    "heading": "Architecture overview — Durable workflow protocol",
    "text": "Submission binds a stable action identity to tenant, account, exact inputs and the full contract\nrevision/hash. Reusing an identity with different content fails. Owner approval references that\nfingerprint and expires by the database clock. A worker leases a job and account with a new fence,\nthen rechecks authorization immediately before committing `ACTING`. Only current fenced state\ntransitions can record results. The human approval is consumed for that execution.\n\nKnown destination rejection becomes `FAILED`. Response loss, process death or insufficient receipt\nevidence becomes `UNKNOWN`. Expired pre-action leases can return to the ready queue; post-action\nuncertainty cannot. Reconciliation reads destination receipts and checks the account and expected\naction. Missing evidence does not establish failure. Persisted rotation prevents one old unknown\njob from monopolizing reconciliation. Cancellation during uncertainty records intent and does not\nclaim to undo an external action. See the workflow runbook.\n\nFencing protects Fleetwright database authority; an arbitrary website does not consume that fence.\nCorrectness therefore also depends on the adapter's permitted action and receipt contract. Never\ngeneralize controlled destination results into exactly-once delivery on all websites."
   },
   {
-   "id": "docs/architecture/overview.md#4-0",
+   "id": "docs/architecture/overview.md#7-0",
    "source": "docs/architecture/overview.md",
    "heading": "Architecture overview — Freight delivery and durable detections",
    "text": "Watchers capture bounded feed responses and persist raw detections before delivery. Filters/schedules select jobs;\nclaims and outbox rows commit together. The relay publishes to a cell stream. Warm actors lease,\nact and record outcomes. The control reconciler examines uncertain bookings without blind retry.\nRedis consumer groups reclaim interrupted deliveries; PostgreSQL unique constraints and fencing\nremain authoritative. See claim lifecycle.\nRaw detections remain in the PostgreSQL mailbox until their filter/claim decision commits. Tenant\nmoves reset unconsumed delivery under the directory lock, so unread old-cell streams and in-flight\nmessages are replayed using current authority. Legacy Redis-only upgrade data requires an explicit\ndrain; older backends cannot safely consume the new topic. See deployment."
   },
   {
-   "id": "docs/architecture/overview.md#5-0",
+   "id": "docs/architecture/overview.md#8-0",
    "source": "docs/architecture/overview.md",
    "heading": "Architecture overview — Isolation and evidence",
    "text": "Tenant content tables use PostgreSQL `ENABLE` and `FORCE ROW LEVEL SECURITY`. Directory/system\nlookups have narrow roles; shared infrastructure metadata is not represented as tenant content.\nTarget credentials and sessions use per-record envelope encryption and row-bound associated data.\nDatabase mutations and their audit rows share a transaction. External Redis/HTTP operations persist\nintent first and outcome afterward; unresolved intent remains inspectable after a crash.\nEvidence exports are bounded/redacted canonical JSON with page hashes. Hashes detect changes;\nthey do not prove authorship. Browser artifacts may contain sensitive data and stay private."
   },
   {
-   "id": "docs/architecture/overview.md#6-0",
+   "id": "docs/architecture/overview.md#9-0",
    "source": "docs/architecture/overview.md",
    "heading": "Architecture overview — Scale boundaries",
    "text": "The freight engine has tenant-to-cell routing and Redis hash tags. The approved-workflow runner\nuses bounded cell-scoped tenant pages and per-tenant turns, rechecking assignment before admission.\nSSE-triggered refetch is coalesced; database pools and workflow scheduling must be\nmeasured and redesigned at later milestones. A single-server deployment shares its host failure\ndomain. Multi-zone placement, gateway fleets, sharding and regional recovery remain\nfuture architecture, with explicit decision records.\n\nThe stack is Python 3.12, FastAPI, SQLAlchemy/Alembic, PostgreSQL, Redis Streams, Playwright,\nofficial FastMCP and Next.js/React. Lockfiles and deployment image digests define release versions."
   },
   {
-   "id": "docs/architecture/overview.md#7-0",
+   "id": "docs/architecture/overview.md#10-0",
    "source": "docs/architecture/overview.md",
    "heading": "Architecture overview — Three separate execution authorities",
-   "text": "The fleet and general workflow runner share PostgreSQL authority, but use distinct process/account\nlifecycles. Catalogue collection uses a fenced durable frontier and an allowlisted HTTP fetch\nprocess; it does not give operators arbitrary browser scripting. The local agent uses SQLite on\nthe user's computer and an installed model for typed drafting; it does not depend on fleet services.\n\nThese boundaries prevent a model response, page instruction, Redis delivery or UI refresh from\nbecoming authority. Local edits survive polling but cannot authorize the old proposal; saving them\ncreates a new hash. Each uncertain action is reconciled against its destination contract."
+   "text": "The fleet and general workflow runner share PostgreSQL authority, but use distinct process/account\nlifecycles. Catalogue collection uses a fenced durable frontier and an allowlisted HTTP fetch\nprocess; it does not give operators arbitrary browser scripting. The local agent uses SQLite on\nthe user's computer and an installed model for typed drafting; it does not depend on fleet services.\n\nThe help assistant is a fourth, read-only path: it reads through the asker's role and tenant and\nholds no execution authority. These boundaries prevent a model response, page instruction, Redis\ndelivery or UI refresh from becoming authority. Local edits survive polling but cannot authorize the old proposal; saving them\ncreates a new hash. Each uncertain action is reconciled against its destination contract."
   },
   {
-   "id": "docs/architecture/overview.md#8-0",
+   "id": "docs/architecture/overview.md#11-0",
    "source": "docs/architecture/overview.md",
    "heading": "Architecture overview — Operational failure domains",
    "text": "The host collector has administrative Docker authority solely for observe-only grant renewal;\nthe independent probe has neither execution nor approval access. Off-host recovery uses a separate\nencryption key and proves data restoration without overwriting source databases. Those are distinct\nfrom full-host/application recovery and measured availability.\n\nRelease identity includes committed source, immutable artifact inventory, final native app/web\nimage IDs and independently trusted signatures. Scan results are bound to those exact images.\nStatic rollback preserves compatible backends and mailbox state; backend recovery requires its\nown tested compatibility procedure. See deployment,\nmonitoring and recovery."
@@ -389,7 +413,7 @@
    "id": "docs/scaling/README.md#1-0",
    "source": "docs/scaling/README.md",
    "heading": "Scaling to 1M+ connected console users — Workload contract",
-   "text": "“Simultaneous” means authenticated/authorized sessions actively connected during a sustained test,\nnot registered accounts or a one-minute arrival count. The target test includes API reads/writes,\nevent fan-out, reconnects, tenant skew, slow clients, revoked users and an availability-zone failure.\nOne million browser contexts is a different workload; 100 MB per context would alone require\nabout 100 TB of memory. It is not the one-million-user control-plane target.\n\n| Plane | Target workload | Main constraints |\n| Static console | 1M+ simultaneous sessions | CDN cache misses, assets and regional delivery |\n| API/authorization | Session, list, approval and investigation requests | Pool budget, query plans, per-tenant fairness and auth storage |\n| Update gateway | 1M+ live connections | File descriptors, socket memory, event fan-out, bandwidth and reconnect storms |\n| Execution | Independently scaled browser cells | Context memory/CPU, account exclusivity and destination permission/rate limits |\n| Evidence | Bounded investigation and export | Retention, object storage, access control and retrieval cost |"
+   "text": "“Simultaneous” means authenticated/authorized sessions actively connected during a sustained test,\nnot registered accounts or a one-minute arrival count. The target test includes API reads/writes,\nevent fan-out, reconnects, tenant skew, slow clients, revoked users and an availability-zone failure.\nOne million browser contexts is a different workload; 100 MB per context would alone require\nabout 100 TB of memory. It is not the one-million-user control-plane target.\n\n| Plane | Target workload | Main constraints |\n| Static console | 1M+ simultaneous sessions | CDN cache misses, assets and regional delivery |\n| API/authorization | Session, list, approval and investigation requests | Pool budget, query plans, per-tenant fairness and auth storage |\n| Update gateway | 1M+ live connections | File descriptors, socket memory, event fan-out, bandwidth and reconnect storms |\n| Execution | Independently scaled browser cells | Context memory/CPU, account exclusivity and destination permission/rate limits |\n| Evidence | Bounded investigation and export | Retention, object storage, access control and retrieval cost |\n| Help assistant | Questions per session, share needing live tools, cached answers | Provider rate limits and price, per-tenant budget and quota, queueing and documentation-search fallback (capacity model) |"
   },
   {
    "id": "docs/scaling/README.md#2-0",
@@ -431,16 +455,34 @@
    "id": "docs/security/README.md#0-0",
    "source": "docs/security/README.md",
    "heading": "Security documentation",
-   "text": "Fleetwright treats human authority, tenant isolation, destination permission and uncertain external\nactions as separate security boundaries. The model proposes typed work; the operator approves\nthe exact account and inputs; database-backed authority governs execution and recovery.\n\n| Document | Purpose |\n| Control status | Implemented protections, release verification and operational responsibilities |\n| Threat model | Assets, trust boundaries, attack scenarios and residual risks |\n| ASVS assurance map | Selected OWASP ASVS 5 evidence, unassessed controls and explicit exceptions |\n| Security reporting | Private vulnerability reporting and supported reporting scope |\n| Privacy and legal register | Deployment-specific permission, data protection and incident obligations |\n| Operations runbooks | Deployment, incident and recovery procedures |\n\nScan results apply to their exact source/image identities and scan time. Zero reported\nHIGH/CRITICAL vulnerabilities does not establish absence of all vulnerabilities, an independent\npenetration test or certification. The latest verified release evidence and remaining gates are\nrecorded in the assurance map; a newer release repeats relevant artifact gates."
+   "text": "Fleetwright treats human authority, tenant isolation, destination permission and uncertain external\nactions as separate security boundaries. The model proposes typed work; the operator approves\nthe exact account and inputs; database-backed authority governs execution and recovery.\n\n| Document | Purpose |\n| Control status | Implemented protections, release verification and operational responsibilities |\n| Threat model | Assets, trust boundaries, attack scenarios and residual risks, including help assistant misuse |\n| ASVS assurance map | Selected OWASP ASVS 5 evidence, unassessed controls and explicit exceptions |\n| Data lifecycle | Handling of identities, credentials, records, evidence, profiles, exports and archives |\n| Security reporting | Private vulnerability reporting and supported reporting scope |\n| Privacy and legal register | Deployment-specific permission, data protection and incident obligations |\n| Operations runbooks | Deployment, incident and recovery procedures |\n| Supply-chain tooling | Local Trivy scans, SBOMs, provenance signing and verification |"
   },
   {
-   "id": "docs/security/README.md#1-1",
+   "id": "docs/security/README.md#1-0",
    "source": "docs/security/README.md",
-   "heading": "Security documentation",
-   "text": "Additions to destinations, model providers, permissions, storage or topology require a threat-model\nand legal-scope review. Never submit private keys, account sessions, raw page traces or customer\nrecords through a public issue."
+   "heading": "Security documentation — Current release evidence",
+   "text": "The current deployed release is `20261125-assistant-rc5` (source `26ebe46`). Its\n25 November 2026 release record is the source for current security\nresults. Older release records, and the earlier measurements in the ASVS map, keep their dated\nboundaries as history."
   },
   {
-   "id": "docs/security/README.md#2-0",
+   "id": "docs/security/README.md#2-1",
+   "source": "docs/security/README.md",
+   "heading": "Security documentation — Current release evidence",
+   "text": "- **Patched images.** The previously deployed images carried advisories published after the October\n  release (application: 1 CRITICAL, 6 HIGH; web: 6 CRITICAL, 19 HIGH). The affected packages were\n  upgraded and pinned. Native Trivy 0.75.0 scans of the deployed images then reported 0 HIGH/CRITICAL\n  findings for the application image and 0 HIGH/CRITICAL with one MEDIUM for the web image\n  (nginx 1.30.8). Next.js was upgraded to 16.4.6 after the CI dependency audit reported published\n  advisories.\n- **Rejected candidates.** Two release candidates were rejected before activation because native\n  image scans found new advisories, and one because a reused web image was vulnerable.\n- **Signing.** Ed25519 provenance was verified against the separately trusted key: 145 primary\n  artifacts with the application image identity and SBOM bound; the web image identity and SBOM were\n  attested before signing. This is an operator-controlled signature, not independent certification.\n- **Source gates.** Gitleaks, Bandit (medium and above) and Semgrep `p/security-audit` passed. Semgrep\n  blocked one commit; the finding was fixed, not suppressed."
+  },
+  {
+   "id": "docs/security/README.md#3-0",
+   "source": "docs/security/README.md",
+   "heading": "Security documentation — Help assistant boundary",
+   "text": "The console help assistant adds a model provider and the API's only outbound internet route.\nControls, recorded in ADR 0016 and the\nthreat model: read-only tools that run as the asker inside the asker's tenant (no\naudit or user-list tools, no write tools); documentation and tool results treated as untrusted data;\nplain-text answers marked AI-generated; CSRF on signed-in requests; hourly question limits, a\nconcurrency limit and a daily budget reserved before each paid call (a dedicated provider key with\nits own monthly cap is planned); documentation-search fallback for every assistant limit or failure. Fleetwright stores no\nquestion text; provider-side retention follows the provider's terms. Answers can still be wrong.\nThe release's 16-case live evaluation, including prompt-injection, key-extraction and write-attempt\ncases, passed 16/16; that is a release check, not a guarantee."
+  },
+  {
+   "id": "docs/security/README.md#4-0",
+   "source": "docs/security/README.md",
+   "heading": "Security documentation — Scope of these results",
+   "text": "Scan results apply to their exact source/image identities and scan time. Zero reported\nHIGH/CRITICAL vulnerabilities does not establish absence of all vulnerabilities, an independent\npenetration test or certification. A newer release repeats the relevant artifact gates.\n\nAdditions to destinations, model providers, permissions, storage or topology require a threat-model\nand legal-scope review. Never submit private keys, account sessions, raw page traces or customer\nrecords through a public issue."
+  },
+  {
+   "id": "docs/security/README.md#5-0",
    "source": "docs/security/README.md",
    "heading": "Security documentation — Data, authority and operational handoff",
    "text": "Data lifecycle assigns handling requirements for identities, credentials,\nworkflow records, raw evidence, local profiles, exports and archives. Review it alongside the\nthreat model when adding a destination, provider, storage location or permission.\n\nSecurity acceptance includes real role/CSRF/revocation behavior, tenant isolation, exact-action\napproval, browser recovery, private evidence and verified backup/key recovery. Track unsupported\ncontrols and retained advisories explicitly. Service ownership\nand commercial readiness assign follow-up and incident duties."
@@ -461,7 +503,7 @@
    "id": "docs/legal/acceptable-use.md#2-0",
    "source": "docs/legal/acceptable-use.md",
    "heading": "Acceptable use and client onboarding gate — Not allowed",
-   "text": "- Sites whose terms prohibit automation, without written approval from the site operator. Many\n  freight load boards fall into this category.\n- Bypassing logins, IP blocks, rate limits, captchas or other technical access controls.\n- Using accounts the client does not own, shared or bought accounts, or credentials obtained\n  without the account holder's consent.\n- Collecting personal data without a lawful basis, or beyond what the task needs.\n- Fake engagement, fake reviews, or AI-generated content presented as human without disclosure.\n- Anything that degrades the target service (load beyond normal human-like use)."
+   "text": "- Sites whose terms prohibit automation, without written approval from the site operator. Many\n  freight load boards fall into this category.\n- Bypassing logins, IP blocks, rate limits, captchas or other technical access controls.\n- Using accounts the client does not own, shared or bought accounts, or credentials obtained\n  without the account holder's consent.\n- Collecting personal data without a lawful basis, or beyond what the task needs.\n- Deceptive engagement, deceptive reviews, or AI-generated content presented as human without disclosure.\n- Anything that degrades the target service (load beyond normal human-like use)."
   },
   {
    "id": "docs/legal/acceptable-use.md#3-0",

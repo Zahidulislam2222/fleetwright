@@ -71,8 +71,8 @@ are running; it is not a continuously staffed external monitoring service.
 
 The implemented deployment uses Docker Compose and a bounded public workspace fleet. Releases
 are rehearsed, checked for drift and compared by file hashes after deployment, with retained
-rollback inputs. A configurable AWS reference has Terraform validation and three mocked-plan
-checks; no AWS provisioning or zone-loss exercise is claimed. Cloud costs and production topology
+rollback inputs. A configurable AWS reference has Terraform validation and three plan-only
+checks with simulated providers; no AWS provisioning or zone-loss exercise is claimed. Cloud costs and production topology
 must be reviewed before a paid deployment.
 
 ### 8. What would a delivery milestone contain?
@@ -88,7 +88,7 @@ Evidence: [test workloads and historical measurements](../testing.md),
 [approved workflow operations](../operations/reliable-browser.md),
 [AWS reference](../../infra/terraform/README.md), [capacity boundaries](../scaling/README.md).
 
-Portfolio: https://zahidul-islam.com/ · GitHub: https://github.com/Zahidulislam2222
+Website: https://zahidul-islam.com/ · GitHub: https://github.com/Zahidulislam2222
 
 Recorded fixture endurance now includes separate zero-error 50/70-context hours. Destination-specific
 throughput and availability remain separate acceptance work; see the linked measurement record.

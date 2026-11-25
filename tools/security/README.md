@@ -1,15 +1,39 @@
 # Free local supply-chain evidence
 
+Local tools that produce dependency inventories, vulnerability reports and signed provenance for a
+release. No paid service or cloud account is used.
+
+Current release: `20261125-assistant-rc5`. Its scan, SBOM and signature results are in the
+[25 November 2026 release record](../../docs/releases/2026-11-25.md); older records keep their dated
+results as history.
+
+## Source dependency scan
+
 Run `python -m tools.security.assurance tools/security/assurance.json` using a Python installation
-with Pydantic. Configure a checksum-verified native Trivy executable for the host platform. The
-tool copies only explicit lockfiles, emits CycloneDX inventory and a vulnerability report including
-development dependencies, and fails visibly on scanner errors/findings/timeouts. No paid service
-or cloud account is used. Scan the final Docker image separately with native Docker access:
+with Pydantic. Configure a checksum-verified native Trivy executable for the host platform (the
+25 November release used Trivy 0.75.0). The tool copies only explicit lockfiles, emits CycloneDX
+inventory and a vulnerability report including development dependencies, and fails visibly on
+scanner errors/findings/timeouts.
+
+## Image scan
+
+Scan each final Docker image separately with native Docker access:
 
 ```sh
 trivy image --image-src docker --scanners vuln --severity HIGH,CRITICAL --exit-code 1 \
   --format json --output image.json IMAGE_TAG
 ```
+
+Image package patches and removals are maintained data, not ad-hoc build edits:
+`config/container-security-apt.txt` and `config/container-security-python-remove.txt` (application
+image) and `config/web-security-apk.txt` (web image). In the 25 November release, the previously
+deployed images carried advisories published after October; the affected packages were upgraded and
+pinned, and the deployed application and web images then scanned with 0 HIGH/CRITICAL findings (one
+MEDIUM in the web image). Two candidates were rejected before activation because native scans found
+new advisories, and one because a reused web image was vulnerable. Rescan a reused image: an earlier
+pass does not cover advisories published since.
+
+## Provenance signing
 
 The source provenance manifest hashes allowed source roots and excludes private/generated trees,
 environment files and private keys. Hash inventory alone is unsigned. To attest exact bytes with
@@ -25,7 +49,8 @@ python -m tools.security.signing verify provenance.json PUBLIC_KEY_FILE provenan
 trusted channel; accepting an attacker-supplied key alongside an artifact proves nothing about
 the signer. Signature tests reject changed payloads and wrong signers. This local signature is
 not independent identity certification or a SLSA provenance claim. Sign only after the final
-manifest/build inputs are fixed; modifying signed bytes invalidates the signature.
+manifest/build inputs are fixed; modifying signed bytes invalidates the signature. The public
+verification key is [config/release-signing-public.pem](../../config/release-signing-public.pem).
 
 Official tool guidance: [Trivy filesystem](https://trivy.dev/docs/latest/target/filesystem/),
 [Trivy image](https://trivy.dev/docs/latest/target/container_image/).

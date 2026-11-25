@@ -26,7 +26,7 @@ Evidence: [crawler operations](../operations/crawler.md),
 [real crawl/export tests](../../apps/coordinator/tests/test_crawler.py),
 [adversarial network and recovery tests](../../apps/coordinator/tests/test_crawler_adversity.py).
 
-Portfolio: https://zahidul-islam.com/ · GitHub: https://github.com/Zahidulislam2222
+Website: https://zahidul-islam.com/ · GitHub: https://github.com/Zahidulislam2222
 
 The exact release console has also completed a real cycle and downloaded four validated owned
 catalogue records, with public start/export denied. Treat that as integration evidence for the

@@ -25,6 +25,9 @@ results. Publish both the measurement window and numerator/denominator.
 | Job admission | Permitted proposal persisted with stable identity within 2 s | 99% / 99.9%, targets |
 | Queued execution | Approved ready job begins within agreed workflow queue deadline | Per-contract objective, measured separately from destination time |
 | Owned freight latency | Detection to confirmed booking | p95 under 1 s, target; historical p95 approximately 540 ms |
+| Help assistant response | Valid in-quota question gets an answer (AI or documentation fallback) without a 5xx within the 25 s whole-answer deadline | 99% / 99.9%, rolling 30 days, objective |
+| Help assistant AI answers | Eligible question (assistant on, within rate limits and budget) answered by the AI rather than the fallback | 95% over 30 days, objective |
+| Help assistant latency | AI answer p95 / documentation fallback p95 | ≤ 15 s / ≤ 2 s, objectives; evaluation-only p95 was 4.98 s |
 
 Count unexpected 429/5xx and timeouts as failures for eligible in-budget traffic. Exclude invalid
 credentials/malformed requests and agreed quota excess using documented classifications. Record
@@ -38,6 +41,26 @@ Latency thresholds here are proposed service definitions, not current guarantees
 fixture and 50/70-browser hour windows do not supply a rolling 30-day availability denominator.
 Promote 99.9% only after representative multi-zone failure/load exercises and independent
 measurement establish that the service and operating team can support the objective.
+
+## Help assistant objectives
+
+The assistant's objectives above are written targets, not measurements. The only measured latency
+is the 16-question held-out evaluation in the [25 November release record](../releases/2026-11-25.md)
+(p95 4.98 s), which is not a production SLI. The 15 s AI p95 objective matches the evaluation
+threshold in `config/assistant-eval.yaml`.
+
+- The response objective is the one users rely on: the console always gets an answer, because every
+  limit and failure falls back to documentation search. A 5xx or a gateway timeout is a failure;
+  a fallback is a success for this indicator.
+- The AI-answer objective excludes fallbacks the deployment chose (assistant switched off, hourly
+  limit reached, daily budget used up), and counts provider errors, timeouts, Redis failures and
+  "busy" fallbacks as misses. Report the excluded fallbacks separately so budget sizing stays visible.
+- Correctness of answers is checked by the held-out evaluation, not by this availability objective.
+  A tenant-data leak or a claimed action the assistant cannot take is a correctness incident with no
+  error budget.
+
+Today these indicators can be read only from the owner-only daily counters and API logs; no assistant
+probe or alert exists in the monitor collector yet (see [monitoring](../operations/monitoring.md#help-assistant)).
 
 ## Measurement and response plan
 

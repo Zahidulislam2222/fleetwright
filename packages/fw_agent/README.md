@@ -5,12 +5,33 @@ Chromium and an installed local Ollama model. PostgreSQL, Redis, Docker and paid
 requirements. Configuration belongs to `fw_core.settings.AgentAppSettings`; maintained templates,
 prompts and UI copy belong to `config/agent.yaml`.
 
+This agent is separate from the console help assistant: it runs a local model on the user's device
+and drafts form content for approval, while the help assistant answers questions in the hosted
+console and has no write tools.
+
+Current release: `20261125-assistant-rc5` ([25 November 2026 record](../../docs/releases/2026-11-25.md)).
+That release added machine-readable AI provenance, described below.
+
+## What it does
+
 The model drafts plain text only. The human sees the exact destination and draft, then authorizes
 one hash-bound save. A failed acknowledgement becomes `UNKNOWN`; receipt reconciliation can
 confirm it, but cannot repeat it. Three owned lab workflows cover maintenance, dispatch handover
 and inspection summaries. They save owned local records and send no emails or purchases.
 
 See [operations and security contract](../../docs/operations/local-agent.md).
+
+## AI provenance in the approval fingerprint
+
+Every model-drafted proposal records `provenance: {ai_generated: true, model: <model id>}`. When a
+person edits the draft, the replacement proposal keeps that record and adds `human_edited: true`.
+The review page shows the matching label from `config/agent.yaml` ("AI-generated draft from the
+local model", plus "Edited by a person after generation" when applicable).
+
+Provenance is part of the proposal that the approval fingerprint covers, together with the origin,
+template, request, source and draft. If any of them changes after the approval hash is issued, the
+approval is refused, so the AI marking cannot be stripped without a fresh human approval.
+`tests/test_authority.py` checks each of these six components.
 
 ## Install and recover
 

@@ -5,10 +5,9 @@ configuration and destination authorization before enabling actions. Integrators
 API/MCP reference and exact-approval contract; service owners should use deployment, monitoring,
 recovery and incident runbooks.
 
-Deployed frontend/backend release: `20261015-publication-rc1`, source `cd64e6b`.
-Its runtime regression passed 289 cases with six expected skips; exact rehearsal, native image scans,
-signatures and lifecycle checks passed. Public workflows/UI/HTTP, signed service-image identities
-and deployed artifact parity passed. Fresh backup restore and monitor/scheduler recovery passed.
+Deployed frontend/backend release: `20261125-assistant-rc5`, source `26ebe46`. It adds the console
+help assistant and patched images; signed artifacts, service-image identities and 147/147 deployed
+files matched, public UI/HTTP and assistant flows passed, and GitHub quality/security checks passed.
 Use the [current release record](releases/2026-11-25.md) and the [October record](releases/2026-10-15.md) for status and retained verification boundaries.
 
 | Area | Documents |
@@ -18,7 +17,7 @@ Use the [current release record](releases/2026-11-25.md) and the [October record
 | Setup and operations | [Local development](operations/local-development.md) · [Configuration](operations/configuration.md) · [Deployment](operations/deployment.md) · [Runbooks](operations/runbooks.md) |
 | Crawling and local agent | [Catalogue crawler](operations/crawler.md) · [Standalone local agent](operations/local-agent.md) |
 | Monitoring and recovery | [Collectors and free external probes](operations/monitoring.md) · [Encrypted off-host recovery](operations/recovery.md) |
-| Portfolio and proposals | [Three capability drafts, technical answers and public case study](proposal-kit/README.md) |
+| Proposals and case study | [Three capability proposals, technical answers and public case study](proposal-kit/README.md) |
 | Security | [Reporting policy](../SECURITY.md) · [Threat model](security/threat-model.md) · [Control status](security/controls.md) |
 | Law and privacy | [Legal register](legal/README.md) · [Acceptable use](legal/acceptable-use.md) · [Privacy and retention](legal/privacy.md) |
 | Future scale and availability | [1M+ simultaneous users](scaling/README.md) · [Capacity arithmetic](scaling/capacity-model.md) · [Add an execution cell](scaling/adding-a-cell.md) · [99% / 99.9% SLOs and recovery](scaling/slo.md) · [500–1,000-user baseline](scaling/baseline-workload.md) |

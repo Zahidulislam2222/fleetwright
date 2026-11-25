@@ -42,6 +42,24 @@ detection still awaiting a committed dispatch decision; the durable relay retrie
 that backlog needs direct operational inspection. This gauge alone is not proof that all detection
 work is drained, and workflow alerts are not a complete fleet/host alert catalogue.
 
+## Help assistant
+
+The monitor collector does not check the help assistant yet; the console does not depend on it,
+because every assistant failure falls back to documentation search. What exists today:
+
+| Signal | Where | Use |
+|---|---|---|
+| Daily counters | `GET /v1/assistant` as the public workspace owner (`today`): questions, AI and search answers, errors, `cost_micro`, helpful/not-helpful votes; kept 40 days in Redis | Budget use, fallback share and error rate per UTC day |
+| "assistant answered" log | API logs: mode, steps, tool names, cost, latency in ms | AI latency and cost per answer |
+| "assistant model call failed" warning | API logs: failure category and bounded detail | Provider outage, timeout or rejected key |
+| Provider account | The provider's usage page for the assistant's key (a dedicated key with its own monthly cap is planned) | Independent check of spend |
+
+No question text exists in any of these. Suggested starting points to watch (not tuned yet): `cost_micro` near the daily budget, errors above
+a few per cent of AI attempts, fallback share rising without a budget or rate reason, and a drop in
+helpful votes after a prompt, model or knowledge change. These thresholds are not wired to alerts:
+adding the counters to the collector with failure/recovery notices is on the
+[roadmap](../roadmap.md#help-assistant-next-steps). Use the [runbook](runbooks.md#help-assistant) to respond.
+
 ## Server collector and credential renewal
 
 The release builder renders `monitor.service` and `monitor.env` from committed templates and typed
@@ -66,13 +84,16 @@ boundary. Do not expose its recovery file or turn the authority adapter into a n
 
 ## Independent availability and proof limits
 
-The deployed `20261015-publication-rc1` collector passed protected unit/environment/source
-parity and current-release process-directory checks. An actual process death recovered in 26.65
-seconds, renewed observe-only authority, revoked its predecessor and produced four fresh healthy
-probes with zero active alerts. The retained history snapshot includes one earlier unhealthy
-workflow-metrics sample (1,608 of 1,609 healthy); its cause is not established by this proof.
-The four latest post-restart checks are healthy. This is collector recovery, not whole-service availability.
-Notifications remain a local file/journal sink. See [current release evidence](../releases/2026-10-15.md).
+For the current `20261125-assistant-rc5` release the monitor was reinstalled with unit/environment
+parity and is active ([release record](../releases/2026-11-25.md)); no new collector recovery test
+was recorded for it. Historically, the deployed `20261015-publication-rc1` collector passed
+protected unit/environment/source parity and current-release process-directory checks. An actual
+process death recovered in 26.65 seconds, renewed observe-only authority, revoked its predecessor
+and produced four fresh healthy probes with zero active alerts. The retained history snapshot
+includes one earlier unhealthy workflow-metrics sample (1,608 of 1,609 healthy); its cause is not
+established by this proof. The four latest post-restart checks are healthy. This is collector
+recovery, not whole-service availability. Notifications remain a local file/journal sink. See the
+[15 October release evidence](../releases/2026-10-15.md).
 
 Historically, the `20261013-free-local-rc4` host collector passed active service/source/unit/environment
 parity checks. Its four configured probes—archive freshness, observation grant, origin health and
@@ -126,4 +147,5 @@ bounded failed probe followed by recovery and confirm both notices survive proce
 Independent scheduled probes are published and enabled, with the successful run linked above.
 They do not share persistent history with the host collector.
 Availability objectives remain [future SLOs](../scaling/slo.md), and operational status belongs in
-the [release record](../releases/2026-10-13.md).
+the [current release record](../releases/2026-11-25.md); the [13 October record](../releases/2026-10-13.md)
+holds the original collector evidence.
