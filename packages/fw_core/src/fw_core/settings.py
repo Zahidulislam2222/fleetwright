@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Literal
+from urllib.parse import urlsplit
 from uuid import UUID
 
 from pydantic import BaseModel, Field, SecretStr, field_validator, model_validator
@@ -77,7 +78,7 @@ class BoardSettings(BaseModel):
     @field_validator("console_url")
     @classmethod
     def console_url_is_web_address(cls, value: str | None) -> str | None:
-        if value is not None and not value.startswith(("https://", "http://")):
+        if value is not None and (urlsplit(value).scheme not in ("http", "https") or not urlsplit(value).netloc):
             raise ValueError("console_url must be an http(s) address")
         return value
 

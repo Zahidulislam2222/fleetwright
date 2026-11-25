@@ -1,2 +1,5 @@
 libssl3t64=3.0.13-0ubuntu3.16
 openssl=3.0.13-0ubuntu3.16
+apt=2.8.4ubuntu0.1
+libapt-pkg6.0t64=2.8.4ubuntu0.1
+libbrotli1=1.1.0-2ubuntu0.1

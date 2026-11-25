@@ -2,7 +2,7 @@
 name = "fw-mcp"
 version = "0.2.0"
 requires-python = ">=3.12,<3.13"
-dependencies = ["fw-core", "mcp==1.28.1"]
+dependencies = ["fw-core", "mcp==1.30.0"]
 
 [project.scripts]
 fleetwright-mcp = "fw_mcp.server:main"
